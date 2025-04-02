@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./assets/kobold-logo.svg" alt="" width="600" align="center" />
+    <img src="./assets/kobold-logo.svg" alt="" width="50%" align="center" />
 </div>
 
 # Kobold Alarm Clock
