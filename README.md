@@ -1,6 +1,5 @@
-
-<div align="center">
-    <img src="./assets/kobold-logo.svg" alt="" width="10%" align="left" />
+<div align="left">
+    <img src="./assets/kobold-logo.svg" alt="" width="30%" align="left" />
 </div>
 
 
