@@ -1,3 +1,5 @@
+![Kobold Alarm Clock](/assets/kobold-logo.svg)
+
 # Kobold Alarm Clock
 
 Kobold: A feature-rich alarm clock for Home Assistant.
