@@ -1,9 +1,6 @@
 <div align="center">
-    <img src="./assets/kobold-logo.svg" alt="" width="200" align="center" />
-    <h1 align="center">Kobold Alarm Clock</h1>
+    <img src="./assets/kobold-logo.svg" alt="" width="600" align="center" />
 </div>
-
-![Kobold Alarm Clock](/assets/kobold-logo.svg)
 
 # Kobold Alarm Clock
 
