@@ -1,12 +1,8 @@
-
-
-
-
-
+<br><br>
 <div align="center">
     <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="30%" align="center" />
 </div>
-
+<br><br>
 
 # Kobold Alarm Clock
 
