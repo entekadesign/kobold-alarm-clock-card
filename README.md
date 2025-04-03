@@ -25,8 +25,13 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 - **Optional enhanced reliability**
     - Set HA entities to ping connection and to sound local alarm
 
+## Requirements:
+
+## Installation:
+
 ```yaml
 type: custom:kobold-alarm-clock
 ```
+## Development:
 
 Kobold is adapted from Ronald Dehuysser's [Lovelace Alarm Clock Card](https://github.com/rdehuyss/homeassistant-lovelace-alarm-clock-card).
