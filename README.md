@@ -21,4 +21,10 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 - Set duration of triggered alarm before it becomes inactive
 - Improve reliability by setting HA entities for ping and locally-hosted alarm
 
+
+
+```yaml
+type: custom:kobold-alarm-clock
+```
+
 Kobold is adapted from Ronald Dehuysser's [Lovelace Alarm Clock Card](https://github.com/rdehuyss/homeassistant-lovelace-alarm-clock-card).
