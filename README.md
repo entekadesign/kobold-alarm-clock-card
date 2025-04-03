@@ -17,7 +17,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
     - Set one or more HA entities to be triggered by alarm
     - Set one or more additional HA entities to activate X minutes before or after alarm
     - Add other HA cards to be displayed or hidden with a tap
-- **Customize appearance and preferences**
+- **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
     - Set duration of snooze (before alarm becomes active again)
