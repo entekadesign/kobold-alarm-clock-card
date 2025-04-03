@@ -4,13 +4,12 @@
 </div>
 <br><br>
 
-# Kobold Alarm Clock
-
-Kobold: A feature-rich alarm clock for Home Assistant.
+# Kobold: A feature-rich alarm clock for Home Assistant
 
 Turn almost any device running Home Assistant Companion or a web browser into a multi-alarm clock by installing the Kobold custom card on your Home Assistant instance.
 
-Features:
+## Features:
+
 - Set a schedule of alarm times, one for each day of the week
 - Set one or more Home Assistant (HA) entities to be triggered by alarm
 - Set one or more additional HA entities to activate X minutes before or after alarm
