@@ -19,7 +19,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 - Set time display font to system or any of three presets
 - Set duration of snooze (before alarm becomes active again)
 - Set duration of triggered alarm (before it becomes inactive)
-- Improve reliability by setting HA entities for ping and locally-hosted alarm
+- Improve reliability by setting HA entities to ping and to sound local alarm
 
 ```yaml
 type: custom:kobold-alarm-clock
