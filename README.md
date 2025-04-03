@@ -1,5 +1,5 @@
 <br><br>
-<div style="width: calc(600px + 1vw);">
+<div>
     <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
