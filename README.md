@@ -17,8 +17,8 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 - Set an unscheduled alarm time easily while scheduled alarm remains enabled
 - Set 12-hour or 24-hour time display format
 - Set time display font to system or any of three presets
-- Set duration of snooze before alarm becomes active again
-- Set duration of triggered alarm before it becomes inactive
+- Set duration of snooze (before alarm becomes active again)
+- Set duration of triggered alarm (before it becomes inactive)
 - Improve reliability by setting HA entities for ping and locally-hosted alarm
 
 ```yaml
