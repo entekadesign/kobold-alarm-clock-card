@@ -18,7 +18,7 @@ Features:
 - Set an unscheduled alarm time easily while scheduled alarm remains active
 - Set 12-hour or 24-hour time display format
 - Set time display font to system or any of three presets
-- Set default duration of snooze before reactivating alarm
+- Set default duration of snooze before alarm becomes active again
 - Set default duration of triggered alarm before becoming inactive
 
 Kobold is adapted from Ronald Dehuysser's [Lovelace Alarm Clock Card](https://github.com/rdehuyss/homeassistant-lovelace-alarm-clock-card).
