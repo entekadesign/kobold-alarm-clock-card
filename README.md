@@ -1,5 +1,5 @@
 <br><br>
-<div aligh="center">
+<div align="center">
     <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
