@@ -1,6 +1,6 @@
 <br><br>
 <div align="center">
-    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" /> |
+    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
 
@@ -28,6 +28,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 | <img src="./assets/01-24-hour.jpg" alt="Main view" width="100%" align="" /> | <img src="./assets/02-main-view.jpg" alt="Main view" width="100%" align="" /> |
 | :---: | :---: |
 | <img src="./assets/03-settings.jpg" alt="Main view" width="100%" align="" /> | <img src="./assets/04-nap.jpg" alt="Main view" width="100%" align="" /> |
+| <img src="./assets/05-schedule.jpg" alt="Main view" width="100%" align="" /> | <img src="./assets/06-schedule-edit.jpg" alt="Main view" width="100%" align="" /> |
 
 ## Requirements:
 
