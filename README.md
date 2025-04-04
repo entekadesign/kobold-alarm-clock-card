@@ -1,10 +1,9 @@
-
-<br><br>
+|<br><br>
 <div align="center">
-|    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" /> |
-| :--- |
+    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" /> |
 </div>
 <br><br>
+| :--- |
 
 # Kobold: A feature-rich alarm clock for Home Assistant
 
