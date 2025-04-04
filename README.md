@@ -27,7 +27,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 
 <br>
 
-| <figure><img src="./assets/main-view.jpg" alt="Main view, 24-hour" width="100%" align="" /><figcaption>Main view: 24-hour format</figcaption></figure> | <figure><img src="./assets/alt-font.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: 12-hour format, alternate font**</figcaption></figure> |
+| <figure><img src="./assets/main-view.jpg" alt="Main view, 24-hour" width="100%" align="" /><figcaption>Main view: 24-hour format</figcaption></figure> | <figure><img src="./assets/main-editing.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: 12-hour format, alternate font, editing next alarm**</figcaption></figure> |
 | :---: | :---: |
 | <figure><img src="./assets/settings.jpg" alt="Settings dialog" width="100%" align="" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="./assets/nap.jpg" alt="Nap dialog" width="100%" align="" /><figcaption>**Nap dialog**</figcaption></figure> |
 | <figure><img src="./assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: time editing**</figcaption></figure> | <figure><img src="./assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: showing added HA cards**</figcaption></figure> |
