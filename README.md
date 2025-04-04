@@ -6,7 +6,7 @@
 
 # Kobold: A feature-rich alarm clock for Home Assistant
 
-Turn almost any device running Home Assistant Companion or a web browser into a multi-alarm clock by installing the Kobold custom card on your Home Assistant (HA) instance.
+Install the Kobold custom card on your Home Assistant (HA) instance to turn almost any device running HA Companion or a web browser into a multi-alarm clock.
 
 ## Features:
 
