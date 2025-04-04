@@ -25,6 +25,8 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 - **Optional enhanced reliability**
     - Set HA entities to ping connection and to sound local alarm
 
+<img src="./assets/01-main-view.jpg" alt="Main view" width="50%" align="" />
+
 ## Requirements:
 
 ## Installation:
