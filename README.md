@@ -12,7 +12,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 
 - **Multi-alarm clock**
     - Set a schedule of alarm times, one for each day of the week
-    - Set an additional unscheduled alarm time easily while scheduled alarm remains enabled
+    - Set an additional, unscheduled alarm time easily while scheduled alarm remains enabled
 - **Integration with Home Assistant**   
     - Set one or more HA entities to be triggered by alarm
     - Set one or more additional HA entities to activate X minutes before or after alarm
