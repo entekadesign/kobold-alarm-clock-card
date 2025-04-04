@@ -31,7 +31,7 @@ Turn almost any device running Home Assistant Companion or a web browser into a 
 | :---: | :---: |
 | <figure><img src="./assets/03-settings.jpg" alt="Settings dialog" width="100%" align="" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="./assets/04-nap.jpg" alt="Nap dialog" width="100%" align="" /><figcaption>**Nap dialog**</figcaption></figure> |
 | <figure><img src="./assets/05-schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog**</figcaption></figure> | <figure><img src="./assets/06-schedule-edit.jpg" alt="Alarm schedule dialog, editing" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing**</figcaption></figure> |
-| <span style="background-color:green" <figure><img src="./assets/07-show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: showing added HA cards**</figcaption></figure></span> | <figure><img src="./assets/08-alt-font.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: alternate font**</figcaption></figure> |
+| <figure><img src="./assets/07-show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: showing added HA cards**</figcaption></figure> | <figure><img src="./assets/08-alt-font.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: alternate font**</figcaption></figure> |
 
 ## Requirements:
 
