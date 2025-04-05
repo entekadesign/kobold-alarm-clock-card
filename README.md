@@ -13,9 +13,9 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - **Multi-alarm clock**
     - Set a schedule of alarm times, one for each day of the week
     - Set an additional, unscheduled alarm time easily while scheduled alarm remains enabled
-- **Integration with Home Assistant**   
+- **Integration with HA**   
     - Set one or more HA entities to be triggered by alarm
-    - Set one or more additional HA entities to activate X minutes before or after alarm
+    - Set one or more additional HA entities to activate *X* minutes before or after alarm
     - Add other HA cards to be displayed or hidden with a tap
 - **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
@@ -40,9 +40,10 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Requirements:
 
-1. [Home Assistant](https://www.home-assistant.io/installation/) with the [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
-2. In HACS: [*Variables+History* integration](https://github.com/enkama/hass-variables)
-3. [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/) 
+1. [Home Assistant](https://www.home-assistant.io/installation/)
+2. [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
+3. [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
+4. [*Variables+History* integration](https://github.com/enkama/hass-variables)
 
 <br>
 
