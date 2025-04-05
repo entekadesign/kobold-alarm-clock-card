@@ -55,14 +55,6 @@ type: custom:kobold-alarm-clock
 ```
 <br>
 
-## Development:
-
-1. [Setup development environment](https://developers.home-assistant.io/docs/development_environment/)
-
-[Tutorials on custom card development](https://github.com/home-assistant-tutorials) including setup of environment and toolchain
-
-<br>
-
 ---
 
 Kobold is adapted from Ronald Dehuysser's [Lovelace Alarm Clock Card](https://github.com/rdehuyss/homeassistant-lovelace-alarm-clock-card).
