@@ -39,7 +39,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
-## Requirements:
+## Prerequisites:
 
 1. [Home Assistant](https://www.home-assistant.io/installation/)
 2. [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
