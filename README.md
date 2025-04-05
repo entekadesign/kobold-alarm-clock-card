@@ -12,16 +12,17 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 - **Multi-alarm clock**
     - Set a schedule of alarm times, one for each day of the week
-    - Set an additional, unscheduled alarm time easily while scheduled alarm remains enabled
-- **Integration with HA**   
+    - Set a new alarm at any time, temporarily overriding scheduled alarm
+    - Set unscheduled alarm *X* minutes in future using nap dialog
+    - Set alarm times easily using sliders in a dialog or directly on main view
+- **Integration with HA**
     - Set one or more HA entities to be triggered by alarm
     - Set one or more additional HA entities to activate *X* minutes before or after alarm
     - Add other HA cards to be displayed or hidden with a tap
 - **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
-    - Set duration of snooze (before alarm becomes active again)
-    - Set duration of triggered alarm (before it becomes inactive)
+    - Set default durations of snooze and undismissed alarm
 - **Optional enhanced reliability**
     - Set HA entities to ping connection and to sound a device-hosted alarm
 
