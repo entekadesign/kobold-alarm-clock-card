@@ -57,6 +57,8 @@ type: custom:kobold-alarm-clock
 
 ## Development:
 
+1. [Setup development environment](https://developers.home-assistant.io/docs/development_environment/)
+
 [Tutorials on custom card development](https://github.com/home-assistant-tutorials) including setup of environment and toolchain
 
 <br>
