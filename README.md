@@ -52,8 +52,6 @@ If you notice an error or have a feature suggestion that would benefit many user
 
 If you want to build your own card but you're not sure how to start, [here is a tutorial](https://github.com/home-assistant-tutorials).
 
-<br>
-
 ## Installation:
 
 ```yaml
