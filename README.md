@@ -56,7 +56,7 @@ type: custom:kobold-alarm-clock
 
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
 
-If you want to build your own card but you're not sure how to start, [here is a tutorial](https://github.com/home-assistant-tutorials).
+If you want to build your own card but you're not sure how to start, [check out this tutorial](https://github.com/home-assistant-tutorials).
 
 <br>
 
