@@ -46,17 +46,18 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 3. [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
 4. [*Variables+History* integration](https://github.com/enkama/hass-variables)
 
+## Installation:
+
+```yaml
+type: custom:kobold-alarm-clock
+```
+
 ## Development:
 
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
 
 If you want to build your own card but you're not sure how to start, [here is a tutorial](https://github.com/home-assistant-tutorials).
 
-## Installation:
-
-```yaml
-type: custom:kobold-alarm-clock
-```
 <br>
 
 ---
