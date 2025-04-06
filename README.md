@@ -46,6 +46,10 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 3. [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
 4. [*Variables+History* integration](https://github.com/enkama/hass-variables)
 
+## Development:
+
+
+
 <br>
 
 ## Installation:
