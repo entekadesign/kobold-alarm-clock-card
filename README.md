@@ -48,7 +48,9 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Development:
 
+If you notice an error or have a feature suggestion that would benefit many users, send me a note or open a pull request.
 
+If you want to fork this repository or build your own card but you're not sure how to start, here is a tutorial.
 
 <br>
 
