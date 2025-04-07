@@ -39,6 +39,10 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
+## Usage:
+
+
+
 ## Prerequisites:
 
 1. [Home Assistant](https://www.home-assistant.io/installation/)
@@ -48,18 +52,17 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Installation:
 
-Copy the latest release of `kobold-alarm-clock-card.js` to the appropriate directory on your HA instance. 
+Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance: 
 
 ```bash
-[home-assistant-root]/www/custom_ui/alarm-clock-card/
-```
-
-```yaml
-type: custom:kobold-alarm-clock
+<config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
 ## Configuration:
 
+```yaml
+type: custom:kobold-alarm-clock
+```
 
 ## Development:
 
