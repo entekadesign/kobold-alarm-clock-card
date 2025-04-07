@@ -52,6 +52,9 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 type: custom:kobold-alarm-clock
 ```
 
+## Configuration:
+
+
 ## Development:
 
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
