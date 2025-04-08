@@ -41,7 +41,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Usage:
 
-Set an alarm for each day of the week in the alarm schedle dialog. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the numerals of the next alarm time or on the toggle button. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to scheduled alarm, tap/click on **CLEAR** button in Nap dialog.
+Set an alarm for each day of the week in the alarm schedle dialog. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the numerals of the next alarm time or on the toggle button. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the Nap dialog.
 
 ## Prerequisites:
 
