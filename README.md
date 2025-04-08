@@ -66,7 +66,7 @@ Register kobold on the [resources page of your HA dashboard](https://developers.
 /local/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
-Add the following to your dashboard's [lovelace configuration](https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#referencing-your-new-card):
+Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
 type: custom:kobold-alarm-clock
