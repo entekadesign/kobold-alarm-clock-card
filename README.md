@@ -60,7 +60,7 @@ Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/e
 
 ## Configuration:
 
-Register kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
+Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
 ```
 /local/kobold-alarm-clock/kobold-alarm-clock-card.js
