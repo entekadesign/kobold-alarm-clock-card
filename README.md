@@ -71,10 +71,20 @@ Add the following to your dashboard's [lovelace configuration](https://www.home-
 ```yaml
 - type: custom:kobold-alarm-clock
   alarm_entities:
-    - input_boolean.[alarm_clock]
+    - input_boolean.alarm_clock
 ```
 
-There must be at least one entity ID under `alarm_entities:`, e.g., the entity ID of your input_boolean helper. Replace "[alarm_clock]" above with a descriptive name.
+There must be at least one entity ID under `alarm_entities:`, e.g., the entity ID of your input_boolean helper. The name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock", you must add a `name:` entry to the lovelace configuration setting the new name:
+
+```yaml
+- type: custom:kobold-alarm-clock
+  name: living_room_clock
+  alarm_entities:
+    - input_boolean.living_room_clock
+```
+
+### Optional configuration:
+
 
 ## Development:
 
