@@ -69,8 +69,12 @@ Register Kobold on the [resources page of your HA dashboard](https://developers.
 Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
-type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock
+  alarm_entities:
+    - input_boolean.[alarm_clock]
 ```
+
+There must be at least one entity ID under `alarm_entities:`, e.g., the entity ID of your input_boolean helper. Replace "[alarm_clock]" above with a descriptive name.
 
 ## Development:
 
