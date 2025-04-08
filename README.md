@@ -18,7 +18,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - **Integration with HA**
     - Set one or more HA entities to be triggered by alarm
     - Set one or more additional HA entities to activate *X* minutes before or after alarm
-    - Add other HA cards to be displayed or hidden with a tap
+    - Add other HA cards to be displayed or hidden with a tap/click
 - **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
@@ -40,6 +40,8 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 <br>
 
 ## Usage:
+
+Set an alarm for each day of the week in the alarm schedle dialog. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the numerals of the next alarm time or the toggle button. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to schedled alarm, tap/click on **Clear** button in Nap dialog.
 
 
 
