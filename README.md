@@ -14,7 +14,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
     - Set a schedule of alarm times, one for each day of the week
     - Set a new alarm at any time, temporarily overriding scheduled alarm
     - Set unscheduled alarm *X* minutes in future using **nap dialog**
-    - Set alarm times easily using sliders in a dialog or directly on main view
+    - Set alarm times easily using sliders directly on main view or in a dialog
 - **Integrate with HA**
     - Set one or more HA entities to be triggered by alarm
     - Set one or more additional HA entities to activate *X* minutes before or after alarm
