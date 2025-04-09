@@ -26,8 +26,6 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - **Optional enhanced reliability**
     - Set HA entities to ping connection and to sound a device-hosted alarm
 
-<br>
-
 |||
 | :---: | :---: |
 | <figure><img src="./assets/main-view.jpg" alt="Main view, 24-hour" width="100%" align="" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="./assets/main-editing.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
@@ -74,7 +72,7 @@ Add the following to your dashboard's [lovelace configuration](https://www.home-
     - input_boolean.alarm_clock
 ```
 
-There must be at least one entity ID under `alarm_entities:`, e.g., the entity ID of your input_boolean helper. The name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock", you must add a `name:` entry to the lovelace configuration to set a new name:
+There must be at least one entity ID under `alarm_entities:`, e.g., the entity ID of your input_boolean helper. The name portion of the entity ID of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock", you must add a `name:` entry to the lovelace configuration to set a new name:
 
 ```yaml
 - type: custom:kobold-alarm-clock
