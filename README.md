@@ -23,7 +23,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
     - Set default durations of snooze and undismissed alarm
-- **Enhanced reliability**
+- **Enhance reliability**
     - Set HA entities to ping connection and to sound a device-hosted alarm
 
 <br>
