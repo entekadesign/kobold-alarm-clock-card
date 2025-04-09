@@ -39,10 +39,6 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
-## Usage:
-
-Set an alarm for each day of the week in the **alarm schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the **nap dialog**.
-
 ## Prerequisites:
 
 1. [Home Assistant](https://www.home-assistant.io/installation/)
@@ -83,7 +79,12 @@ There must be at least one entity ID under `alarm_entities:`, e.g., the entity I
     - input_boolean.living_room_clock
 ```
 
-### Optional configuration:
+## Usage:
+
+Set an alarm for each day of the week in the **alarm schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the **nap dialog**.
+
+
+## Optional configuration:
 
 
 ## Development:
