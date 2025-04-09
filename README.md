@@ -35,8 +35,6 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 | <figure><img src="./assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="./assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: showing added HA cards, alternate font**</figcaption></figure> |
 |||
 
-<br>
-
 ## Usage:
 
 Set an alarm for each day of the week in the alarm schedle dialog. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the nap dialog. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the nap dialog.
@@ -89,8 +87,6 @@ There must be at least one entity ID under `alarm_entities:`, e.g., the entity I
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
 
 If you want to build your own card but you're not sure how to start, [check out this tutorial](https://github.com/home-assistant-tutorials).
-
-<br>
 
 ---
 
