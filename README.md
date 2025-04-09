@@ -26,6 +26,8 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - **Optional enhanced reliability**
     - Set HA entities to ping connection and to sound a device-hosted alarm
 
+<br>
+
 |||
 | :---: | :---: |
 | <figure><img src="./assets/main-view.jpg" alt="Main view, 24-hour" width="100%" align="" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="./assets/main-editing.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
@@ -34,6 +36,8 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 |||
 | <figure><img src="./assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="./assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: showing added HA cards, alternate font**</figcaption></figure> |
 |||
+
+<br>
 
 ## Usage:
 
