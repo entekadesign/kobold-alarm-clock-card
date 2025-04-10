@@ -99,7 +99,7 @@ You can instruct Kobold to activate an HA integration at other times than when a
       when: '-00:01'
 ```
 
-The value for `when` must be a string representing one of the following events: a time (positive values cause activation after the alarm), or a button activation ('on_snooze' or 'on_dismiss').
+The value for `when` must be a string representing one of the following events: a time (in *HH:mm* format; positive values cause activation after the alarm), or a button activation ('on_snooze' or 'on_dismiss').
 
 ### Cards display
 
