@@ -41,14 +41,14 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Prerequisites:
 
-1. [Home Assistant](https://www.home-assistant.io/installation/)
-2. [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
-3. [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
-4. [*Variables+History* integration](https://github.com/enkama/hass-variables)
+- [Home Assistant](https://www.home-assistant.io/installation/)
+- [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
+- [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
+- [*Variables+History* integration](https://github.com/enkama/hass-variables)
 
 ## Installation:
 
-1. Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance: 
+Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance: 
 
 ```bash
 <config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
@@ -62,7 +62,7 @@ Register Kobold on the [resources page of your HA dashboard](https://developers.
 /local/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
-2. Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
+Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
 - type: custom:kobold-alarm-clock
