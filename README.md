@@ -86,7 +86,7 @@ Set an alarm for each day of the week in the **alarm schedule dialog**. The next
 
 ## Optional configuration:
 
-### Actions
+### Alarm actions
 
 You can instruct Kobold to activate an HA integration at other times than when an alarm activates. For example, to configure an input_boolean helper to activate one minute before the alarm, add an `alarm_actions` entry to your lovelace configuration:  
 
