@@ -101,8 +101,13 @@ You can instruct Kobold to activate an HA integration at other times than when a
 
 The value for `when` must be a string representing one of the following events: a time (in *HH:mm* format; positive values cause activation after the alarm), or a button activation ("on_snooze" or "on_dismiss"). Note that alarm actions are not executed for override alarms, only for scheduled alarms.
 
-### Cards display
+### Safety configuration
 
+Enhance reliability by adding one or both of the following integrations.
+
+The [*Ping* integration](https://www.home-assistant.io/integrations/ping/) provides a binary_sensor that can be used to query an IP address to confirm the availability of an Internet connection. 
+
+### Cards display
 
 ## Development:
 
