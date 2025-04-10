@@ -70,7 +70,7 @@ Add the following to your dashboard's [lovelace configuration](https://www.home-
     - input_boolean.alarm_clock
 ```
 
-Kobold expects the entity ID of your input_boolean helper to be in the `alarm_entities` list. These are entity IDs representing HA integrations that will activate when the alarm is activated (called "alarm ringers" in the **settings dialog**). Note that the name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock", you must add a `name` entry to the lovelace configuration to set a new name:
+Kobold expects the entity ID of your input_boolean helper to be in the `alarm_entities` list. These are entity IDs representing HA integrations that will activate when the alarm is activated (called "alarm ringers" in the **settings dialog**). Note that the name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock," you must add a `name` entry to the lovelace configuration to set a new name:
 
 ```yaml
 - type: custom:kobold-alarm-clock
