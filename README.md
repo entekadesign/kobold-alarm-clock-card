@@ -188,6 +188,8 @@ mode: single
 description: ""
 ```
 
+Then, create a switch in the same way as above, this time associating with it the script just created, and add the entity ID of the switch as the value of your `alarm_entity_local` entry.
+
 ### Debug
 
 Some debugging information can be logged in the HA system log by adding a `debug` entry to your lovelace configuration:
