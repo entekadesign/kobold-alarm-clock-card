@@ -165,7 +165,7 @@ Now, configure Kobold by adding the switch's entity ID to your lovelace configur
 
 ### Debug
 
-Some debugging information can be logged in the HA system log by adding the following to your lovelace configuration:
+Some debugging information can be logged in the HA system log by adding a `debug` entry to your lovelace configuration:
 
 ```yaml
 - type: custom:kobold-alarm-clock
