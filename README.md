@@ -126,6 +126,8 @@ Enhance reliability by configuring both of the following.
 
 ### Cards display
 
+## More examples:
+
 ## Development:
 
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
