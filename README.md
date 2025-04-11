@@ -165,7 +165,7 @@ Now, configure Kobold by adding the switch's entity ID to your lovelace configur
 
 If you need a LAN-accessible alarm, you can use an audio file [hosted on the HA server](https://www.home-assistant.io/more-info/local-media/setup-media/). First, create a script whose yaml configuration is similar to the following, replacing `media_player.my_browser` with the entity ID of your browser's media player, and `alarm_sound.mp3` with the filename of your alarm sound:
 
-``yaml
+```yaml
 alias: Ring Alarm Bell
 sequence:
   - repeat:
