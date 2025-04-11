@@ -140,6 +140,14 @@ Display HA cards in an area along lower edge of main view by adding a `cards` en
       forecast_type: hourly
 ```
 
+### Kiosk mode:
+
+If you would like to eliminate the HA header and sidebar, first install a kiosk browser on your device, such as [*Kiosk+* for iOS](https://apps.apple.com/us/app/kiosk/id1239509744) or [*Fully-Kiosk Browser* for Android](https://www.fully-kiosk.com) or [*OpenKiosk* for all platforms](https://openkiosk.mozdevgroup.com/download.html). Then, install Thomas Lovén's excellent [*Browser_Mod* integration](https://github.com/thomasloven/hass-browser_mod) and configure it by registering the browser you installed and set it to remove header and sidebar. You can also configure *Browser_Mod* to automatically switch to the dashboard that contains Kobold.
+
+### Browser audio
+
+Another feature of *Browser_Mod* is its ability to allow a browser to serve an audio stream. 
+
 ### Debug
 
 Some debugging information can be logged in the HA system log by adding the following to your lovelace configuration:
@@ -150,8 +158,6 @@ Some debugging information can be logged in the HA system log by adding the foll
     - input_boolean.alarm_clock
   debug: true
 ```
-
-## Example configuration:
 
 ## Development:
 
