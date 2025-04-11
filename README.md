@@ -114,7 +114,7 @@ Enhance reliability by configuring both of the following.
   ping_entity: binary_sensor.8_8_8_8
 ```
 
-2. To configure a LAN-accessible alarm, add an 'alarm_entity_local` entry to your lovelace configuration, including as the value the entity ID of an alarm integration that does not require the Internet:
+2. To configure a LAN-accessible alarm, add an `alarm_entity_local` entry to your lovelace configuration, including as the value the entity ID of an alarm integration that does not require the Internet:
 
 ```yaml
 - type: custom:kobold-alarm-clock
@@ -126,7 +126,32 @@ Enhance reliability by configuring both of the following.
 
 ### Cards display
 
-## More examples:
+Display HA cards in an area along lower edge of main view by adding a `cards` entry to your lovelace configuration:
+
+```yaml
+- type: custom:kobold-alarm-clock
+  alarm_entities:
+    - input_boolean.alarm_clock
+  cards:
+    - type: weather-forecast
+      name: NYC
+      entity: weather.forecast_home
+      show_forecast: true
+      forecast_type: hourly
+```
+
+### Debug
+
+Some debugging information can be logged in the HA system log by adding the following to your lovelace configuration:
+
+```yaml
+- type: custom:kobold-alarm-clock
+  alarm_entities:
+    - input_boolean.alarm_clock
+  debug: true
+```
+
+## Example configuration:
 
 ## Development:
 
