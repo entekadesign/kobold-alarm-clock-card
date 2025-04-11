@@ -8,7 +8,7 @@
 
 Install the Kobold custom card on your Home Assistant (HA) instance to turn almost any device running HA Companion or a web browser into a customizable alarm clock.
 
-## Features:
+## Features
 
 - **Multi-alarm clock**
     - Set a schedule of alarm times, one for each day of the week
@@ -39,14 +39,14 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
-## Prerequisites:
+## Prerequisites
 
 - [Home Assistant](https://www.home-assistant.io/installation/)
 - [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
 - [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
 - [*Variables+History* integration](https://github.com/enkama/hass-variables)
 
-## Installation:
+## Installation
 
 Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance: 
 
@@ -54,7 +54,7 @@ Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/e
 <config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
-## Configuration:
+## Configuration
 
 Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
@@ -79,12 +79,12 @@ Kobold expects the entity ID of your input_boolean helper to be in the `alarm_en
     - input_boolean.living_room_clock
 ```
 
-## Usage:
+## Usage
 
 Set an alarm for each day of the week in the **alarm schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the **nap dialog**.
 
 
-## Optional configuration:
+## Optional configuration
 
 ### Alarm actions
 
@@ -140,7 +140,7 @@ Display HA cards in an area along lower edge of main view by adding a `cards` en
       forecast_type: hourly
 ```
 
-### Kiosk mode:
+### Kiosk mode
 
 If you would like to eliminate the HA header and sidebar, first install a kiosk browser on your device, such as [*Kiosk+* for iOS](https://apps.apple.com/us/app/kiosk/id1239509744) or [*Fully-Kiosk Browser* for Android](https://www.fully-kiosk.com) or [*OpenKiosk* for all platforms](https://openkiosk.mozdevgroup.com/download.html). Then, install Thomas Lovén's excellent [*Browser_Mod* integration](https://github.com/thomasloven/hass-browser_mod) and configure it by registering the browser you installed and set it to remove header and sidebar. You can also configure *Browser_Mod* to automatically switch to the dashboard that contains Kobold.
 
@@ -161,7 +161,7 @@ Some debugging information can be logged in the HA system log by adding the foll
   debug: true
 ```
 
-## Development:
+## Development
 
 If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock/pulls).
 
