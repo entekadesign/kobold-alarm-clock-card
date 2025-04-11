@@ -146,7 +146,9 @@ If you would like to eliminate the HA header and sidebar, first install a kiosk 
 
 ### Browser audio
 
-Another feature of *Browser_Mod* is its ability to allow a browser to serve an audio stream. 
+Another feature of *Browser_Mod* is its ability to allow a browser to serve an audio stream. Configuring HA to use your browser to sound alarms requires two elements: (1) an [HA *Template Switch*](https://www.home-assistant.io/integrations/switch.template/) and (2) an [HA *Script*](https://www.home-assistant.io/integrations/script/).
+
+1. 
 
 ### Debug
 
