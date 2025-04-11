@@ -148,11 +148,18 @@ If you would like to eliminate the HA header and sidebar from the Kobold main vi
 
 Another feature of *Browser_Mod* is its ability to allow a browser to serve an audio stream. Configuring HA to use your browser to sound alarms requires two elements: (1) an [HA *script*](https://www.home-assistant.io/integrations/script/) and (2) an [HA *template switch helper*](https://www.home-assistant.io/integrations/switch.template/).
 
-1. Create a script (HA -> Settings -> Automations -> Scripts). Choose your action whose target is your browser; for example, "Media player: Play media," with content ID "https://fm939.wnyc.org/wnycfm" and media type "music".
+1. Create a script (HA -> Settings -> Automations -> Scripts). Choose an action whose target is your browser; for example, "Media player: Play media," with content ID "https://fm939.wnyc.org/wnycfm" and media type "music".
 
 2. Create a template switch (HA -> Settings -> Devices -> Helpers) whose turn-on action is "Script: Turn on" targeting your script, and whose turn-off action is "Media Player: Turn off" targeting your browser's media player.
 
-Now, configure Kobold to use the audio for the alarm by adding the switch's entity ID to your lovelace configuration:
+Now, configure Kobold by adding the switch's entity ID to your lovelace configuration:
+
+```yaml
+- type: custom:kobold-alarm-clock
+  alarm_entities:
+    - input_boolean.alarm_clock
+    - switch.stream_wnyc
+```
 
 ### Debug
 
