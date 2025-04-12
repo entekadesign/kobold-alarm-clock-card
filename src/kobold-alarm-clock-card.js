@@ -217,7 +217,7 @@ class KoboldAlarmClockCard extends LitElement {
                                   <ha-textfield
                                     id="ringer-text-${i}"
                                     class="ringer-text"
-                                    .value=${this._hass.states[entity.entity_id].attributes.friendly_name}
+                                    .value=${this._hass.states[entity.entity_id] ? this._hass.states[entity.entity_id].attributes.friendly_name : 'No ringer entity found'}
                                     readonly
                                     >
                                   </ha-textfield>
@@ -918,9 +918,9 @@ class KoboldAlarmClockCard extends LitElement {
 
     if(!this._alarmController.isSafetyConfigSet()) {
       if (this.config.debug) {
-        this._hass.callService('system_log', 'write', { 'message': '*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) switch entity launching script that plays local alarm sound', 'level': 'info'} );
+        this._hass.callService('system_log', 'write', { 'message': '*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity', 'level': 'info'} );
       }
-      console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) switch entity launching script that plays local alarm sound');
+      console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
     }
 
     this.alarmsEnabled = this.alarmConfiguration.alarmsEnabled;
@@ -1062,7 +1062,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     if(!this._alarmController.isConfigCorrect()) {
-      alert(`Card requires two integration entities: input boolean helper and Variables+History whose entity ids are: sensor.${config.name} and input_boolean.${config.name}`);
+      alert(`Card requires two integration entities: input boolean helper and Variables+History whose entity IDs are: sensor.${config.name} and input_boolean.${config.name}`);
     }
   }
 

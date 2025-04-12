@@ -61,7 +61,11 @@ export class AlarmController {
 
     get alarmClockConfiguration() {
         if(!this._alarmClockConfiguration) {
-            this._alarmClockConfiguration = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this.config.name}`].attributes);
+            if (this._hass.states[`sensor.${this.config.name}`]) {
+                this._alarmClockConfiguration = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this.config.name}`].attributes);
+            } else {
+                alert(`Card requires Variables+History integration whose entity ID is sensor.${this.config.name}`);
+            }
         }
         return this._alarmClockConfiguration;
     }
