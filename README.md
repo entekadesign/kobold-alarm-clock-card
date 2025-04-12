@@ -144,7 +144,7 @@ To customize the appearance of the cards, install Thomas Lovén's outstanding  [
 
 ### Kiosk mode
 
-If you would like to eliminate the HA header and sidebar from the Kobold main view, first install a kiosk browser on your device, such as [*Kiosk+* for iOS](https://apps.apple.com/us/app/kiosk/id1239509744) or [*Fully-Kiosk Browser* for Android](https://www.fully-kiosk.com) or [*OpenKiosk* for other platforms](https://openkiosk.mozdevgroup.com/download.html). Then, install Lovén's excellent [*Browser-Mod* integration](https://github.com/thomasloven/hass-browser_mod) and configure it by registering the browser you installed and adjust the settings for header and sidebar. You can also configure *Browser_Mod* to automatically switch to the Kobold dashboard when the browser logs into to HA.
+If you would like to eliminate the HA header and sidebar from the Kobold main view, first install a kiosk browser on your device, such as [*Kiosk+* for iOS](https://apps.apple.com/us/app/kiosk/id1239509744) or [*Fully-Kiosk Browser* for Android](https://www.fully-kiosk.com) or [*OpenKiosk* for other platforms](https://openkiosk.mozdevgroup.com/download.html). Then, install Lovén's excellent [*Browser-Mod* integration](https://github.com/thomasloven/hass-browser_mod) and configure it by registering the browser you installed and adjusting the settings for header and sidebar. You can also configure *Browser_Mod* to automatically switch to the Kobold dashboard when the browser logs into to HA.
 
 ### Browser audio
 
