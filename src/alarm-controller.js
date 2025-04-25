@@ -199,7 +199,7 @@ export class AlarmController {
         this._alarmActionsScripts[`${tempAction.entity}-${tempAction.when}`] = true;
     }
 
-    async _callAlarmRingingService(action) {
+    _callAlarmRingingService(action) {
         if (this.config.debug) {
             this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; controllerID: ' + this.controllerID, 'level': 'info'} );
         }
@@ -207,7 +207,7 @@ export class AlarmController {
             if (this.alarmSoundLocalEntity) {
                 if (this.alarmClockPingEntity.state === 'off' || action === 'turn_off' || !this.config.alarm_entities) {
                     if ( (action === 'turn_on' && this.alarmSoundLocalEntity.state !== 'on') || (action === 'turn_off' && this.alarmSoundLocalEntity.state !== 'off') ) {
-                        await this._hass.callService('homeassistant', action, {'entity_id': this.config.alarm_entity_local});
+                        this._hass.callService('homeassistant', action, {'entity_id': this.config.alarm_entity_local});
                     }
                 }
             } else {
@@ -234,11 +234,11 @@ export class AlarmController {
                     const entityState = this._hass.states[entitiesArrayElement].state;
                     if(entitiesArrayElement.startsWith('media_player')) {
                         if ( (action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off') ) {
-                            await this._hass.callService('media_player', this._mappingMediaPlayer[action], {'entity_id': entitiesArrayElement});
+                            this._hass.callService('media_player', this._mappingMediaPlayer[action], {'entity_id': entitiesArrayElement});
                         }
                     } else {
                         if ( (action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off') ) {
-                            await this._hass.callService('homeassistant', action, {'entity_id': entitiesArrayElement});
+                            this._hass.callService('homeassistant', action, {'entity_id': entitiesArrayElement});
                         }
                     }
                 }
