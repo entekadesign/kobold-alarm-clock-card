@@ -14,6 +14,8 @@ dayjs.extend(relativeTime);
 import { AlarmController, AlarmConfiguration, Helpers } from './alarm-controller.js';
 import './alarm-picker.js';
 
+import type { CardConfig, TimeObject, NextAlarmObject } from './types';
+
 function loadCSS(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -26,26 +28,40 @@ loadCSS('https://fonts.googleapis.com/css2?family=Noto+Sans:wdth,wght@87.5,600&d
 loadCSS('https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap');
 loadCSS('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@600&display=swap');
 
+// loadCardHelpers() provided by HA needs to be typed
+declare global {
+  interface Window {
+    loadCardHelpers(): Promise<void>;
+  }
+}
+
 class KoboldAlarmClockCard extends LitElement {
+
+  private _cardId?: string;
+  private _config: CardConfig;
+  private _updateLoopId: number;
+  private _alarmController: AlarmController;
+  public alarmConfiguration: AlarmConfiguration;
+  public nextAlarm: NextAlarmObject;
 
   constructor() {
     super();
-    this.cardID = Math.random().toString(36).substr(2, 9) + ', ' + new Date().toJSON();
+    this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
   }
 
   connectedCallback() {
     super.connectedCallback();
-    if (this.config.debug) {
-      this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); cardID: ' + this.cardID, 'level': 'info'} );
+    if (this._config.debug) {
+      this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
     };
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    clearTimeout(this.updateLoop);
+    clearTimeout(this._updateLoopId);
     // if (this._alarmController) Object.keys(this._alarmController).forEach(myKey => delete this._alarmController[myKey]);
-    if (this.config.debug) {
-      this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); cardID: ' + this.cardID, 'level': 'info'} );
+    if (this._config.debug) {
+      this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
     };
   }
 
@@ -83,16 +99,16 @@ class KoboldAlarmClockCard extends LitElement {
     const alarmEntities = [];
     const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
 
-    if (this.config.alarm_entities) {
+    if (this._config.alarm_entities) {
       // add any alarm_entities that are not already members of ringerEntities
-      this.config.alarm_entities.forEach( (item) => { if(ringerEntitiesIds.indexOf(item) < 0) alarmEntities.push({enabled: true, entity_id: item}); if(!this._hass.states[item]) console.warn(`*** Entity ${item} does not exist in HA`) });
+      this._config.alarm_entities.forEach((item) => { if (ringerEntitiesIds.indexOf(item) < 0) alarmEntities.push({ enabled: true, entity_id: item }); if (!this._hass.states[item]) console.warn(`*** Entity ${item} does not exist in HA`) });
     } else {
-      if (!this.config.alarm_entity_local) alert('No alarm_entities and no alarm_entity_local in YAML configuration. One is required for alarm');
+      if (!this._config.alarm_entity_local) alert('No alarm_entities and no alarm_entity_local in YAML configuration. One is required for alarm');
     }
 
     // add alarm_entity_local if not already member of ringerEntities
-    if (this.config.alarm_entity_local) {
-      if(ringerEntitiesIds.indexOf(this.config.alarm_entity_local) < 0) alarmEntities.push({enabled: false, entity_id: this.config.alarm_entity_local});
+    if (this._config.alarm_entity_local) {
+      if (ringerEntitiesIds.indexOf(this._config.alarm_entity_local) < 0) alarmEntities.push({ enabled: false, entity_id: this._config.alarm_entity_local });
     }
 
     this._ringerEntities = [...alarmEntities, ...this._ringerEntities];
@@ -211,7 +227,7 @@ class KoboldAlarmClockCard extends LitElement {
                         <span>Alarm Ringers:</span>
                         <div class="switches-group-options">
                           ${this._ringerEntities.map((entity, i) =>
-                            html`
+      html`
                               <div class="switch-row">
                                 <div class="switch-row-group">
                                   <ha-textfield
@@ -225,7 +241,7 @@ class KoboldAlarmClockCard extends LitElement {
                                 </div>
                               </div>
                             `
-                          )}
+    )}
                         </div>
                       </div>
                     </div>
@@ -319,7 +335,7 @@ class KoboldAlarmClockCard extends LitElement {
                                             id="clockDefaultFullscreen"
                                             class="fullscreen-switch"
                                             ?checked=${this.clockDefaultFullscreen}
-                                            @change=${(e) => {this.clockDefaultFullscreen = e.target.checked}}>
+                                            @change=${(e) => { this.clockDefaultFullscreen = e.target.checked }}>
                                         </ha-switch>
                                     </div>
                                 </div>
@@ -916,9 +932,9 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** Missing <ha-card> in renderRoot')
     }
 
-    if(!this._alarmController.isSafetyConfigSet()) {
-      if (this.config.debug) {
-        this._hass.callService('system_log', 'write', { 'message': '*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity', 'level': 'info'} );
+    if (!this._alarmController.isSafetyConfigSet()) {
+      if (this._config.debug) {
+        this._hass.callService('system_log', 'write', { 'message': '*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity', 'level': 'info' });
       }
       console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
     }
@@ -954,10 +970,10 @@ class KoboldAlarmClockCard extends LitElement {
 
       if (optionButtonsHosts) {
         let optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
-        optionButtonsHosts.forEach( (optionButtonsHost) => {
-          myStyle = document.createElement( 'style' );
+        optionButtonsHosts.forEach((optionButtonsHost) => {
+          myStyle = document.createElement('style');
           myStyle.innerHTML = optionButtonsStyle;
-          optionButtonsHost.renderRoot.appendChild( myStyle );
+          optionButtonsHost.renderRoot.appendChild(myStyle);
         });
       }
 
@@ -968,26 +984,26 @@ class KoboldAlarmClockCard extends LitElement {
 
       if (switchHosts) {
         let settingsDialogStyle = '.mdc-switch{ margin: auto 0 !important; }';
-        switchHosts.forEach( (switchHost) => {
-          myStyle = document.createElement( 'style' );
+        switchHosts.forEach((switchHost) => {
+          myStyle = document.createElement('style');
           myStyle.innerHTML = settingsDialogStyle;
-          switchHost.renderRoot.appendChild( myStyle );
+          switchHost.renderRoot.appendChild(myStyle);
         });
       }
       if (textfieldHosts) {
         let settingsDialogStyle = '.mdc-text-field--filled { height: 2em !important; }';
-        textfieldHosts.forEach( (textfieldHost) => {
-          myStyle = document.createElement( 'style' );
+        textfieldHosts.forEach((textfieldHost) => {
+          myStyle = document.createElement('style');
           myStyle.innerHTML = settingsDialogStyle;
-          textfieldHost.renderRoot.appendChild( myStyle );
+          textfieldHost.renderRoot.appendChild(myStyle);
         });
       }
       if (formfieldHosts) {
         let settingsDialogStyle = '.mdc-form-field > label { margin-left: -0.5em !important } .mdc-form-field { color: #000000 !important; gap: 0 !important }';
-        formfieldHosts.forEach( (formfieldHost) => {
-          myStyle = document.createElement( 'style' );
+        formfieldHosts.forEach((formfieldHost) => {
+          myStyle = document.createElement('style');
           myStyle.innerHTML = settingsDialogStyle;
-          formfieldHost.renderRoot.appendChild( myStyle );
+          formfieldHost.renderRoot.appendChild(myStyle);
         });
       }
     }
@@ -1004,15 +1020,17 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     // these settings can be overridden by including them in card's yaml config
-    this.config = {
+    this._config = {
       name: 'alarm_clock',
       ...config
     };
 
     // NOTE: Some cards call setConfig() multiple times during life of card
-    if (!this._alarmController) this._alarmController = new AlarmController(this.config, this.cardID);
+    if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
   }
 
+  // TODO: test elimination of updateLoop by using reactive hass @property
+  // TODO: add hass to each card; e.g.: https://ls.entekadesign.com/8;
   set hass(hass) {
     this._hass = hass;
     this._alarmController.hass = hass;
@@ -1039,11 +1057,11 @@ class KoboldAlarmClockCard extends LitElement {
       root.removeChild(root.lastChild);
     }
 
-    const config = this.config;
+    const config = this._config;
 
     if (config.cards) {
       const elements = this._elements = [];
-      config.cards.forEach( async (card) => {
+      config.cards.forEach(async (card) => {
         const element = await this._createCardElement(card);
         elements.push(element);
         await root.appendChild(element);
@@ -1061,7 +1079,7 @@ class KoboldAlarmClockCard extends LitElement {
       }
     }
 
-    if(!this._alarmController.isConfigCorrect()) {
+    if (!this._alarmController.isConfigCorrect()) {
       alert(`Card requires two integration entities: input boolean helper and Variables+History whose entity IDs are: sensor.${config.name} and input_boolean.${config.name}`);
     }
   }
@@ -1080,7 +1098,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _updateLoop() {
-    this.updateLoop = setTimeout( () => { this._updateTime(); this._updateLoop(); }, 1000);
+    this._updateLoopId = setTimeout(() => { this._updateTime(); this._updateLoop(); }, 1000);
   }
 
   _updateTime(force = false) {
@@ -1091,11 +1109,11 @@ class KoboldAlarmClockCard extends LitElement {
     const time = dayjs().format(this.alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
-    if (this.clock && 
-          (force 
-            || this._time !== time 
-            || this._ringing !== isAlarmRinging 
-            || this._alarmClockConfigurationLastUpdate !== this.alarmConfiguration.lastUpdated)) {
+    if (this.clock &&
+      (force
+        || this._time !== time
+        || this._ringing !== isAlarmRinging
+        || this._alarmClockConfigurationLastUpdate !== this.alarmConfiguration.lastUpdated)) {
       this._time = time;
       this._ringing = isAlarmRinging;
       this._alarmClockConfigurationLastUpdate = this.alarmConfiguration.lastUpdated;
@@ -1127,15 +1145,15 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _setAlarm() {
-      // set alarm time given nap duration
-      const alarm = this.renderRoot.querySelector('#napTimePicker').value
-      const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
-      this._alarmController.nextAlarm = {
-          ...alarm,
-          time: alarmTime.format('HH:mm'),
-          nap: true,
-          overridden: true
-      }
+    // set alarm time given nap duration
+    const alarm = this.renderRoot.querySelector('#napTimePicker').value
+    const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
+    this._alarmController.nextAlarm = {
+      ...alarm,
+      time: alarmTime.format('HH:mm'),
+      nap: true,
+      overridden: true
+    }
   }
 
   _areAlarmsEnabled() {
@@ -1146,9 +1164,9 @@ class KoboldAlarmClockCard extends LitElement {
     // this not triggered by snooze or alarm picker dialogs; only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
     if (!event.detail.alarm.enabled) {
       this._alarmController.nextAlarm = {
-          ...this.alarmConfiguration.nextAlarm,
-          enabled: false,
-          overridden: true
+        ...this.alarmConfiguration.nextAlarm,
+        enabled: false,
+        overridden: true
       }
     } else {
       this._alarmController.nextAlarm = event.detail.alarm;
@@ -1186,7 +1204,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   _getDayOfWeek(days) {
     // returns day of week in language set in set hass() method
-    return dayjs('2018-08-27').add(days,'days').format('dddd');
+    return dayjs('2018-08-27').add(days, 'days').format('dddd');
   }
 
   saveAndCloseAlarmPicker() {
@@ -1271,7 +1289,7 @@ class KoboldAlarmClockCard extends LitElement {
     const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
     const ringerEntitiesConfig = this.alarmConfiguration['ringerEntities'] ? JSON.parse(this.alarmConfiguration['ringerEntities']) : [];
 
-    ringerEntitiesConfig.forEach( (item) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
+    ringerEntitiesConfig.forEach((item) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
     this._ringerEntities = alarmEntities;
     dialogElement.show();
     dialogElement.classList.add('open');
@@ -1280,7 +1298,7 @@ class KoboldAlarmClockCard extends LitElement {
   closeDialog(target) {
     const dialogElement = this.renderRoot.querySelector(target);
     dialogElement.classList.remove('open');
-    this.dialogTimeout = setTimeout(()=>{dialogElement.close()}, 120);
+    this.dialogTimeout = setTimeout(() => { dialogElement.close() }, 120);
   }
 
   _toggleLogoVisibility() {
@@ -1297,9 +1315,9 @@ class KoboldAlarmClockCard extends LitElement {
 
 class HeightUpdater {
   static updateHeight(card, element) {
-    if(this._updateHeightOnNormalCard(card, element)) return;
-    if(this._updateHeightOnNestedCards(card, element)) return;
-    if(this._updateHeightOnMediaControlCards(card, element)) return;
+    if (this._updateHeightOnNormalCard(card, element)) return;
+    if (this._updateHeightOnNestedCards(card, element)) return;
+    if (this._updateHeightOnMediaControlCards(card, element)) return;
   }
   static _updateHeightOnNormalCard(card, element) {
     if (element.renderRoot) {
@@ -1326,7 +1344,7 @@ class HeightUpdater {
   }
 
   static _updateHeightOnMediaControlCards(card, element) {
-    if(card.type !== 'media-control') {
+    if (card.type !== 'media-control') {
       return;
     }
     if (element.firstChild && element.firstChild.renderRoot) {

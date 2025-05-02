@@ -1,5 +1,5 @@
 {
-  "source": "src/kobold-alarm-clock-card.js",
+  "source": "src/kobold-alarm-clock-card.ts",
   "module": "dist/kobold-alarm-clock-card.js",
   "targets": {
     "module": {
