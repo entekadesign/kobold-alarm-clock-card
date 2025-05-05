@@ -1,7 +1,10 @@
-export interface CardConfig {
+// HA types
+import type { LovelaceCardConfig } from "custom-card-helpers";
+
+export interface CardConfig extends LovelaceCardConfig {
     type: string;
     name?: string;
-    alarm_entities: Array<Record<string, string>>;
+    alarm_entities: Array<string>;
     alarm_actions?: Array<Record<'entity' | 'when', string>>;
     ping_entity?: string;
     alarm_entity_local?: string;
@@ -21,25 +24,3 @@ export interface NextAlarmObject extends TimeObject {
     nap?: boolean;
     overridden?: boolean;
 }
-
-// export interface AlarmConfig {
-//     alarmsEnabled: boolean;
-//     nextAlarm: NextAlarmObject;
-//     mo: TimeObject;
-//     tu: TimeObject;
-//     we: TimeObject;
-//     th: TimeObject;
-//     fr: TimeObject;
-//     sa: TimeObject;
-//     su: TimeObject;
-//     timeFormat: string;
-//     clockFontFace: string;
-//     clockDefaultFullscreen: boolean;
-//     snoozeDurationDefault: TimeObject;
-//     alarmDurationDefault: TimeObject;
-//     napDurationDefault: TimeObject;
-//     ringerEntities: Array<{ 'enabled': boolean, 'entity_id': string }>;
-//     snooze(snoozeTime: TimeObject): void;
-//     dismiss(): void;
-//     createNextAlarm(alarm: string, forToday?: boolean): NextAlarmObject;
-// }

@@ -8,13 +8,14 @@ import type { CardConfig, NextAlarmObject, TimeObject } from './types';
 
 export class AlarmController {
 
-    private _controllerId?: string;
+    private _alarmClockConfiguration: AlarmConfiguration;
+    private _hass: any;
     private _config: CardConfig;
     private _isAlarmRinging: boolean;
     private readonly _mappingMediaPlayer: { readonly 'turn_on': 'media_play', readonly 'turn_off': 'media_pause' };
-    private _alarmActionsScripts?: Array<Record<string, boolean>>;
     private _alarmRinging: (state: boolean) => void;
-    private _alarmClockConfiguration?: AlarmConfiguration;
+    private _controllerId?: string;
+    private _alarmActionsScripts?: Array<Record<string, boolean>>;
 
     constructor(config, controllerId) {
         this._controllerId = controllerId;
@@ -317,6 +318,7 @@ export class AlarmConfiguration {
     public snoozeDurationDefault: TimeObject;
     public alarmDurationDefault: TimeObject;
     public napDurationDefault: TimeObject;
+    public lastUpdated: string;
 
     constructor() {
         this.alarmsEnabled = false;
