@@ -1,7 +1,5 @@
 import dayjs from 'dayjs';
-// import dayjs from 'https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js/+esm';
 import duration from 'dayjs/plugin/duration';
-// import duration from 'https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/duration.js/+esm';
 dayjs.extend(duration);
 
 import type { CardConfig, NextAlarmObject, TimeObject } from './types';
@@ -11,8 +9,8 @@ export class AlarmController {
     private _alarmClockConfiguration: AlarmConfiguration;
     private _hass: any;
     private _config: CardConfig;
-    private _isAlarmRinging: boolean;
-    private readonly _mappingMediaPlayer: { readonly 'turn_on': 'media_play', readonly 'turn_off': 'media_pause' };
+    private _isAlarmRinging: boolean = false;
+    private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _alarmRinging: (state: boolean) => void;
     private _controllerId?: string;
     private _alarmActionsScripts?: Array<Record<string, boolean>>;
@@ -20,8 +18,8 @@ export class AlarmController {
     constructor(config, controllerId) {
         this._controllerId = controllerId;
         this._config = config;
-        this._isAlarmRinging = false;
-        this._mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
+        // this._isAlarmRinging = false;
+        // this._mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
         this._alarmActionsScripts = [];
         function throttle(fn, delay) {
             let timerFlag = null;
@@ -303,40 +301,40 @@ export class AlarmController {
 
 export class AlarmConfiguration {
 
-    public nextAlarm: NextAlarmObject;
-    public alarmsEnabled: boolean;
-    public mo: TimeObject;
-    public tu: TimeObject;
-    public we: TimeObject;
-    public th: TimeObject;
-    public fr: TimeObject;
-    public sa: TimeObject;
-    public su: TimeObject;
-    public timeFormat: string;
-    public clockFontFace: string;
-    public clockDefaultFullscreen: boolean;
-    public snoozeDurationDefault: TimeObject;
-    public alarmDurationDefault: TimeObject;
-    public napDurationDefault: TimeObject;
+    public alarmsEnabled: boolean = false;
+    public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', dateTime: '' };
+    public mo: TimeObject = { enabled: false, time: '07:00' };
+    public tu: TimeObject = { enabled: false, time: '07:00' };
+    public we: TimeObject = { enabled: false, time: '07:00' };
+    public th: TimeObject = { enabled: false, time: '07:00' };
+    public fr: TimeObject = { enabled: false, time: '07:00' };
+    public sa: TimeObject = { enabled: false, time: '09:00' };
+    public su: TimeObject = { enabled: false, time: '09:00' };
+    public timeFormat: string = '12hr';
+    public clockFontFace: string = '0';
+    public clockDefaultFullscreen: boolean = false;
+    public snoozeDurationDefault: TimeObject = { enabled: true, time: '00:15' };
+    public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
+    public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
     public lastUpdated: string;
 
-    constructor() {
-        this.alarmsEnabled = false;
-        this.nextAlarm = { enabled: false, time: '08:00', date: '', dateTime: '' };
-        this.mo = { enabled: false, time: '07:00' }
-        this.tu = { enabled: false, time: '07:00' }
-        this.we = { enabled: false, time: '07:00' }
-        this.th = { enabled: false, time: '07:00' }
-        this.fr = { enabled: false, time: '07:00' }
-        this.sa = { enabled: false, time: '09:00' }
-        this.su = { enabled: false, time: '09:00' }
-        this.timeFormat = '12hr'
-        this.clockFontFace = '0';
-        this.clockDefaultFullscreen = false
-        this.snoozeDurationDefault = { enabled: true, time: '00:15' }
-        this.alarmDurationDefault = { enabled: true, time: '00:30' }
-        this.napDurationDefault = { enabled: true, time: '00:30' }
-    }
+    // constructor() {
+    //     this.alarmsEnabled = false;
+    //     this.nextAlarm = { enabled: false, time: '08:00', date: '', dateTime: '' };
+    //     this.mo = { enabled: false, time: '07:00' }
+    //     this.tu = { enabled: false, time: '07:00' }
+    //     this.we = { enabled: false, time: '07:00' }
+    //     this.th = { enabled: false, time: '07:00' }
+    //     this.fr = { enabled: false, time: '07:00' }
+    //     this.sa = { enabled: false, time: '09:00' }
+    //     this.su = { enabled: false, time: '09:00' }
+    //     this.timeFormat = '12hr'
+    //     this.clockFontFace = '0';
+    //     this.clockDefaultFullscreen = false
+    //     this.snoozeDurationDefault = { enabled: true, time: '00:15' }
+    //     this.alarmDurationDefault = { enabled: true, time: '00:30' }
+    //     this.napDurationDefault = { enabled: true, time: '00:30' }
+    // }
 
     snooze(snoozeTime) {
         const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
