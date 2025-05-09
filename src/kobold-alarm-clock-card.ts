@@ -1,10 +1,10 @@
 // TODO: recover from HA restart. see https://github.com/dermotduffy/advanced-camera-card/blob/2eb0d9e35e150a24f09cf47368e0b8408634cc45/src/components/live/providers/jsmpeg.ts
-import { AlarmController, AlarmConfiguration, Helpers } from './alarm-controller.js';
-import './alarm-picker.js';
+import { AlarmController, AlarmConfiguration, Helpers } from './alarm-controller';
+import './alarm-picker';
 
 import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { property, state, customElement, query, queryAll } from "lit/decorators.js";
+import { state, customElement, query, queryAll } from "lit/decorators.js";
 
 function loadCSS(url) {
   const link = document.createElement('link');
