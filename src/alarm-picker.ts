@@ -23,7 +23,7 @@ class AlarmPicker extends LitElement {
     @property({ reflect: false }) disabled: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ;
-    @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput') _alarmTimeInputQ;
+    @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ;
     @query('ha-icon.button') _iconButtonQ;
     @query('#alarmPicker', true) _alarmPickerQ;
 

@@ -38,7 +38,7 @@ declare global {
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
 
-  private _cardId?: string;
+  private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
   private _config: CardConfig;
   private _updateLoopId: number;
   private _alarmController: AlarmController;
@@ -48,31 +48,30 @@ class KoboldAlarmClockCard extends LitElement {
   private _cardHelpers: any;
   private _time: string;
   private _ringing: boolean;
-  private _alarmClockConfigurationLastUpdate: string;
+  private _controllersAlarmConfigLastUpdate: string;
   private _snoozeDurationDefault: TimeObject;
   private _alarmDurationDefault: TimeObject;
-  public alarmConfiguration: AlarmConfiguration; // make private?
+  private _alarmConfiguration: AlarmConfiguration;
 
-  @state() nextAlarm: NextAlarmObject; //TODO: change to _nextAlarm?
-  @state() alarmPickerMo: TimeObject; //TODO: change to _alarmPickerMo?
-  @state() alarmPickerTu: TimeObject; //TODO: change to _alarmPickerTu?
-  @state() alarmPickerWe: TimeObject; //TODO: change to _alarmPickerWe?
-  @state() alarmPickerTh: TimeObject; //TODO: change to _alarmPickerTh?
-  @state() alarmPickerFr: TimeObject; //TODO: change to _alarmPickerFr?
-  @state() alarmPickerSa: TimeObject; //TODO: change to _alarmPickerSa?
-  @state() alarmPickerSu: TimeObject; //TODO: change to _alarmPickerSu?
-  @state() _napTime: TimeObject; //TODO: change to _alarmNap?
-  @state() _timeFormat: string; //TODO: change to _timeFormat?
+  @state() _alarmsEnabled: boolean;
+  @state() _nextAlarm: NextAlarmObject;
+  @state() _alarmPickerMo: TimeObject;
+  @state() _alarmPickerTu: TimeObject;
+  @state() _alarmPickerWe: TimeObject;
+  @state() _alarmPickerTh: TimeObject;
+  @state() _alarmPickerFr: TimeObject;
+  @state() _alarmPickerSa: TimeObject;
+  @state() _alarmPickerSu: TimeObject;
+  @state() _napTime: TimeObject;
+  @state() _timeFormat: string;
   @state() _clockDefaultFullscreen: boolean;
-  @state() _clockFontFace: string; //TODO: change to _clockFontFace?
+  @state() _clockFontFace: string;
   @state() _hass: HomeAssistant;
   @state() _ringerEntities: Array<{ enabled: boolean, entity_id: string }>;
   @state() _alarmClockClasses: { [key: string]: boolean };
   @state() _alarmButtonsClasses: { [key: string]: boolean };
   @state() _footClasses: { [key: string]: boolean };
   @state() _clockClasses: { [key: string]: boolean };
-
-  @property({ reflect: false }) alarmsEnabled: boolean; // TODO: change to state?
 
   @query('#clock', true) _clockQ;
   @query('#date', true) _dateQ;
@@ -101,12 +100,10 @@ class KoboldAlarmClockCard extends LitElement {
   @query('#settingsDialog', true) _settingsDialogQ;
   @query('#alarm-top div#clockLogo', true) _clockLogoQ;
 
-  constructor() {
-    super();
-    if (this._config.debug) {
-      this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
-    };
-  }
+  // constructor() {
+  //   super();
+  //   this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
+  // }
 
   connectedCallback() {
     super.connectedCallback();
@@ -126,8 +123,8 @@ class KoboldAlarmClockCard extends LitElement {
 
   render() {
     // TODO: change any/all assignments to connectedCallback()?
-    this.alarmConfiguration = this._alarmController.alarmClockConfiguration;
-    this.nextAlarm = this._alarmController.nextAlarm;
+    this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
+    this._nextAlarm = this._alarmController.nextAlarm;
 
     this._ringerEntities = this._ringerEntities || [];
     const alarmEntities = [];
@@ -184,17 +181,17 @@ class KoboldAlarmClockCard extends LitElement {
                             <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${() => this.closeDialog('#scheduleDialog')}></ha-icon>
                           </ha-icon-button>
                           <span class="header-title">Set Schedule</span>
-                          <ha-switch ?checked=${this.alarmsEnabled} @change=${() => { this.alarmsEnabled = !this.alarmsEnabled }}></ha-switch>
+                          <ha-switch ?checked=${this._alarmsEnabled} @change=${() => { this._alarmsEnabled = !this._alarmsEnabled }}></ha-switch>
                         </header>
                         <div id="alarm-picker-dialog-content" class="mdc-dialog__content alarm-picker-dialog-content">
                           <div class="workweek">
-                              <alarm-picker id="alarmPickerMo" .alarm=${this.alarmPickerMo} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(0)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTu" .alarm=${this.alarmPickerTu} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(1)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerWe" .alarm=${this.alarmPickerWe} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(2)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTh" .alarm=${this.alarmPickerTh} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(3)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerFr" .alarm=${this.alarmPickerFr} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(4)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSa" .alarm=${this.alarmPickerSa} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(5)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSu" .alarm=${this.alarmPickerSu} disabled=${!this.alarmsEnabled} .alarmConfiguration=${this.alarmConfiguration}><span>${this._getDayOfWeek(6)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerMo" .alarm=${this._alarmPickerMo} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(0)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerTu" .alarm=${this._alarmPickerTu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(1)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerWe" .alarm=${this._alarmPickerWe} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(2)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerTh" .alarm=${this._alarmPickerTh} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(3)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerFr" .alarm=${this._alarmPickerFr} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(4)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerSa" .alarm=${this._alarmPickerSa} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(5)}: </span></alarm-picker>
+                              <alarm-picker id="alarmPickerSu" .alarm=${this._alarmPickerSu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(6)}: </span></alarm-picker>
                           </div>
                           <div class="alarm-picker-dialog-buttons dialog-buttons">
                             <ha-button @click=${this.saveAndCloseAlarmPicker} raised>Save</ha-button>
@@ -224,7 +221,7 @@ class KoboldAlarmClockCard extends LitElement {
                           <span class="header-title">Set Nap Length</span>
                         </header>
                         <div id="alarm-nap-dialog-content" class="mdc-dialog__content alarm-nap-dialog-content">
-                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} show-toggle-button="false" .alarmConfiguration=${this.alarmConfiguration}>
+                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
                               <span>Nap Duration: </span>
                           </alarm-picker>
                           <div class="alarm-nap-dialog-buttons dialog-buttons">
@@ -376,10 +373,10 @@ class KoboldAlarmClockCard extends LitElement {
                             </div>
                         </div>
                     </div>
-                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} show-toggle-button="false" .alarmConfiguration=${this.alarmConfiguration}>
+                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
                       <span>Snooze Duration: </span>
                     </alarm-picker>
-                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} show-toggle-button="false" .alarmConfiguration=${this.alarmConfiguration}>
+                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
                       <span>Alarm Duration: </span>
                     </alarm-picker>
                     <div class="alarm-settings-dialog-buttons dialog-buttons">
@@ -400,8 +397,8 @@ class KoboldAlarmClockCard extends LitElement {
                   <ha-icon id="napButton" class="button" icon="mdi:sleep" @click=${this._showNapDialog}></ha-icon>
                 </div>
                 ${this._areAlarmsEnabled() ? html`
-                    <alarm-picker id="alarmpicker" show-icon="true" .alarm=${this.nextAlarm}
-                        .alarmConfiguration=${this.alarmConfiguration}
+                    <alarm-picker id="alarmpicker" show-icon="true" .alarm=${this._nextAlarm}
+                        .alarmConfiguration=${this._alarmConfiguration}
                         .time=${this._time}
                         @alarm-button-clicked=${this._showAlarmPicker}
                         @alarm-changed=${this._onAlarmChanged}
@@ -953,9 +950,9 @@ class KoboldAlarmClockCard extends LitElement {
   firstUpdated(changedProperties: Map<string, any>): void {
     super.firstUpdated(changedProperties);
 
-    this._timeFormat = this.alarmConfiguration['timeFormat'];
-    this._clockFontFace = this.alarmConfiguration['clockFontFace'];
-    this._toggleAlarmFullscreen(this.alarmConfiguration['clockDefaultFullscreen']);
+    this._timeFormat = this._alarmConfiguration['timeFormat'];
+    this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+    this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
     this._updateTime();
     this._updateLoop();
 
@@ -972,14 +969,14 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
     }
 
-    this.alarmsEnabled = this.alarmConfiguration.alarmsEnabled;
+    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
   }
 
   // willUpdate(changedProperties) {
   //   if (changedProperties.has('nextAlarm')) {
   //     // this is never getting called //TODO: delete me?
   //     console.log('*** willUpdate; getNextAlarm called cos nextAlarm changed; why not handled by _onAlarmChanged? this should never get called');
-  //     this.nextAlarm = this._alarmController.nextAlarm;
+  //     this._nextAlarm = this._alarmController.nextAlarm;
   //   }
   // }
 
@@ -994,7 +991,7 @@ class KoboldAlarmClockCard extends LitElement {
     // }
 
     // if (changedProperties.has('alarmsEnabled')) {
-    //   console.log('*** updated; alarmsEnabled changed:', this.alarmsEnabled);
+    //   console.log('*** updated; alarmsEnabled changed:', this._alarmsEnabled);
     // };
 
     if (!this._injectStylesDone) {
@@ -1140,24 +1137,24 @@ class KoboldAlarmClockCard extends LitElement {
 
   _updateTime(force = false) {
     this._alarmController.evaluateAlarms();
-    const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this.alarmConfiguration['clockFontFace']) ? '0' : this.alarmConfiguration['clockFontFace'];
+    const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
     const fontFaceClass = 'fontFace' + fontNum;
     this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
-    const time = dayjs().format(this.alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
+    const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
     if (this._clockQ &&
       (force
         || this._time !== time
         || this._ringing !== isAlarmRinging
-        || this._alarmClockConfigurationLastUpdate !== this.alarmConfiguration.lastUpdated)) {
+        || this._controllersAlarmConfigLastUpdate !== this._alarmConfiguration.lastUpdated)) {
       this._time = time;
       this._ringing = isAlarmRinging;
-      this._alarmClockConfigurationLastUpdate = this.alarmConfiguration.lastUpdated;
+      this._controllersAlarmConfigLastUpdate = this._alarmConfiguration.lastUpdated;
 
       let timeDisplay;
 
-      if (this.alarmConfiguration['timeFormat'] === '24hr') {
+      if (this._alarmConfiguration['timeFormat'] === '24hr') {
         timeDisplay = time;
       } else {
         const [timeNum, timeTxt] = time.split(' ');
@@ -1176,13 +1173,13 @@ class KoboldAlarmClockCard extends LitElement {
           ${timeDisplay}
         </div>
       `;
-      const dateFormat = this.alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
+      const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
       this._dateQ.innerHTML = dayjs().format(dateFormat);
     }
   }
 
   _setAlarm() {
-    const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ as HTMLInputElement).value));
+    const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
     const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
     this._alarmController.nextAlarm = {
       ...this._alarmController.nextAlarm,
@@ -1194,14 +1191,14 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _areAlarmsEnabled() {
-    return this.alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
+    return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
   }
 
   _onAlarmChanged(event) {
     // this not triggered by snooze or alarm picker dialogs; only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
     if (!event.detail.alarm.enabled) {
       this._alarmController.nextAlarm = {
-        ...this.alarmConfiguration.nextAlarm,
+        ...this._alarmConfiguration.nextAlarm,
         enabled: false,
         overridden: true
       }
@@ -1245,47 +1242,47 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   saveAndCloseAlarmPicker() {
-    const alarmClockConfiguration = Object.assign(new AlarmConfiguration, {
-      ...this.alarmConfiguration,
-      alarmsEnabled: (this._haSwitchQ as HTMLInputElement).checked,
-      mo: (this._alarmPickerMoQ as HTMLInputElement).value,
-      tu: (this._alarmPickerTuQ as HTMLInputElement).value,
-      we: (this._alarmPickerWeQ as HTMLInputElement).value,
-      th: (this._alarmPickerThQ as HTMLInputElement).value,
-      fr: (this._alarmPickerFrQ as HTMLInputElement).value,
-      sa: (this._alarmPickerSaQ as HTMLInputElement).value,
-      su: (this._alarmPickerSuQ as HTMLInputElement).value,
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
+      alarmsEnabled: (this._haSwitchQ).checked,
+      mo: (this._alarmPickerMoQ).value,
+      tu: (this._alarmPickerTuQ).value,
+      we: (this._alarmPickerWeQ).value,
+      th: (this._alarmPickerThQ).value,
+      fr: (this._alarmPickerFrQ).value,
+      sa: (this._alarmPickerSaQ).value,
+      su: (this._alarmPickerSuQ).value,
     });
 
-    alarmClockConfiguration.dismiss();
-    this._alarmController.saveAlarmClockConfiguration(alarmClockConfiguration);
+    controllersAlarmConfig.dismiss();
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
     this.closeDialog('#scheduleDialog');
   }
 
   saveAndCloseSettings() {
-    const alarmClockConfiguration = Object.assign(new AlarmConfiguration, {
-      ...this.alarmConfiguration,
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
       ringerEntities: JSON.stringify(this._ringerEntities),
-      timeFormat: (this._timeFormatQ as HTMLInputElement).value,
-      clockFontFace: (this._clockFontFaceQ as HTMLInputElement).value,
-      clockDefaultFullscreen: (this._clockDefaultFullscreenQ as HTMLInputElement).checked,
-      snoozeDurationDefault: (this._snoozeDurationPickerQ as HTMLInputElement).value,
-      alarmDurationDefault: (this._alarmDurationPickerQ as HTMLInputElement).value,
+      timeFormat: (this._timeFormatQ).value,
+      clockFontFace: (this._clockFontFaceQ).value,
+      clockDefaultFullscreen: (this._clockDefaultFullscreenQ).checked,
+      snoozeDurationDefault: (this._snoozeDurationPickerQ).value,
+      alarmDurationDefault: (this._alarmDurationPickerQ).value,
     });
 
-    this._alarmController.saveAlarmClockConfiguration(alarmClockConfiguration);
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
     if (this._alarmClockClasses.fullscreen !== this._clockDefaultFullscreen) this._toggleAlarmFullscreen(this._clockDefaultFullscreen);
     this.closeDialog('#settingsDialog');
   }
 
   saveAndCloseNap() {
     this._setAlarm();
-    const alarmClockConfiguration = Object.assign(new AlarmConfiguration, {
-      ...this.alarmConfiguration,
-      napDurationDefault: (this._napTimePickerQ as HTMLInputElement).value,
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
+      napDurationDefault: (this._napTimePickerQ).value,
     });
 
-    this._alarmController.saveAlarmClockConfiguration(alarmClockConfiguration);
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
     this.closeDialog('#napDialog');
   }
 
@@ -1295,33 +1292,33 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _showAlarmPicker() {
-    this.alarmsEnabled = this.alarmConfiguration.alarmsEnabled;
-    this.alarmPickerMo = JSON.parse(JSON.stringify(this.alarmConfiguration['mo']));
-    this.alarmPickerTu = JSON.parse(JSON.stringify(this.alarmConfiguration['tu']));
-    this.alarmPickerWe = JSON.parse(JSON.stringify(this.alarmConfiguration['we']));
-    this.alarmPickerTh = JSON.parse(JSON.stringify(this.alarmConfiguration['th']));
-    this.alarmPickerFr = JSON.parse(JSON.stringify(this.alarmConfiguration['fr']));
-    this.alarmPickerSa = JSON.parse(JSON.stringify(this.alarmConfiguration['sa']));
-    this.alarmPickerSu = JSON.parse(JSON.stringify(this.alarmConfiguration['su']));
+    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+    this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
+    this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
+    this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
+    this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
+    this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
+    this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
+    this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
     this._scheduleDialogQ.show();
     this._scheduleDialogQ.classList.add('open');
   }
 
   _showNapDialog() {
-    this._napTime = JSON.parse(JSON.stringify(this.alarmConfiguration['napDurationDefault']));
+    this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
     this._napDialogQ.show();
     this._napDialogQ.classList.add('open');
   }
 
   _showSettingsDialog() {
-    this._timeFormat = this.alarmConfiguration['timeFormat'];
-    this._clockDefaultFullscreen = this.alarmConfiguration['clockDefaultFullscreen'];
-    this._clockFontFace = this.alarmConfiguration['clockFontFace'];
-    this._snoozeDurationDefault = JSON.parse(JSON.stringify(this.alarmConfiguration['snoozeDurationDefault']));
-    this._alarmDurationDefault = JSON.parse(JSON.stringify(this.alarmConfiguration['alarmDurationDefault']));
+    this._timeFormat = this._alarmConfiguration['timeFormat'];
+    this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+    this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+    this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
+    this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
     const alarmEntities = [];
     const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
-    const ringerEntitiesConfig = this.alarmConfiguration['ringerEntities'] ? JSON.parse(this.alarmConfiguration['ringerEntities']) : [];
+    const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
 
     ringerEntitiesConfig.forEach((item) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
     this._ringerEntities = alarmEntities;

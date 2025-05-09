@@ -6,21 +6,21 @@ import type { CardConfig, NextAlarmObject, TimeObject } from './types';
 
 export class AlarmController {
 
-    private _alarmClockConfiguration: AlarmConfiguration;
+    private _controllersAlarmConfig: AlarmConfiguration;
     private _hass: any;
     private _config: CardConfig;
     private _isAlarmRinging: boolean = false;
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _alarmRinging: (state: boolean) => void;
     private _controllerId?: string;
-    private _alarmActionsScripts?: Array<Record<string, boolean>>;
+    private _alarmActionsScripts?: Array<Record<string, boolean>> = [];
 
     constructor(config, controllerId) {
         this._controllerId = controllerId;
         this._config = config;
         // this._isAlarmRinging = false;
         // this._mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
-        this._alarmActionsScripts = [];
+        // this._alarmActionsScripts = [];
         function throttle(fn, delay) {
             let timerFlag = null;
             return (...args) => {
@@ -45,7 +45,7 @@ export class AlarmController {
 
     set hass(hass) {
         this._hass = hass;
-        this._alarmClockConfiguration = null;
+        this._controllersAlarmConfig = null;
         this._evaluate();
     }
 
@@ -67,18 +67,18 @@ export class AlarmController {
         }
     }
 
-    get alarmClockConfiguration() {
-        if (!this._alarmClockConfiguration) {
+    get controllersAlarmConfig() {
+        if (!this._controllersAlarmConfig) {
             if (this._hass.states[`sensor.${this._config.name}`]) {
-                this._alarmClockConfiguration = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
+                this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
             } else {
                 alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
             }
         }
-        return this._alarmClockConfiguration;
+        return this._controllersAlarmConfig;
     }
 
-    saveAlarmClockConfiguration(configuration) {
+    saveControllersAlarmConfig(configuration) {
         this._saveConfiguration(configuration);
     }
 
@@ -115,18 +115,18 @@ export class AlarmController {
 
     //TODO: replace nextAlarmReset with set nextAlarm, adding parameters?
     nextAlarmReset(snooze = false) {
-        const alarmClockConfiguration = this.alarmClockConfiguration;
+        const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) {
-            alarmClockConfiguration.snooze(alarmClockConfiguration['snoozeDurationDefault'].time);
+            controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
         } else {
-            alarmClockConfiguration.dismiss();
+            controllersAlarmConfig.dismiss();
         }
-        this._saveConfiguration(alarmClockConfiguration);
+        this._saveConfiguration(controllersAlarmConfig);
     }
 
     get nextAlarm(): NextAlarmObject {
         // called each time _evaluate is called
-        const nextAlarm = this.alarmClockConfiguration.nextAlarm;
+        const nextAlarm = this.controllersAlarmConfig.nextAlarm;
 
         if (!nextAlarm) {
             return { enabled: false, time: '08:00', date: '', dateTime: '' };
@@ -135,13 +135,13 @@ export class AlarmController {
     }
 
     set nextAlarm(nextAlarm) {
-        const alarmClockConfiguration = this.alarmClockConfiguration;
+        const controllersAlarmConfig = this.controllersAlarmConfig;
         const forToday = true;
-        alarmClockConfiguration.nextAlarm = {
+        controllersAlarmConfig.nextAlarm = {
             ...AlarmConfiguration.createNextAlarm(nextAlarm, forToday),
             overridden: true
         };
-        this._saveConfiguration(alarmClockConfiguration);
+        this._saveConfiguration(controllersAlarmConfig);
     }
 
     get isAlarmEnabled() {
@@ -150,7 +150,7 @@ export class AlarmController {
         if (nextAlarm.overridden && nextAlarm.enabled) {
             return true;
         }
-        return this.alarmClockConfiguration.alarmsEnabled && nextAlarm.enabled;
+        return this.controllersAlarmConfig.alarmsEnabled && nextAlarm.enabled;
     }
 
     isAlarmRinging() {
@@ -173,7 +173,7 @@ export class AlarmController {
             }
         }
 
-        if (!this.alarmClockConfiguration.alarmsEnabled && !nextAlarm.nap) {
+        if (!this.controllersAlarmConfig.alarmsEnabled && !nextAlarm.nap) {
             return;
         }
 
@@ -185,7 +185,7 @@ export class AlarmController {
             this._alarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm automatically after alarmdurationdefault time elapses
-            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(this.alarmClockConfiguration['alarmDurationDefault'].time))).format('HH:mm') <= dayjs().format('HH:mm')) {
+            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(this.controllersAlarmConfig['alarmDurationDefault'].time))).format('HH:mm') <= dayjs().format('HH:mm')) {
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
@@ -226,7 +226,7 @@ export class AlarmController {
             }
             if (this._config.alarm_entities) {
                 const entitiesArray = [];
-                const ringerEntities = this.alarmClockConfiguration['ringerEntities'] ? JSON.parse(this.alarmClockConfiguration['ringerEntities']) : '';
+                const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
                 for (const entity of this._config.alarm_entities) {
                     if (ringerEntities) {
                         for (const ringerEntity of ringerEntities) {
@@ -263,6 +263,7 @@ export class AlarmController {
     }
 
     _saveConfiguration(configuration) {
+        // TODO: do we really need two variables here?
         let actualConfiguration = configuration;
         if (!(configuration instanceof AlarmConfiguration)) {
             actualConfiguration = Object.assign(new AlarmConfiguration, configuration);
@@ -270,7 +271,7 @@ export class AlarmController {
         }
 
         // reset next alarm after being disabled and now being re-enabled
-        if (actualConfiguration.alarmsEnabled && this.alarmClockConfiguration.alarmsEnabled === false) {
+        if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) {
             actualConfiguration.dismiss();
         }
 
@@ -289,7 +290,7 @@ export class AlarmController {
 
         if (this.alarmClockPingEntity.state === 'on') {
             this._hass.callService('variable', 'update_sensor', param);
-            this._alarmClockConfiguration = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
+            this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
         } else {
             if (this._config.debug) {
                 this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
@@ -353,7 +354,7 @@ export class AlarmConfiguration {
         this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
     }
 
-    static createNextAlarm(alarm, forToday = false) {
+    static createNextAlarm(alarm, forToday = false): NextAlarmObject {
         let dayjsNow = dayjs();
         if (!((alarm.time >= dayjsNow.format('HH:mm')) && forToday)) {
             dayjsNow = dayjsNow.add(1, 'day');
