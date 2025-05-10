@@ -454,26 +454,24 @@ class KoboldAlarmClockCard extends LitElement {
       white-space: nowrap;
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
-
     #clock .periodName {
       position: relative;
       bottom: 2.2vh;
-      padding-left: 0.45em;
+      /*padding-left: 0.45em;*/
+      margin-left: -0.2em;
       font-size: 31%;
       font-weight: 900;
       writing-mode: vertical-lr;
       text-orientation: upright;
       letter-spacing: -0.15em;
     }
-
     #clock .periodKern {
-      padding-left: 0.25em !important;
+      /*padding-left: 0.25em !important;*/
+      margin-left: -0.3em !important;
     }
-
     #clock .colonKern {
       margin-left: -0.1em !important;
     }
-
     #clock .colon {
       position: relative;
       bottom: 3.3vh;
@@ -489,8 +487,11 @@ class KoboldAlarmClockCard extends LitElement {
     }
     #clock.fontFace1 .periodName {
       bottom: 5.2vh;
-      padding-left: 0.5em;
+      /*padding-left: 0.5em;*/
       letter-spacing: -0.4em;
+    }
+    #clock.fontFace1 .periodKern {
+      margin-left: -0.3em !important;
     }
 
     #clock.fontFace2 {
@@ -500,7 +501,7 @@ class KoboldAlarmClockCard extends LitElement {
       font-style: normal;
       letter-spacing: 0;
     }
-    #clock .colonKern {
+    #clock.fontFace2 .colonKern {
       margin-left: -0.05em !important;
     }
     #clock.fontFace2 .periodName {
@@ -515,12 +516,12 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
-      bottom: 4vh;
+      /*bottom: 4vh;*/
       letter-spacing: -0.2em;
-      padding-left: 0.5em;
+      /*padding-left: 0.5em;*/
     }
     #clock.fontFace3 .periodKern {
-      padding-left: 0.5em !important;
+      /*padding-left: 0.5em !important;*/
     }
     #clock.fontFace3 .colonKern {
       margin-left: 0 !important;
@@ -1091,10 +1092,10 @@ class KoboldAlarmClockCard extends LitElement {
     const time = dayjs().format(this.alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
-    if (this.clock && 
-          (force 
-            || this._time !== time 
-            || this._ringing !== isAlarmRinging 
+    if (this.clock &&
+          (force
+            || this._time !== time
+            || this._ringing !== isAlarmRinging
             || this._alarmClockConfigurationLastUpdate !== this.alarmConfiguration.lastUpdated)) {
       this._time = time;
       this._ringing = isAlarmRinging;
