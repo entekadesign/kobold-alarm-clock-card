@@ -21,6 +21,7 @@ class AlarmPicker extends LitElement {
     @property({ reflect: false }) alarm: TimeObject;
     @property({ reflect: false }) time: string;
     @property({ reflect: false }) disabled: boolean;
+    // @property({ reflect: false }) showToggleButton: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ;
     @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ;
@@ -163,7 +164,7 @@ class AlarmPicker extends LitElement {
             }
         }
 
-        :host([show-toggle-button="false"]) {
+        :host([hide-toggle-button]) {
             #alarmEnabledToggleButton {
                 display: none;
             }
@@ -174,12 +175,13 @@ class AlarmPicker extends LitElement {
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
+            // TODO: replace with css, eg :host([id="alarmpicker"])?
             let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
             let pickerStyle = '';
             let pickerOrOptionsDialogStyle = '';
             let myStyle: HTMLElement;
             if (this.id == 'alarmpicker') {
-                pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; }';
+                pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
                 myStyle = document.createElement('style');
                 // const switchHost = this.shadowRoot.querySelector('div#alarmPicker.alarm').querySelector('ha-switch');
                 let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';

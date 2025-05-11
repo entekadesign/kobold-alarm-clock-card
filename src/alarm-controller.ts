@@ -355,15 +355,15 @@ export class AlarmConfiguration {
     }
 
     static createNextAlarm(alarm, forToday = false): NextAlarmObject {
-        let dayjsNow = dayjs();
-        if (!((alarm.time >= dayjsNow.format('HH:mm')) && forToday)) {
-            dayjsNow = dayjsNow.add(1, 'day');
+        let alarmDate = dayjs();
+        if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
+            alarmDate = alarmDate.add(1, 'day');
         }
 
         return {
             ...alarm,
-            date: dayjsNow.format('YYYY-MM-DD'),
-            dateTime: `${dayjsNow.format('YYYY-MM-DD')} ${alarm.time}`,
+            date: alarmDate.format('YYYY-MM-DD'),
+            dateTime: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
         }
     }
 }

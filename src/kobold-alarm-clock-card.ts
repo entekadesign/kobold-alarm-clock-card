@@ -221,7 +221,7 @@ class KoboldAlarmClockCard extends LitElement {
                           <span class="header-title">Set Nap Length</span>
                         </header>
                         <div id="alarm-nap-dialog-content" class="mdc-dialog__content alarm-nap-dialog-content">
-                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
+                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
                               <span>Nap Duration: </span>
                           </alarm-picker>
                           <div class="alarm-nap-dialog-buttons dialog-buttons">
@@ -373,10 +373,10 @@ class KoboldAlarmClockCard extends LitElement {
                             </div>
                         </div>
                     </div>
-                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
+                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
                       <span>Snooze Duration: </span>
                     </alarm-picker>
-                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} show-toggle-button="false" .alarmConfiguration=${this._alarmConfiguration}>
+                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
                       <span>Alarm Duration: </span>
                     </alarm-picker>
                     <div class="alarm-settings-dialog-buttons dialog-buttons">
@@ -972,14 +972,6 @@ class KoboldAlarmClockCard extends LitElement {
 
     this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
   }
-
-  // willUpdate(changedProperties) {
-  //   if (changedProperties.has('nextAlarm')) {
-  //     // this is never getting called //TODO: delete me?
-  //     console.log('*** willUpdate; getNextAlarm called cos nextAlarm changed; why not handled by _onAlarmChanged? this should never get called');
-  //     this._nextAlarm = this._alarmController.nextAlarm;
-  //   }
-  // }
 
   updated(changedProperties: Map<string, any>): void {
 
