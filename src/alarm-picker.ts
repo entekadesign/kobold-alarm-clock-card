@@ -152,22 +152,18 @@ class AlarmPicker extends LitElement {
             cursor: pointer;
         }
 
-        :host([id="alarmpicker"]) {
-            #alarmEnabledToggleButton {
-                filter: invert(1);
-                scale: 1.25;
-                margin: 0 0.5rem;
-            }
-
-            .alarm > .sliders {
-                padding-top: 6rem; backdrop-filter: blur(10px);
-            }
+        :host([id="alarmpicker"]) #alarmEnabledToggleButton {
+            filter: invert(1);
+            scale: 1.25;
+            margin: 0 0.5rem;
         }
 
-        :host([hide-toggle-button]) {
-            #alarmEnabledToggleButton {
-                display: none;
-            }
+        :host([id="alarmpicker"]) .alarm > .sliders {
+            padding-top: 6rem; backdrop-filter: blur(10px);
+        }
+
+        :host([hide-toggle-button]) #alarmEnabledToggleButton {
+            display: none;
         }
     `;
 
@@ -195,7 +191,7 @@ class AlarmPicker extends LitElement {
                 // iconHost.shadowRoot.appendChild(myStyle);
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
-            if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'alarmSettingsDialog')) {
+            if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
                 pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             }
             // const textfieldHost = this.shadowRoot.querySelector('div#alarmPicker.alarm').querySelector('ha-textfield#alarmTimeInput');
