@@ -16,6 +16,7 @@ export class AlarmController {
     private _alarmActionsScripts?: Array<Record<string, boolean>> = [];
 
     constructor(config, controllerId) {
+
         this._controllerId = controllerId;
         this._config = config;
         // this._isAlarmRinging = false;

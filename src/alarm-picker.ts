@@ -29,12 +29,12 @@ class AlarmPicker extends LitElement {
     @query('#alarmPicker', true) _alarmPickerQ;
 
     render() {
-        let _alarmTimeInputClasses = '';
-        let _alarmEnabledToggleClasses = '';
-        if (this.id === 'alarmpicker') {
-            _alarmEnabledToggleClasses = _alarmTimeInputClasses = 'picker';
-            _alarmTimeInputClasses += this.alarmConfiguration.nextAlarm.overridden ? ' overridden' : '';
-        }
+        // let _alarmTimeInputClasses = '';
+        // let _alarmEnabledToggleClasses = '';
+        // if (this.id === 'alarmpicker') {
+        //     // _alarmEnabledToggleClasses = _alarmTimeInputClasses = 'picker';
+        //     _alarmTimeInputClasses += this.alarmConfiguration.nextAlarm.overridden ? ' overridden' : '';
+        // }
         // if (this.showToggleButton === 'false') {
         //     _alarmEnabledToggleClasses += ' hidden';
         // }
@@ -72,14 +72,14 @@ class AlarmPicker extends LitElement {
                         maxlength="8"
                         ?disabled=${this.disabled}
                         .value=${!this.alarm ? '' : dayjs(this.alarm.time, 'HH:mm').format(this._alarmTimeFormat())}
-                        class=${_alarmTimeInputClasses}
+                        ?overridden=${this.id === 'alarmpicker' && this.alarmConfiguration.nextAlarm.overridden}
                         @click=${this._clickHandler}
                         readonly
                         >
                     </ha-textfield>
                 </div>
 
-                <ha-switch id="alarmEnabledToggleButton" ?checked=${!this.alarm ? false : this.alarm.enabled} @change=${this.toggleAlarmEnabled} ?disabled=${this.disabled} class=${_alarmEnabledToggleClasses}></ha-switch>
+                <ha-switch id="alarmEnabledToggleButton" ?checked=${!this.alarm ? false : this.alarm.enabled} @change=${this.toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
 
             </div>
         `;
@@ -118,12 +118,20 @@ class AlarmPicker extends LitElement {
             margin: 0 1em;
         }
 
-        #alarmTimeInput.picker {
+        /*#alarmTimeInput.picker {
+            filter: invert(1);
+            margin: 0 0.5em;
+        }*/
+        :host([id="alarmpicker"]) #alarmTimeInput {
             filter: invert(1);
             margin: 0 0.5em;
         }
 
-        #alarmTimeInput.picker.overridden {
+        /*#alarmTimeInput.picker.overridden {
+            border: 1px dotted black;
+            padding: 1px;
+        }*/
+        #alarmTimeInput[overridden] {
             border: 1px dotted black;
             padding: 1px;
         }
@@ -143,6 +151,9 @@ class AlarmPicker extends LitElement {
             transition: width 120ms;
             width: 0;
         }
+        :host([id="alarmpicker"]) .alarm > .sliders {
+            padding-top: 6rem; backdrop-filter: blur(10px);
+        }
 
         @keyframes delay-overflow {
             from { overflow: hidden; }
@@ -158,10 +169,6 @@ class AlarmPicker extends LitElement {
             margin: 0 0.5rem;
         }
 
-        :host([id="alarmpicker"]) .alarm > .sliders {
-            padding-top: 6rem; backdrop-filter: blur(10px);
-        }
-
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
             display: none;
         }
@@ -171,7 +178,6 @@ class AlarmPicker extends LitElement {
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
-            // TODO: replace with css, eg :host([id="alarmpicker"])?
             let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
             let pickerStyle = '';
             let pickerOrOptionsDialogStyle = '';

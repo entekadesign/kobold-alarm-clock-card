@@ -1,4 +1,3 @@
-// TODO: recover from HA restart. see https://github.com/dermotduffy/advanced-camera-card/blob/2eb0d9e35e150a24f09cf47368e0b8408634cc45/src/components/live/providers/jsmpeg.ts
 import { AlarmController, AlarmConfiguration, Helpers } from './alarm-controller';
 import './alarm-picker';
 
@@ -32,12 +31,15 @@ import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
 declare global {
   interface Window {
     loadCardHelpers(): Promise<void>;
+    // hassConnection: Promise<any>;
   }
 }
 
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
 
+  // public connection;
+  // public connected;
   private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
   private _config: CardConfig;
   private _updateLoopId: number;
@@ -53,6 +55,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _alarmDurationDefault: TimeObject;
   private _alarmConfiguration: AlarmConfiguration;
 
+  // @state() _haIsConnected: boolean;
   @state() _alarmsEnabled: boolean;
   @state() _nextAlarm: NextAlarmObject;
   @state() _alarmPickerMo: TimeObject;
@@ -102,24 +105,160 @@ class KoboldAlarmClockCard extends LitElement {
 
   // constructor() {
   //   super();
-  //   this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
+  //   // this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
+  //   // this.connect();
   // }
 
   connectedCallback() {
     super.connectedCallback();
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
+      console.warn(' *** connectedCallback(); _cardID: ' + this._cardId);
     };
+
+    // recover from disconnect, e.g., HA restart
+    window.addEventListener("connection-status", (ev: CustomEvent) => {
+      if (ev.detail === "connected") {
+        window.setTimeout(() => {
+          if (this._config.debug) {
+            this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+            console.warn('*** Recovering from disconnect');
+          };
+          location.reload();
+        }, 15000);
+      }
+    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     clearTimeout(this._updateLoopId);
+    // this.removeEventListener('input', this._connectionListener);
     // if (this._alarmController) Object.keys(this._alarmController).forEach(myKey => delete this._alarmController[myKey]);
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
+      console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
   }
+
+  // async connect() {
+  //   // const conn = (await this.getHass()).connection;
+  //   // this.connection = conn;
+
+  //   // Subscribe to configuration updates
+  //   // conn.subscribeMessage((msg) => console.log(msg), {
+  //   //   type: "browser_mod/connect",
+  //   //   browserID: 'framework_chromium',
+  //   // });
+
+  //   // //Keep connection status up to date
+  //   // conn.addEventListener("disconnected", () => {
+  //   //   this.connected = false;
+  //   //   console.log('*** DISCONNECTED');
+  //   //   // this.fireEvent("browser-mod-disconnected");
+  //   // });
+  //   // conn.addEventListener("ready", () => {
+  //   //   // this.connected = true;
+  //   //   console.log('*** CONNECTED ' + new Date().toJSON());
+  //   //   window.setTimeout(() => {
+  //   //     if (this._elements) {
+  //   //       this._elements.forEach((element) => {
+  //   //         this.requestUpdate();
+  //   //         console.log('*** updating element: ', element);
+  //   //       });
+  //   //     }
+  //   //     this._buildConfig();
+  //   //   }, 15000);
+
+  //   //   // this.fireEvent("browser-mod-connected");
+  //   //   // this.sendUpdate({});
+  //   // });
+
+
+  //   // function myHandler(e) {
+  //   //   let evt = JSON.parse(e.data);
+  //   //   if (!Array.isArray(evt)) {
+  //   //     evt = new Array(evt);
+  //   //   }
+  //   //   evt.forEach(e => {
+  //   //     // console.log('*** received event: ', e);
+  //   //     if (e?.result?.resources?.binary_sensor?.connectivity.state) {
+  //   //       console.log('*** connectivity: ', e.result.resources.binary_sensor.connectivity.state);
+  //   //     }
+  //   //     if (e.type === 'event') {
+  //   //       console.log('*** received event: ', e.event);
+  //   //       // if (e.type === 'event' && e.event.event_type === 'lovelace_updated') {
+  //   //       // if (document.location.pathname.startsWith('/' + e.event.data.url_path)) {
+  //   //       //   setTimeout(() => document.location.reload(), 500);
+  //   //       // }
+  //   //     }
+  //   //   });
+  //   // }
+
+  //   // window.hassConnection.then(t => t.conn.socket.addEventListener("message", myHandler));
+
+  //   window.addEventListener("connection-status", (ev: CustomEvent) => {
+  //     if (ev.detail === "connected") {
+  //       // this.connected = true;
+  //       // console.log('*** CONNECTED: ' + new Date().toJSON());
+  //       // console.log('*** _elements: ', this._elements);
+  //       window.setTimeout(() => {
+  //         // if (this._elements) {
+  //         //   this._elements.forEach((element) => {
+  //         //     this.requestUpdate();
+  //         //   });
+  //         // }
+  //         if (this._config.debug) {
+  //           this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+  //           console.warn('*** Recovering from disconnect');
+  //         };
+  //         location.reload();
+  //         // console.log('*** refreshing page: ' + new Date().toJSON());
+  //       }, 15000);
+  //       // if (this._haCardQ) {
+  //       //   // window.localStorage.removeItem.hassTokens('refresh_token');
+  //       //   // this._buildConfig();
+  //       // } else {
+  //       //   console.warn('*** Missing <ha-card> in shadowRoot')
+  //       // }
+  //       // this.fireEvent("browser-mod-connected");
+  //       // window.setTimeout(() => this.sendUpdate({}), 1000);
+  //     }
+  //     // if (ev.detail === "disconnected") {
+  //     //   // this.connected = false;
+  //     //   console.log('*** DISCONNECTED ' + new Date().toJSON());
+  //     //   // this.fireEvent("browser-mod-disconnected");
+  //     // }
+  //   });
+
+  //   // this.provideHass(this);
+  // }
+
+  // async getHass() {
+  //   const base: any = await this.hass_base_el();
+  //   while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
+  //   return base.hass;
+  // }
+
+  // // async provideHass(el) {
+  // //   const base: any = await this.hass_base_el();
+  // //   base.provideHass(el);
+  // // }
+
+  // async hass_base_el() {
+  //   await Promise.race([
+  //     customElements.whenDefined("home-assistant"),
+  //     customElements.whenDefined("hc-main"),
+  //   ]);
+
+  //   const element = customElements.get("home-assistant")
+  //     ? "home-assistant"
+  //     : "hc-main";
+
+  //   while (!document.querySelector(element))
+  //     await new Promise((r) => window.setTimeout(r, 100));
+  //   return document.querySelector(element);
+  // }
 
   render() {
     // TODO: change any/all assignments to connectedCallback()?
@@ -1071,6 +1210,13 @@ class KoboldAlarmClockCard extends LitElement {
         element.hass = hass;
       });
     }
+
+    // console.log('*** this.connected (hass): ', this.connected);
+    // TODO: test HA restart; does nothing
+    // this.requestUpdate();
+    // location.reload(true) // parameter=without cache
+    // if no connection (or use _reconnected variable), _buildConfig()
+    // see connection-status event: https://github.com/thomasloven/hass-browser_mod/blob/b35685fe705541f94f5f12233924a735349fa5a4/js/plugin/connection.ts#L86
   }
 
   getCardSize() {
@@ -1078,6 +1224,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _buildConfig() {
+    // console.log('*** buildConfig ' + new Date().toJSON());
     if (!this._rootQ) console.warn('*** Cards root not available');
 
     while (this._rootQ.lastChild) {
