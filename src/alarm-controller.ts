@@ -19,9 +19,6 @@ export class AlarmController {
 
         this._controllerId = controllerId;
         this._config = config;
-        // this._isAlarmRinging = false;
-        // this._mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
-        // this._alarmActionsScripts = [];
         function throttle(fn, delay) {
             let timerFlag = null;
             return (...args) => {
@@ -319,24 +316,6 @@ export class AlarmConfiguration {
     public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
     public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
     public lastUpdated: string;
-
-    // constructor() {
-    //     this.alarmsEnabled = false;
-    //     this.nextAlarm = { enabled: false, time: '08:00', date: '', dateTime: '' };
-    //     this.mo = { enabled: false, time: '07:00' }
-    //     this.tu = { enabled: false, time: '07:00' }
-    //     this.we = { enabled: false, time: '07:00' }
-    //     this.th = { enabled: false, time: '07:00' }
-    //     this.fr = { enabled: false, time: '07:00' }
-    //     this.sa = { enabled: false, time: '09:00' }
-    //     this.su = { enabled: false, time: '09:00' }
-    //     this.timeFormat = '12hr'
-    //     this.clockFontFace = '0';
-    //     this.clockDefaultFullscreen = false
-    //     this.snoozeDurationDefault = { enabled: true, time: '00:15' }
-    //     this.alarmDurationDefault = { enabled: true, time: '00:30' }
-    //     this.napDurationDefault = { enabled: true, time: '00:30' }
-    // }
 
     snooze(snoozeTime) {
         const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));

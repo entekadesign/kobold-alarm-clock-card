@@ -31,15 +31,12 @@ import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
 declare global {
   interface Window {
     loadCardHelpers(): Promise<void>;
-    // hassConnection: Promise<any>;
   }
 }
 
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
 
-  // public connection;
-  // public connected;
   private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
   private _config: CardConfig;
   private _updateLoopId: number;
@@ -55,7 +52,6 @@ class KoboldAlarmClockCard extends LitElement {
   private _alarmDurationDefault: TimeObject;
   private _alarmConfiguration: AlarmConfiguration;
 
-  // @state() _haIsConnected: boolean;
   @state() _alarmsEnabled: boolean;
   @state() _nextAlarm: NextAlarmObject;
   @state() _alarmPickerMo: TimeObject;
@@ -103,12 +99,6 @@ class KoboldAlarmClockCard extends LitElement {
   @query('#settingsDialog', true) _settingsDialogQ;
   @query('#alarm-top div#clockLogo', true) _clockLogoQ;
 
-  // constructor() {
-  //   super();
-  //   // this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
-  //   // this.connect();
-  // }
-
   connectedCallback() {
     super.connectedCallback();
     if (this._config.debug) {
@@ -133,132 +123,11 @@ class KoboldAlarmClockCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     clearTimeout(this._updateLoopId);
-    // this.removeEventListener('input', this._connectionListener);
-    // if (this._alarmController) Object.keys(this._alarmController).forEach(myKey => delete this._alarmController[myKey]);
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
   }
-
-  // async connect() {
-  //   // const conn = (await this.getHass()).connection;
-  //   // this.connection = conn;
-
-  //   // Subscribe to configuration updates
-  //   // conn.subscribeMessage((msg) => console.log(msg), {
-  //   //   type: "browser_mod/connect",
-  //   //   browserID: 'framework_chromium',
-  //   // });
-
-  //   // //Keep connection status up to date
-  //   // conn.addEventListener("disconnected", () => {
-  //   //   this.connected = false;
-  //   //   console.log('*** DISCONNECTED');
-  //   //   // this.fireEvent("browser-mod-disconnected");
-  //   // });
-  //   // conn.addEventListener("ready", () => {
-  //   //   // this.connected = true;
-  //   //   console.log('*** CONNECTED ' + new Date().toJSON());
-  //   //   window.setTimeout(() => {
-  //   //     if (this._elements) {
-  //   //       this._elements.forEach((element) => {
-  //   //         this.requestUpdate();
-  //   //         console.log('*** updating element: ', element);
-  //   //       });
-  //   //     }
-  //   //     this._buildConfig();
-  //   //   }, 15000);
-
-  //   //   // this.fireEvent("browser-mod-connected");
-  //   //   // this.sendUpdate({});
-  //   // });
-
-
-  //   // function myHandler(e) {
-  //   //   let evt = JSON.parse(e.data);
-  //   //   if (!Array.isArray(evt)) {
-  //   //     evt = new Array(evt);
-  //   //   }
-  //   //   evt.forEach(e => {
-  //   //     // console.log('*** received event: ', e);
-  //   //     if (e?.result?.resources?.binary_sensor?.connectivity.state) {
-  //   //       console.log('*** connectivity: ', e.result.resources.binary_sensor.connectivity.state);
-  //   //     }
-  //   //     if (e.type === 'event') {
-  //   //       console.log('*** received event: ', e.event);
-  //   //       // if (e.type === 'event' && e.event.event_type === 'lovelace_updated') {
-  //   //       // if (document.location.pathname.startsWith('/' + e.event.data.url_path)) {
-  //   //       //   setTimeout(() => document.location.reload(), 500);
-  //   //       // }
-  //   //     }
-  //   //   });
-  //   // }
-
-  //   // window.hassConnection.then(t => t.conn.socket.addEventListener("message", myHandler));
-
-  //   window.addEventListener("connection-status", (ev: CustomEvent) => {
-  //     if (ev.detail === "connected") {
-  //       // this.connected = true;
-  //       // console.log('*** CONNECTED: ' + new Date().toJSON());
-  //       // console.log('*** _elements: ', this._elements);
-  //       window.setTimeout(() => {
-  //         // if (this._elements) {
-  //         //   this._elements.forEach((element) => {
-  //         //     this.requestUpdate();
-  //         //   });
-  //         // }
-  //         if (this._config.debug) {
-  //           this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
-  //           console.warn('*** Recovering from disconnect');
-  //         };
-  //         location.reload();
-  //         // console.log('*** refreshing page: ' + new Date().toJSON());
-  //       }, 15000);
-  //       // if (this._haCardQ) {
-  //       //   // window.localStorage.removeItem.hassTokens('refresh_token');
-  //       //   // this._buildConfig();
-  //       // } else {
-  //       //   console.warn('*** Missing <ha-card> in shadowRoot')
-  //       // }
-  //       // this.fireEvent("browser-mod-connected");
-  //       // window.setTimeout(() => this.sendUpdate({}), 1000);
-  //     }
-  //     // if (ev.detail === "disconnected") {
-  //     //   // this.connected = false;
-  //     //   console.log('*** DISCONNECTED ' + new Date().toJSON());
-  //     //   // this.fireEvent("browser-mod-disconnected");
-  //     // }
-  //   });
-
-  //   // this.provideHass(this);
-  // }
-
-  // async getHass() {
-  //   const base: any = await this.hass_base_el();
-  //   while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
-  //   return base.hass;
-  // }
-
-  // // async provideHass(el) {
-  // //   const base: any = await this.hass_base_el();
-  // //   base.provideHass(el);
-  // // }
-
-  // async hass_base_el() {
-  //   await Promise.race([
-  //     customElements.whenDefined("home-assistant"),
-  //     customElements.whenDefined("hc-main"),
-  //   ]);
-
-  //   const element = customElements.get("home-assistant")
-  //     ? "home-assistant"
-  //     : "hc-main";
-
-  //   while (!document.querySelector(element))
-  //     await new Promise((r) => window.setTimeout(r, 100));
-  //   return document.querySelector(element);
-  // }
 
   render() {
     // TODO: change any/all assignments to connectedCallback()?
@@ -601,7 +470,6 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     #alarm-top {
-      /*font-size: 1rem;*/
       font-size: calc(1rem + 1vh);
       display: flex;
       justify-content: space-between;
@@ -610,10 +478,6 @@ class KoboldAlarmClockCard extends LitElement {
       align-items: center;
       color: var(--secondary-text-color);
     }
-
-    /*#alarm-top #date {
-      font-size: 1.25rem;
-    }*/
 
     #alarm-top div#clockLogo {
       background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27175%27%20viewBox%3D%270%200%20198.437%2046.302%27%3E%3Cdefs%3E%3Cpath%20id%3D%27a%27%20d%3D%27M134.532%20279.996h1013.197v243.84H134.532z%27%2F%3E%3C%2Fdefs%3E%3Cg%20aria-label%3D%27KOBOLD%27%20style%3D%27font-size%3A192px%3Bline-height%3A1.25%3Bwhite-space%3Apre%3Bshape-inside%3Aurl%28%23a%29%27%20transform%3D%27translate%28-39.822%2011.568%29%20scale%28.26458%29%27%3E%3Cpath%20d%3D%27M297.007%20381.147v7.723l-36.756%2043.764q9.01%2010.87%2018.307%2022.025%209.439%2011.013%2018.45%2021.739v7.723h-23.17l-33.753-40.331H219.92v40.331h-22.311V381.147h22.31v40.331h20.166q3.29-3.718%206.436-7.58%203.147-3.861%206.436-7.723l20.881-25.028zm232.264%2040.474q0%204.005-1%206.58%202.144%202.717%203.575%206.292%201.43%203.433%201.43%207.151v21.31q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147h77.802q4.291%200%208.153%201.716%203.861%201.573%206.721%204.434%203.004%202.86%204.577%206.722%201.716%203.861%201.716%208.295zM452.47%20461.81h58.352v-18.879H452.47Zm0-41.19h54.347v-17.162H452.47Zm222.958-39.616h22.168v80.806h80.807v22.311H675.428Zm193.22.143q4.434%200%208.295%201.716%203.862%201.573%206.722%204.434%202.86%202.86%204.577%206.722%201.716%203.861%201.716%208.295v60.64q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147Zm-59.496%2080.663h58.352v-58.352h-58.352z%27%20style%3D%27font-family%3AOrbitron%3B-inkscape-font-specification%3AOrbitron%3Bstroke-width%3A.744895%27%20transform%3D%27translate%28-33.794%20-401.053%29%20scale%281.02854%29%27%2F%3E%3Cpath%20d%3D%27M419.64%20675.367A117.536%20117.536%200%200%200%20302.101%20792.9%20117.536%20117.536%200%200%200%20419.64%20910.437%20117.536%20117.536%200%200%200%20537.172%20792.9%20117.536%20117.536%200%200%200%20419.64%20675.367Zm-.71%2012.63%203.237%2036.913%203.195%2036.426h.043l-.032.141.032.346h-.106l-3.132%2014.648-3.237%2015.135-3.237-15.135-3.135-14.648h-.102l.028-.346-.028-.14h.042l3.195-36.427zm-1.728%20106.955-5.173%208.6-5.007%208.322.078.138-.194.06-.05.081-.031-.056-20.703%206.41-20.977%206.496%2016.118-14.916%2015.9-14.722-.032-.057h.095l.148-.14.082.137%209.71-.173z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%2895.652%20-407.931%29%20scale%28.56969%29%27%2F%3E%3Cpath%20d%3D%27M705.391%20675.367A117.536%20117.536%200%200%200%20587.855%20792.9%20117.536%20117.536%200%200%200%20705.39%20910.437%20117.536%20117.536%200%200%200%20822.925%20792.9%20117.536%20117.536%200%200%200%20705.39%20675.367Zm.54%2012.63%203.237%2036.913%203.195%2036.426h.042l-.032.141.032.346h-.106l-3.131%2014.648-3.237%2015.135-3.24-15.135-3.132-14.648h-.102l.028-.346-.028-.14h.042l3.191-36.427zm1.57%20106.856%2010.035.18%209.715.173.077-.138.152.141h.091l-.031.057%2015.9%2014.722%2016.118%2014.916-20.978-6.495-20.699-6.411-.031.056-.05-.08-.197-.06.077-.138-5.007-8.322z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%28185.991%20-407.931%29%20scale%28.56969%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
@@ -644,7 +508,6 @@ class KoboldAlarmClockCard extends LitElement {
     #clock .periodName {
       position: relative;
       bottom: 2.2vh;
-      /*padding-left: 0.45em;*/
       margin-left: -0.2em;
       font-size: 31%;
       font-weight: 900;
@@ -653,7 +516,6 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: -0.15em;
     }
     #clock .periodKern {
-      /*padding-left: 0.25em !important;*/
       margin-left: -0.3em !important;
     }
     #clock .colonKern {
@@ -674,7 +536,6 @@ class KoboldAlarmClockCard extends LitElement {
     }
     #clock.fontFace1 .periodName {
       bottom: 5.2vh;
-      /*padding-left: 0.5em;*/
       letter-spacing: -0.4em;
     }
     #clock.fontFace1 .periodKern {
@@ -703,12 +564,7 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
-      /*bottom: 4vh;*/
       letter-spacing: -0.2em;
-      /*padding-left: 0.5em;*/
-    }
-    #clock.fontFace3 .periodKern {
-      /*padding-left: 0.5em !important;*/
     }
     #clock.fontFace3 .colonKern {
       margin-left: 0 !important;
@@ -1006,7 +862,6 @@ class KoboldAlarmClockCard extends LitElement {
     /* *** alarm-nap-dialog *** */
     /* ************************ */
 
-
     #napTimePicker > span {
       width: auto;
     }
@@ -1114,18 +969,6 @@ class KoboldAlarmClockCard extends LitElement {
 
   updated(changedProperties: Map<string, any>): void {
 
-    // This does not help updating of weather card
-    // if (changedProperties.has("_hass")) {
-    //   this._elements.forEach((element) => {
-    //     // console.log('*** updated; setting hass to element', element);
-    //     element.hass = this._hass;
-    //   });
-    // }
-
-    // if (changedProperties.has('alarmsEnabled')) {
-    //   console.log('*** updated; alarmsEnabled changed:', this._alarmsEnabled);
-    // };
-
     if (!this._injectStylesDone) {
       this._injectStylesDone = true;
 
@@ -1210,13 +1053,6 @@ class KoboldAlarmClockCard extends LitElement {
         element.hass = hass;
       });
     }
-
-    // console.log('*** this.connected (hass): ', this.connected);
-    // TODO: test HA restart; does nothing
-    // this.requestUpdate();
-    // location.reload(true) // parameter=without cache
-    // if no connection (or use _reconnected variable), _buildConfig()
-    // see connection-status event: https://github.com/thomasloven/hass-browser_mod/blob/b35685fe705541f94f5f12233924a735349fa5a4/js/plugin/connection.ts#L86
   }
 
   getCardSize() {
@@ -1224,7 +1060,6 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _buildConfig() {
-    // console.log('*** buildConfig ' + new Date().toJSON());
     if (!this._rootQ) console.warn('*** Cards root not available');
 
     while (this._rootQ.lastChild) {
@@ -1529,5 +1364,3 @@ class HeightUpdater {
     return false;
   }
 }
-
-// customElements.define('kobold-alarm-clock-card', KoboldAlarmClockCard);

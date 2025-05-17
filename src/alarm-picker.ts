@@ -21,7 +21,6 @@ class AlarmPicker extends LitElement {
     @property({ reflect: false }) alarm: TimeObject;
     @property({ reflect: false }) time: string;
     @property({ reflect: false }) disabled: boolean;
-    // @property({ reflect: false }) showToggleButton: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ;
     @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ;
@@ -29,15 +28,6 @@ class AlarmPicker extends LitElement {
     @query('#alarmPicker', true) _alarmPickerQ;
 
     render() {
-        // let _alarmTimeInputClasses = '';
-        // let _alarmEnabledToggleClasses = '';
-        // if (this.id === 'alarmpicker') {
-        //     // _alarmEnabledToggleClasses = _alarmTimeInputClasses = 'picker';
-        //     _alarmTimeInputClasses += this.alarmConfiguration.nextAlarm.overridden ? ' overridden' : '';
-        // }
-        // if (this.showToggleButton === 'false') {
-        //     _alarmEnabledToggleClasses += ' hidden';
-        // }
 
         return html`
             <div class="alarm" id="alarmPicker">
@@ -118,19 +108,11 @@ class AlarmPicker extends LitElement {
             margin: 0 1em;
         }
 
-        /*#alarmTimeInput.picker {
-            filter: invert(1);
-            margin: 0 0.5em;
-        }*/
         :host([id="alarmpicker"]) #alarmTimeInput {
             filter: invert(1);
             margin: 0 0.5em;
         }
 
-        /*#alarmTimeInput.picker.overridden {
-            border: 1px dotted black;
-            padding: 1px;
-        }*/
         #alarmTimeInput[overridden] {
             border: 1px dotted black;
             padding: 1px;
@@ -185,34 +167,26 @@ class AlarmPicker extends LitElement {
             if (this.id == 'alarmpicker') {
                 pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
                 myStyle = document.createElement('style');
-                // const switchHost = this.shadowRoot.querySelector('div#alarmPicker.alarm').querySelector('ha-switch');
                 let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                 myStyle.innerHTML = switchStyle;
-                // switchHost.shadowRoot.appendChild(myStyle);
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
                 myStyle = document.createElement('style');
-                // const iconHost = this.shadowRoot.querySelector('ha-icon.button');
                 let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
                 myStyle.innerHTML = iconStyle;
-                // iconHost.shadowRoot.appendChild(myStyle);
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
             if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
                 pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             }
-            // const textfieldHost = this.shadowRoot.querySelector('div#alarmPicker.alarm').querySelector('ha-textfield#alarmTimeInput');
             myStyle = document.createElement('style');
             myStyle.innerHTML = allStyle + pickerStyle + pickerOrOptionsDialogStyle;
-            // textfieldHost.shadowRoot.appendChild(myStyle);
             this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
         }
     }
 
     _clickHandler() {
-        // const myTarget = this.shadowRoot.querySelector('#alarmPicker');
         let timeArray: Array<string>;
         if (this.id === 'alarmpicker') {
-            // if (!myTarget.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             const isEnabled = this.alarm.enabled;
             const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
@@ -229,17 +203,13 @@ class AlarmPicker extends LitElement {
         }
         this._displayedValueH = timeArray[0];
         this._displayedValueM = timeArray[1];
-        // myTarget.classList.add('open');
         this._alarmPickerQ.classList.add('open');
         document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
         document.addEventListener('click', (e) => { this._clickOutsideAlarmTimeInput(e) }, false);
     };
 
     _clickOutsideAlarmTimeInput(event) {
-        // const myTarget = this.shadowRoot.querySelector('#alarmPicker');
-        // if (typeof event.composedPath === 'function' && !event.composedPath().includes(myTarget)) {
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            // if (this.id === 'alarmpicker' && myTarget.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             if (this.id === 'alarmpicker' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ.classList.remove('open');
             document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
@@ -286,5 +256,3 @@ class AlarmPicker extends LitElement {
         return this.alarm;
     }
 }
-
-// customElements.define('alarm-picker', AlarmPicker);
