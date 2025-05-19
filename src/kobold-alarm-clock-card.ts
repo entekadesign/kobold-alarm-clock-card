@@ -5,7 +5,7 @@ import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { state, customElement, query, queryAll } from "lit/decorators.js";
 
-function loadCSS(url) {
+function loadCSS(url: string) {
   const link = document.createElement('link');
   link.type = 'text/css';
   link.rel = 'stylesheet';
@@ -23,10 +23,10 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 
-import type { CardConfig, NextAlarmObject, TimeObject } from './types';
+import type { CardConfig, NextAlarmObject, TimeObject, RingerEntity, LovelaceElement } from './types';
 
 // HA types
-import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
+import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
   interface Window {
@@ -72,32 +72,32 @@ class KoboldAlarmClockCard extends LitElement {
   @state() _footClasses: { [key: string]: boolean };
   @state() _clockClasses: { [key: string]: boolean };
 
-  @query('#clock', true) _clockQ;
-  @query('#date', true) _dateQ;
-  @query('ha-card', true) _haCardQ;
-  @queryAll('div.optionButtons ha-icon') _optionButtonsHostsQ;
-  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .radio-row ha-formfield') _formfieldHostsQ;
-  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .switches-group-table ha-textfield') _textfieldHostsQ;
-  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .switches-group-table ha-switch') _switchHostsQ;
-  @query('#extraInfo', true) _rootQ;
-  @query('#napTimePicker', true) _napTimePickerQ;
-  @query('#alarm-picker-dialog-title ha-switch', true) _haSwitchQ;
-  @query('#alarmPickerMo', true) _alarmPickerMoQ;
-  @query('#alarmPickerTu', true) _alarmPickerTuQ;
-  @query('#alarmPickerWe', true) _alarmPickerWeQ;
-  @query('#alarmPickerTh', true) _alarmPickerThQ;
-  @query('#alarmPickerFr', true) _alarmPickerFrQ;
-  @query('#alarmPickerSa', true) _alarmPickerSaQ;
-  @query('#alarmPickerSu', true) _alarmPickerSuQ;
-  @query('#timeFormat ha-radio[checked]') _timeFormatQ;
-  @query('#clockFontFace ha-radio[checked]') _clockFontFaceQ;
-  @query('#clockDefaultFullscreen', true) _clockDefaultFullscreenQ;
-  @query('#snoozeDurationPicker', true) _snoozeDurationPickerQ;
-  @query('#alarmDurationPicker', true) _alarmDurationPickerQ;
-  @query('#scheduleDialog', true) _scheduleDialogQ;
-  @query('#napDialog', true) _napDialogQ;
-  @query('#settingsDialog', true) _settingsDialogQ;
-  @query('#alarm-top div#clockLogo', true) _clockLogoQ;
+  @query('#clock', true) _clockQ: HTMLElement;
+  @query('#date', true) _dateQ: HTMLElement;
+  @query('ha-card', true) _haCardQ: HTMLElement;
+  @queryAll('div.optionButtons ha-icon') _optionButtonsHostsQ: NodeListOf<HTMLElement>;
+  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .radio-row ha-formfield') _formfieldHostsQ: NodeListOf<HTMLElement>;
+  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .switches-group-table ha-textfield') _textfieldHostsQ: NodeListOf<HTMLElement>;
+  @queryAll('dialog#settingsDialog #alarm-settings-dialog-content .switches-group-table ha-switch') _switchHostsQ: NodeListOf<HTMLElement>;
+  @query('#extraInfo', true) _rootQ: HTMLElement;
+  @query('#napTimePicker', true) _napTimePickerQ: HTMLInputElement;
+  @query('#alarm-picker-dialog-title ha-switch', true) _haSwitchQ: HTMLInputElement;
+  @query('#alarmPickerMo', true) _alarmPickerMoQ: HTMLInputElement;
+  @query('#alarmPickerTu', true) _alarmPickerTuQ: HTMLInputElement;
+  @query('#alarmPickerWe', true) _alarmPickerWeQ: HTMLInputElement;
+  @query('#alarmPickerTh', true) _alarmPickerThQ: HTMLInputElement;
+  @query('#alarmPickerFr', true) _alarmPickerFrQ: HTMLInputElement;
+  @query('#alarmPickerSa', true) _alarmPickerSaQ: HTMLInputElement;
+  @query('#alarmPickerSu', true) _alarmPickerSuQ: HTMLInputElement;
+  @query('#timeFormat ha-radio[checked]') _timeFormatQ: HTMLInputElement;
+  @query('#clockFontFace ha-radio[checked]') _clockFontFaceQ: HTMLInputElement;
+  @query('#clockDefaultFullscreen', true) _clockDefaultFullscreenQ: HTMLInputElement;
+  @query('#snoozeDurationPicker', true) _snoozeDurationPickerQ: HTMLInputElement;
+  @query('#alarmDurationPicker', true) _alarmDurationPickerQ: HTMLInputElement;
+  @query('#scheduleDialog', true) _scheduleDialogQ: HTMLDialogElement;
+  @query('#napDialog', true) _napDialogQ: HTMLDialogElement;
+  @query('#settingsDialog', true) _settingsDialogQ: HTMLDialogElement;
+  @query('#alarm-top div#clockLogo', true) _clockLogoQ: HTMLElement;
 
   connectedCallback() {
     super.connectedCallback();
@@ -374,7 +374,7 @@ class KoboldAlarmClockCard extends LitElement {
                                             id="clockDefaultFullscreen"
                                             class="fullscreen-switch"
                                             ?checked=${this._clockDefaultFullscreen}
-                                            @change=${(e) => { this._clockDefaultFullscreen = e.target.checked }}>
+                                            @change=${(e: Event) => { this._clockDefaultFullscreen = (<HTMLInputElement>e.target).checked }}>
                                         </ha-switch>
                                     </div>
                                 </div>
@@ -967,7 +967,8 @@ class KoboldAlarmClockCard extends LitElement {
     this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
   }
 
-  updated(changedProperties: Map<string, any>): void {
+  // updated(changedProperties: Map<string, any>): void {
+  updated(): void {
 
     if (!this._injectStylesDone) {
       this._injectStylesDone = true;
@@ -1021,7 +1022,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  setConfig(config) {
+  setConfig(config: CardConfig) {
 
     if (!config) {
       alert('Card config incorrect.');
@@ -1042,7 +1043,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   // TODO: test elimination of updateLoop by using reactive hass @property
-  set hass(hass) {
+  set hass(hass: HomeAssistant) {
     this._hass = hass;
     this._alarmController.hass = hass;
 
@@ -1073,7 +1074,7 @@ class KoboldAlarmClockCard extends LitElement {
       config.cards.forEach(async (card) => {
         const element = await this._createCardElement(card);
         elements.push(element);
-        await this._rootQ.appendChild(element);
+        this._rootQ.appendChild(element);
         HeightUpdater.updateHeight(card, element);
       });
 
@@ -1093,8 +1094,8 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  async _createCardElement(card) {
-    let element;
+  async _createCardElement(card: LovelaceCardConfig) {
+    let element: LovelaceElement;
     try {
       this._cardHelpers = await (window).loadCardHelpers();
       element = await this._cardHelpers.createCardElement(card);
@@ -1127,7 +1128,7 @@ class KoboldAlarmClockCard extends LitElement {
       this._ringing = isAlarmRinging;
       this._controllersAlarmConfigLastUpdate = this._alarmConfiguration.lastUpdated;
 
-      let timeDisplay;
+      let timeDisplay: string;
 
       if (this._alarmConfiguration['timeFormat'] === '24hr') {
         timeDisplay = time;
@@ -1169,7 +1170,7 @@ class KoboldAlarmClockCard extends LitElement {
     return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
   }
 
-  _onAlarmChanged(event) {
+  _onAlarmChanged(event: CustomEvent) {
     // this not triggered by snooze or alarm picker dialogs; only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
     if (!event.detail.alarm.enabled) {
       this._alarmController.nextAlarm = {
@@ -1182,24 +1183,24 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _handleAlarmButtonsClick(event) {
-    this._alarmController[event.target.id]();
+  _handleAlarmButtonsClick(event: Event) {
+    this._alarmController[(<HTMLInputElement>event.target).id]();
   }
 
-  _handleRadioValueTimeFormat(event) {
-    this._timeFormat = event.target.value;
+  _handleRadioValueTimeFormat(event: Event) {
+    this._timeFormat = (<HTMLInputElement>event.target).value;
   }
 
-  _handleRadioValueClockFontFace(event) {
-    this._clockFontFace = event.target.value;
+  _handleRadioValueClockFontFace(event: Event) {
+    this._clockFontFace = (<HTMLInputElement>event.target).value;
   }
 
-  _handleSwitchRingerEntity(event) {
-    const entityIndex = event.target.id.split('-').pop();
-    this._ringerEntities[entityIndex].enabled = event.target.checked;
+  _handleSwitchRingerEntity(event: Event) {
+    const entityIndex = (<HTMLInputElement>event.target).id.split('-').pop();
+    this._ringerEntities[entityIndex].enabled = (<HTMLInputElement>event.target).checked;
   }
 
-  _toggleAlarmFullscreen(force) {
+  _toggleAlarmFullscreen(force: boolean) {
     if (!this._alarmController.isAlarmRinging()) {
       if (this._alarmClockClasses.fullscreen || !force) {
         this._alarmClockClasses = { fullscreen: false };
@@ -1211,7 +1212,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _getDayOfWeek(days) {
+  _getDayOfWeek(days: number) {
     // returns day of week in language set in set hass() method
     return dayjs('2018-08-27').add(days, 'days').format('dddd');
   }
@@ -1295,14 +1296,14 @@ class KoboldAlarmClockCard extends LitElement {
     const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
     const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
 
-    ringerEntitiesConfig.forEach((item) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
+    ringerEntitiesConfig.forEach((item: RingerEntity) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
     this._ringerEntities = alarmEntities;
     this._settingsDialogQ.show();
     this._settingsDialogQ.classList.add('open');
   }
 
-  closeDialog(target) {
-    const dialogElement = this.shadowRoot.querySelector(target);
+  closeDialog(target: string) {
+    const dialogElement: HTMLDialogElement = this.shadowRoot.querySelector(target);
     dialogElement.classList.remove('open');
     setTimeout(() => { dialogElement.close() }, 120);
   }
@@ -1321,12 +1322,13 @@ class KoboldAlarmClockCard extends LitElement {
 class HeightUpdater {
   static updateHeight(card, element) {
     if (this._updateHeightOnNormalCard(card, element)) return;
-    if (this._updateHeightOnNestedCards(card, element)) return;
+    if (this._updateHeightOnNestedCards(element)) return;
     if (this._updateHeightOnMediaControlCards(card, element)) return;
   }
   static _updateHeightOnNormalCard(card, element) {
     if (element.shadowRoot) {
       let cardTag = element.shadowRoot.querySelector('ha-card');
+      console.log('*** updateHeightOnNormalCard: ', cardTag);
       if (cardTag) {
         cardTag.style.height = "100%";
         cardTag.style.boxSizing = "border-box";
@@ -1336,8 +1338,9 @@ class HeightUpdater {
     return false;
   }
 
-  static _updateHeightOnNestedCards(card, element) {
+  static _updateHeightOnNestedCards(element) {
     if (element.firstChild && element.firstChild.shadowRoot) {
+      console.log('*** updateHeightOnNestedCards');
       let cardTag = element.firstChild.shadowRoot.querySelector('ha-card');
       if (cardTag) {
         cardTag.style.height = "100%";
@@ -1352,8 +1355,9 @@ class HeightUpdater {
     if (card.type !== 'media-control') {
       return;
     }
+    console.log('*** updateHeightOnMediaControlCards');
     if (element.firstChild && element.firstChild.shadowRoot) {
-      element.firstChild.style.height = '100%';
+      element.firstChild.style.height = '50%';
       let bannerTag = element.firstChild.shadowRoot.querySelector('div.banner');
       if (bannerTag) {
         bannerTag.style.boxSizing = "border-box";

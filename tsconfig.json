@@ -2,7 +2,7 @@
   "compilerOptions": {
     "isolatedModules": true,
     "target": "es2017",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "esModuleInterop": true
