@@ -115,7 +115,7 @@ class KoboldAlarmClockCard extends LitElement {
             console.warn('*** Recovering from disconnect');
           };
           location.reload();
-        }, 15000);
+        }, 1000 * 30);
       }
     });
   }

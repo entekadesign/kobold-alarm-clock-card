@@ -20,19 +20,8 @@ export class AlarmController {
 
         this._controllerId = controllerId;
         this._config = config;
-        // TODO: move throttle to helpers class?
-        function throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
-            let timerFlag = null;
-            return (...args: T) => {
-                if (timerFlag === null) {
-                    fn(...args);
-                    timerFlag = setTimeout(() => {
-                        timerFlag = null;
-                    }, delay);
-                }
-            };
-        }
-        this._alarmRinging = throttle((state) => {
+
+        this._alarmRinging = Helpers.throttle((state) => {
             if (state) {
                 this._isAlarmRinging = true;
                 this._callAlarmRingingService('turn_on');
@@ -351,6 +340,18 @@ export class AlarmConfiguration {
 }
 
 export class Helpers {
+    static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
+        let timerFlag = null;
+        return (...args: T) => {
+            if (timerFlag === null) {
+                fn(...args);
+                timerFlag = setTimeout(() => {
+                    timerFlag = null;
+                }, delay);
+            }
+        };
+    }
+
     static convertToMinutes(HHMM: string): { 'minutes': number } {
         // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
         const [H, M] = HHMM.split(":").map(val => parseInt(val));
