@@ -23,7 +23,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 
-import type { CardConfig, NextAlarmObject, TimeObject, RingerEntity, LovelaceElement } from './types';
+import type { CardConfig, NextAlarmObject, TimeObject, RingerEntity } from './types';
 
 // HA types
 import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
@@ -42,7 +42,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _updateLoopId: number;
   private _alarmController: AlarmController;
   private _ringingBegun: boolean;
-  private _elements: LovelaceCard[];
+  private _elements: Array<LovelaceCard>;
   private _injectStylesDone: boolean;
   private _cardHelpers: any;
   private _time: string;
@@ -952,7 +952,7 @@ class KoboldAlarmClockCard extends LitElement {
     this._updateLoop();
 
     if (this._haCardQ) {
-      this._buildConfig();
+      this._buildCard();
     } else {
       console.warn('*** Missing <ha-card> in shadowRoot')
     }
@@ -1025,7 +1025,7 @@ class KoboldAlarmClockCard extends LitElement {
   setConfig(config: CardConfig) {
 
     if (!config) {
-      alert('Card config incorrect.');
+      alert('Card config incorrectly formatted or missing.');
     }
 
     if (!config.cards || !Array.isArray(config.cards)) {
@@ -1060,8 +1060,8 @@ class KoboldAlarmClockCard extends LitElement {
     return 3;
   }
 
-  _buildConfig() {
-    if (!this._rootQ) console.warn('*** Cards root not available');
+  _buildCard() {
+    if (!this._rootQ) console.warn('*** Root of card not available now');
 
     while (this._rootQ.lastChild) {
       this._rootQ.removeChild(this._rootQ.lastChild);
@@ -1071,10 +1071,10 @@ class KoboldAlarmClockCard extends LitElement {
 
     if (config.cards) {
       const elements = this._elements = [];
-      config.cards.forEach(async (card) => {
+      config.cards.forEach(async (card: LovelaceCardConfig) => {
         const element = await this._createCardElement(card);
         elements.push(element);
-        this._rootQ.appendChild(element);
+        await this._rootQ.appendChild(element);  //TODO: why await has "no effect" on expression? wrong type?
         HeightUpdater.updateHeight(card, element);
       });
 
@@ -1095,7 +1095,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   async _createCardElement(card: LovelaceCardConfig) {
-    let element: LovelaceElement;
+    let element: LovelaceCard; // what is type that will preserve await in buildCard?
     try {
       this._cardHelpers = await (window).loadCardHelpers();
       element = await this._cardHelpers.createCardElement(card);
@@ -1320,15 +1320,15 @@ class KoboldAlarmClockCard extends LitElement {
 }
 
 class HeightUpdater {
-  static updateHeight(card, element) {
-    if (this._updateHeightOnNormalCard(card, element)) return;
+  static updateHeight(card: LovelaceCardConfig, element: LovelaceCard) {
+    if (this._updateHeightOnNormalCard(element)) return;
     if (this._updateHeightOnNestedCards(element)) return;
     if (this._updateHeightOnMediaControlCards(card, element)) return;
   }
-  static _updateHeightOnNormalCard(card, element) {
+  static _updateHeightOnNormalCard(element: LovelaceCard) {
     if (element.shadowRoot) {
-      let cardTag = element.shadowRoot.querySelector('ha-card');
-      console.log('*** updateHeightOnNormalCard: ', cardTag);
+      let cardTag: LovelaceCard = element.shadowRoot.querySelector('ha-card');
+      // console.log('*** updateHeightOnNormalCard: ', cardTag);
       if (cardTag) {
         cardTag.style.height = "100%";
         cardTag.style.boxSizing = "border-box";
@@ -1338,10 +1338,10 @@ class HeightUpdater {
     return false;
   }
 
-  static _updateHeightOnNestedCards(element) {
-    if (element.firstChild && element.firstChild.shadowRoot) {
-      console.log('*** updateHeightOnNestedCards');
-      let cardTag = element.firstChild.shadowRoot.querySelector('ha-card');
+  static _updateHeightOnNestedCards(element: LovelaceCard) {
+    if (element.firstChild && element.children[0].shadowRoot) {
+      // console.log('*** updateHeightOnNestedCards');
+      let cardTag: LovelaceCard = element.children[0].shadowRoot.querySelector('ha-card');
       if (cardTag) {
         cardTag.style.height = "100%";
         cardTag.style.boxSizing = "border-box";
@@ -1351,14 +1351,14 @@ class HeightUpdater {
     return false;
   }
 
-  static _updateHeightOnMediaControlCards(card, element) {
+  static _updateHeightOnMediaControlCards(card: LovelaceCardConfig, element: LovelaceCard) {
     if (card.type !== 'media-control') {
       return;
     }
-    console.log('*** updateHeightOnMediaControlCards');
-    if (element.firstChild && element.firstChild.shadowRoot) {
-      element.firstChild.style.height = '50%';
-      let bannerTag = element.firstChild.shadowRoot.querySelector('div.banner');
+    // console.log('*** updateHeightOnMediaControlCards');
+    if (element.children[0] && element.children[0].shadowRoot) {
+      (element.children[0] as LovelaceCard).style.height = '50%';
+      let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
       if (bannerTag) {
         bannerTag.style.boxSizing = "border-box";
         bannerTag.style.height = "calc(100% - 72px)";

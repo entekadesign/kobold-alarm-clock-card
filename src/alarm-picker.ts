@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
-import type { TimeObject } from './types';
+import type { NextAlarmObject } from './types';
 
 @customElement('alarm-picker')
 class AlarmPicker extends LitElement {
@@ -18,14 +18,14 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueM: string;
 
     @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
-    @property({ reflect: false }) alarm: TimeObject;
+    @property({ reflect: false }) alarm: NextAlarmObject;
     @property({ reflect: false }) time: string;
     @property({ reflect: false }) disabled: boolean;
 
-    @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ;
-    @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ;
-    @query('ha-icon.button') _iconButtonQ;
-    @query('#alarmPicker', true) _alarmPickerQ;
+    @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;
+    @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ: HTMLInputElement;
+    @query('ha-icon.button') _iconButtonQ: HTMLElement;
+    @query('#alarmPicker', true) _alarmPickerQ: HTMLElement;
 
     render() {
 
@@ -208,7 +208,7 @@ class AlarmPicker extends LitElement {
         document.addEventListener('click', (e) => { this._clickOutsideAlarmTimeInput(e) }, false);
     };
 
-    _clickOutsideAlarmTimeInput(event) {
+    _clickOutsideAlarmTimeInput(event: Event) {
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
             if (this.id === 'alarmpicker' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ.classList.remove('open');
@@ -220,13 +220,13 @@ class AlarmPicker extends LitElement {
         return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
     }
 
-    _updateValue(e) {
-        const value = (e.target).value;  //Number((e.target).value);
-        e.target.id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
+    _updateValue(event: Event) {
+        const value = (<HTMLInputElement>event.target).value;  //Number((e.target).value);
+        (<HTMLInputElement>event.target).id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
     }
 
-    _getAlarmPickerIcon(alarm) {
+    _getAlarmPickerIcon(alarm: NextAlarmObject) {
         if (!alarm.enabled) {
             return 'mdi:alarm-off';
         } else if (alarm.snooze) {
@@ -235,15 +235,15 @@ class AlarmPicker extends LitElement {
         return 'mdi:alarm';
     }
 
-    _onTimeChanged(timeStr) {
+    _onTimeChanged(timeStr: string) {
         this.alarm.time = dayjs(timeStr, 'HH:mm').format('HH:mm');
         this.alarm.enabled = true;
         // listener for this event is on #alarmpicker element, so only received when "this" used here is #alarmpicker element
         this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: this.alarm } }));
     }
 
-    toggleAlarmEnabled(event) {
-        this.alarm.enabled = event.target.checked;
+    toggleAlarmEnabled(event: Event) {
+        this.alarm.enabled = (<HTMLInputElement>event.target).checked;
         this.requestUpdate('alarm'); //necessary because lit does not mutate reactive object properties
         this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: { time: this.alarm.time, enabled: this.alarm.enabled } } }));
     }

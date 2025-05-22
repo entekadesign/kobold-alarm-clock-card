@@ -1,3 +1,4 @@
+import { HomeAssistant } from 'custom-card-helpers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
@@ -15,13 +16,14 @@ export class AlarmController {
     private _controllerId?: string;
     private _alarmActionsScripts?: Array<Record<string, boolean>> = [];
 
-    constructor(config, controllerId) {
+    constructor(config: CardConfig, controllerId: string) {
 
         this._controllerId = controllerId;
         this._config = config;
-        function throttle(fn, delay) {
+        // TODO: move throttle to helpers class?
+        function throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
             let timerFlag = null;
-            return (...args) => {
+            return (...args: T) => {
                 if (timerFlag === null) {
                     fn(...args);
                     timerFlag = setTimeout(() => {
@@ -41,7 +43,7 @@ export class AlarmController {
         }, 1000);
     }
 
-    set hass(hass) {
+    set hass(hass: HomeAssistant) {
         this._hass = hass;
         this._controllersAlarmConfig = null;
         this._evaluate();
@@ -76,7 +78,7 @@ export class AlarmController {
         return this._controllersAlarmConfig;
     }
 
-    saveControllersAlarmConfig(configuration) {
+    saveControllersAlarmConfig(configuration: AlarmConfiguration) {
         this._saveConfiguration(configuration);
     }
 
@@ -195,7 +197,7 @@ export class AlarmController {
         }
     }
 
-    _runAction(action) {
+    _runAction(action: Record<'entity' | 'when', string>) {
         const tempAction = {
             service: 'homeassistant.turn_on',
             ...action
@@ -205,7 +207,7 @@ export class AlarmController {
         this._alarmActionsScripts[`${tempAction.entity}-${tempAction.when}`] = true;
     }
 
-    _callAlarmRingingService(action) {
+    _callAlarmRingingService(action: string) {
         if (this._config.debug) {
             this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; controllerID: ' + this._controllerId, 'level': 'info' });
         }
@@ -260,7 +262,7 @@ export class AlarmController {
         }
     }
 
-    _saveConfiguration(configuration) {
+    _saveConfiguration(configuration: AlarmConfiguration) {
         // TODO: do we really need two variables here?
         let actualConfiguration = configuration;
         if (!(configuration instanceof AlarmConfiguration)) {
@@ -317,7 +319,7 @@ export class AlarmConfiguration {
     public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
     public lastUpdated: string;
 
-    snooze(snoozeTime) {
+    snooze(snoozeTime: string) {
         const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
         this.nextAlarm = {
             ...this.nextAlarm,
@@ -334,7 +336,7 @@ export class AlarmConfiguration {
         this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
     }
 
-    static createNextAlarm(alarm, forToday = false): NextAlarmObject {
+    static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
         let alarmDate = dayjs();
         if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
             alarmDate = alarmDate.add(1, 'day');

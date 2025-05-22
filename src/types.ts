@@ -1,9 +1,9 @@
 // HA types
-import type { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
+import type { LovelaceCardConfig } from "custom-card-helpers";
 
 export interface CardConfig extends LovelaceCardConfig {
     type: string;
-    name?: string;
+    name: string;
     alarm_entities: Array<string>;
     alarm_actions?: Array<Record<'entity' | 'when', string>>;
     ping_entity?: string;
@@ -12,10 +12,10 @@ export interface CardConfig extends LovelaceCardConfig {
     debug?: boolean;
 }
 
-export interface LovelaceElement extends HTMLElement {
-  hass?: HomeAssistant;
-  setConfig(config: any): void;
-}
+// export interface LovelaceElement extends HTMLElement {
+//     hass?: HomeAssistant;
+//     setConfig(config: any): void;
+// }
 
 export interface TimeObject {
     enabled: boolean;
