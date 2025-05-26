@@ -51,6 +51,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _snoozeDurationDefault: TimeObject;
   private _alarmDurationDefault: TimeObject;
   private _alarmConfiguration: AlarmConfiguration;
+  public connection;
 
   @state() _alarmsEnabled: boolean;
   @state() _nextAlarm: NextAlarmObject;
@@ -109,15 +110,39 @@ class KoboldAlarmClockCard extends LitElement {
     // recover from disconnect, e.g., HA restart
     window.addEventListener("connection-status", (ev: CustomEvent) => {
       if (ev.detail === "connected") {
+        // window.setTimeout(() => {
+        //   if (this._config.debug) {
+        //     this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+        //     console.warn('*** Recovering from disconnect');
+        //   };
+        //   location.reload();
+        // }, 1000 * 20);
+        if (this._config.debug) {
+          this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+          console.warn('*** Recovering from disconnect');
+        };
         window.setTimeout(() => {
-          if (this._config.debug) {
-            this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
-            console.warn('*** Recovering from disconnect');
-          };
-          location.reload();
-        }, 1000 * 30);
+          // this._hass.callService('system_log', 'write', { 'message': '*** TEMP: Beginning wait for config attributes: ' + JSON.stringify(this._hass.states[`sensor.${this._config.name}`].attributes), 'level': 'info' });
+          // this._hass.states[`sensor.${this._config.name}`];
+          this._hass.callService('system_log', 'write', { 'message': '*** TEMP: RELOADING NOW', 'level': 'info' });
+          // location.reload();
+        }, 1000 * 90);
       }
     });
+
+    async () => {
+      const conn = (await this.testHass()).connection;
+      this.connection = conn;
+
+      conn.addEventListener("ready", () => {
+        this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received ready event', 'level': 'info' });
+      });
+      conn.addEventListener("homeassistant_started", () => {
+        this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event', 'level': 'info' });
+      });
+
+    }
+
   }
 
   disconnectedCallback() {
@@ -129,8 +154,28 @@ class KoboldAlarmClockCard extends LitElement {
     };
   }
 
+  async hass_base_el() {
+    await Promise.race([
+      customElements.whenDefined("home-assistant"),
+      customElements.whenDefined("hc-main"),
+    ]);
+
+    const element = customElements.get("home-assistant")
+      ? "home-assistant"
+      : "hc-main";
+
+    while (!document.querySelector(element))
+      await new Promise((r) => window.setTimeout(r, 100));
+    return document.querySelector(element);
+  }
+
+  async testHass() {
+    const base: any = await this.hass_base_el();
+    while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
+    return base.hass;
+  }
+
   render() {
-    // TODO: change any/all assignments to connectedCallback()?
     this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
     this._nextAlarm = this._alarmController.nextAlarm;
 
@@ -1319,6 +1364,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 }
 
+// TODO: are these working?
 class HeightUpdater {
   static updateHeight(card: LovelaceCardConfig, element: LovelaceCard) {
     if (this._updateHeightOnNormalCard(element)) return;
@@ -1356,8 +1402,9 @@ class HeightUpdater {
       return;
     }
     // console.log('*** updateHeightOnMediaControlCards');
+    // console.log('*** firstChild: ' + element.children[0] + '; firstChild.shadowRoot: ' + element.children[0]?.shadowRoot);
     if (element.children[0] && element.children[0].shadowRoot) {
-      (element.children[0] as LovelaceCard).style.height = '50%';
+      (element.children[0] as LovelaceCard).style.height = '50%';  // TEST
       let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
       if (bannerTag) {
         bannerTag.style.boxSizing = "border-box";

@@ -62,6 +62,9 @@ export class AlarmController {
                 this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
             } else {
                 alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
+                if (this._config.debug) {
+                    this._hass.callService('system_log', 'write', { 'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`, 'level': 'info' });
+                }
             }
         }
         return this._controllersAlarmConfig;
@@ -115,6 +118,11 @@ export class AlarmController {
 
     get nextAlarm(): NextAlarmObject {
         // called each time _evaluate is called
+        // console.log('*** controllersAlarmConfig: ' + this?.controllersAlarmConfig + '; nextAlarm: ' + this?.controllersAlarmConfig?.nextAlarm + '; ' + new Date().toJSON());
+        if (!this.controllersAlarmConfig) {
+            this._hass.callService('system_log', 'write', { 'message': '*** TEMP: missing controllersAlarmConfig: ' + JSON.stringify(this._hass.states[`sensor.${this._config.name}`].attributes), 'level': 'info' });
+        }
+
         const nextAlarm = this.controllersAlarmConfig.nextAlarm;
 
         if (!nextAlarm) {
