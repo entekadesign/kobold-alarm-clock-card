@@ -102,6 +102,8 @@ class KoboldAlarmClockCard extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+
+    this.connect();
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** connectedCallback(); _cardID: ' + this._cardId);
@@ -110,13 +112,6 @@ class KoboldAlarmClockCard extends LitElement {
     // recover from disconnect, e.g., HA restart
     window.addEventListener("connection-status", (ev: CustomEvent) => {
       if (ev.detail === "connected") {
-        // window.setTimeout(() => {
-        //   if (this._config.debug) {
-        //     this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
-        //     console.warn('*** Recovering from disconnect');
-        //   };
-        //   location.reload();
-        // }, 1000 * 20);
         if (this._config.debug) {
           this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
           console.warn('*** Recovering from disconnect');
@@ -129,20 +124,6 @@ class KoboldAlarmClockCard extends LitElement {
         }, 1000 * 90);
       }
     });
-
-    async () => {
-      const conn = (await this.testHass()).connection;
-      this.connection = conn;
-
-      conn.addEventListener("ready", () => {
-        this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received ready event', 'level': 'info' });
-      });
-      conn.addEventListener("homeassistant_started", () => {
-        this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event', 'level': 'info' });
-      });
-
-    }
-
   }
 
   disconnectedCallback() {
@@ -152,6 +133,27 @@ class KoboldAlarmClockCard extends LitElement {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
+  }
+
+  async connect() {
+    const conn = (await this.getHass()).connection;
+    this.connection = conn;
+
+    console.log('*** TEMP: connection', await this.getHass());
+
+    conn.addEventListener("ready", () => {
+      this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received ready event', 'level': 'info' });
+    });
+    conn.addEventListener("homeassistant_started", () => {
+      this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event', 'level': 'info' });
+    });
+
+  }
+
+  async getHass() {
+    const base: any = await this.hass_base_el();
+    while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
+    return base.hass;
   }
 
   async hass_base_el() {
@@ -167,12 +169,6 @@ class KoboldAlarmClockCard extends LitElement {
     while (!document.querySelector(element))
       await new Promise((r) => window.setTimeout(r, 100));
     return document.querySelector(element);
-  }
-
-  async testHass() {
-    const base: any = await this.hass_base_el();
-    while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
-    return base.hass;
   }
 
   render() {
