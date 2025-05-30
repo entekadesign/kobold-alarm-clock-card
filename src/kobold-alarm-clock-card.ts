@@ -26,7 +26,7 @@ dayjs.extend(relativeTime);
 import type { CardConfig, NextAlarmObject, TimeObject, RingerEntity } from './types';
 
 // HA types
-import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
+import type { EntityConfig, HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
   interface Window {
@@ -67,7 +67,6 @@ class KoboldAlarmClockCard extends LitElement {
   @state() _clockDefaultFullscreen: boolean;
   @state() _clockFontFace: string;
   @state() _hass: HomeAssistant;
-  // @state() _hassUpdatedTime: string;
   @state() _ringerEntities: Array<{ enabled: boolean, entity_id: string }>;
   @state() _alarmClockClasses: { [key: string]: boolean };
   @state() _alarmButtonsClasses: { [key: string]: boolean };
@@ -104,55 +103,10 @@ class KoboldAlarmClockCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    // window.hassConnection.then(({ conn }) => {
-    //   let myId = ++conn.commandId;
-    //   conn.socket.send(
-    //     JSON.stringify({
-    //       'id': myId,
-    //       'type': 'subscribe_trigger',
-    //       'trigger': {
-    //         'platform': 'homeassistant',
-    //         'event': 'shutdown'
-    //       }
-    //     })
-    //   );
-
-    //   conn.socket.onmessage = function (event) {
-    //     const message = JSON.parse(event.data);
-    //     if (message.type === 'trigger' && message.id === myId) {
-    //       console.log('*** TEMP: HA shutdown recognized at ' + new Date().toJSON());
-    //       // message.result.forEach((item) => {
-    //       console.log('*** TEMP: result: ', message); //item);
-    //       // });
-    //     };
-    //   };
-
-    //   // conn.subscribeEvents(() => {
-    //   //   console.log('*** TEMP: Homeassistant starting now.');
-    //   //   // location.reload();
-    //   // }, 'start');
-    // });
-
-
-    // console.log('*** TEMP: hass object: ', this._hass);
-    // console.log('*** TEMP: variables sensor attributes: ', this._hass.states[`sensor.${this._config.name}`].attributes);
-    // console.log('*** TEMP: variables sensor: ', this._hass.states[`sensor.${this._config.name}`]);
-    // console.log('*** TEMP: hass states: ', this._hass.states);
-    // console.log('*** TEMP: variables sensor.last_reported: ', this._hass.states[`sensor.${this._config.name}`].last_reported);
-
-    // this.connect();
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** connectedCallback(); _cardID: ' + this._cardId);
     };
-
-    // function handleReconnect() {
-    //   // this.requestUpdate();
-    //   window.setInterval(() => {
-    //     console.log('*** TEMP: variables sensor attributes: ', this._hass.states[`sensor.${this._config.name}`].attributes.lastUpdated);
-    //     // console.log('*** TEMP: hassUpdatedTime: ', this._hassUpdatedTime);
-    //   }, 1000);
-    // }
 
     // recover from disconnect, e.g., HA restart
     window.addEventListener("connection-status", (ev: CustomEvent) => {
@@ -161,40 +115,16 @@ class KoboldAlarmClockCard extends LitElement {
           this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
           console.warn('*** Recovering from disconnect');
         };
-        // location.reload();
-        // window.setInterval(() => {
-        //   // console.log('*** TEMP: variables sensor attributes: ', this._hass.states[`sensor.${this._config.name}`].attributes.lastUpdated);
-        //   // console.log('*** TEMP: hassUpdatedTime: ', this._hassUpdatedTime);
-        //   this.handleReconnect();
-        // }, 1000);
 
+        // Reload browser if temporarily disconnected for 90 seconds
         window.setTimeout(() => {
-          // this.handleReconnect();
-          // this._hass.callService('system_log', 'write', { 'message': '*** TEMP: Timer elapsed; Reload now?', 'level': 'info' });
-          console.log('*** TEMP: Timer elapsed; Reload now?');
-          // this.requestUpdate();
-          // let hassDefined = await this.hass.states[`sensor.${this._config.name}`];
-          // if (this?.hass?.states[`sensor.${this._config.name}`]) {
-          //   console.log('*** TEMP: sensor: ', this.hass.states[`sensor.${this._config.name}`]);
-          // } else {
-          //   console.log('*** TEMP: sensor not found');
-          // }
-          // if (hassDefined) {
-          // location.reload();
-          // }
+          location.reload();
         }, 1000 * 90);
 
+        // Reload browser after HA restart (if homeassistant_started event received before 90 seconds)
         window.hassConnection.then(({ conn }) => {
-          // conn.socket.send(
-          //   JSON.stringify({
-          //     'id': 18,
-          //     'type': 'subscribe_events',
-          //     'event_type': 'homeassistant_started'
-          //   })
-          // );
           conn.subscribeEvents(() => {
-            console.log('*** TEMP: Homeassistant started. Restart now?');
-            // location.reload();
+            location.reload();
           }, 'homeassistant_started');
         });
 
@@ -210,93 +140,6 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
   }
-
-  // handleReconnect() {
-  //   // this.requestUpdate();
-  //   // console.log('*** TEMP: hassUpdatedTime: ', this._hassUpdatedTime);
-  //   // window.setInterval(() => {
-  //   //   // console.log('*** TEMP: variables sensor attributes: ', this._hass.states[`sensor.${this._config.name}`].attributes.lastUpdated);
-  //   //   console.log('*** TEMP: hassUpdatedTime: ', this._hassUpdatedTime);
-  //   // }, 1000);
-  //   if (this?.hass?.states[`sensor.${this._config.name}`]) {
-  //     console.log('*** TEMP: sensor: ', this.hass.states[`sensor.${this._config.name}`]);
-  //   } else {
-  //     console.log('*** TEMP: sensor not found');
-  //   }
-  // };
-
-  // async connect() {
-  //   // const connn = (await this.getHass()).connection;
-  //   // this.connection = connn;
-
-  //   // console.log('*** TEMP: connection', await this.getHass());
-
-  //   // conn.addEventListener("ready", () => {
-  //   //   this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received ready event', 'level': 'info' });
-  //   // });
-  //   // conn.addEventListener("homeassistant_started", () => {
-  //   //   this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event on connection', 'level': 'info' });
-  //   // });
-
-  //   // conn.socket.addEventListener("homeassistant_started", () => {
-  //   //   this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event on socket', 'level': 'info' });
-  //   // });
-
-  //   window.hassConnection.then(({ conn }) => {
-  //     conn.socket.send(
-  //       JSON.stringify({
-  //         'id': 18,
-  //         'type': 'subscribe_events',
-  //         'event_type': 'homeassistant_started'
-  //       })
-  //     );
-  //     // conn.socket.addEventListener('message', (e) => { eventHandler(e, 1) });
-  //     // conn.subscribeEvents((e) => { eventHandler(e, 3) });
-  //     conn.subscribeEvents((e) => { console.log('*** TEMP: Homeassistant started. Restart now: ', e) }, 'homeassistant_started');
-  //     // conn.socket.addEventListener('message', (e) => { console.log('*** TEMP: message event on conn (1): ', e.data) });
-  //   });
-
-  //   // connn.socket.addEventListener('message', (e) => { eventHandler(e, 2) });
-  //   // connn.socket.addEventListener('message', (e) => { console.log('*** TEMP: message event on conn (2): ', e.data) });
-  //   // conn.subscribeEvents((e) => { this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event: ' + e.toJSON(), 'level': 'info' }) });
-  //   // conn.subscribeEvents((e) => { this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received started event on connection: ' + e.toJSON(), 'level': 'info' }) }, 'homeassistant-started');
-  //   // conn.subscribeEvents((e) => { this._hass.callService('system_log', 'write', { 'message': '*** TEMP: received ready event on connection: ' + e.toJSON(), 'level': 'info' }) }, 'ready');
-
-  //   // function eventHandler(e, num) {
-  //   //   let evt = JSON.parse(e.data);
-  //   //   if (!Array.isArray(evt)) {
-  //   //     evt = new Array(evt);
-  //   //   }
-  //   //   evt.forEach(e => {
-  //   //     // if (e.type === 'event' && e.event.event_type === 'lovelace_updated') {
-  //   //     if (e.type === 'event') {
-  //   //       console.log('*** TEMP: message event ' + num + ': ' + JSON.stringify(e.event));
-  //   //     }
-  //   //   });
-  //   // }
-
-  // }
-
-  // async getHass() {
-  //   const base: any = await this.hass_base_el();
-  //   while (!base.hass) await new Promise((r) => window.setTimeout(r, 100));
-  //   return base.hass;
-  // }
-
-  // async hass_base_el() {
-  //   await Promise.race([
-  //     customElements.whenDefined("home-assistant"),
-  //     customElements.whenDefined("hc-main"),
-  //   ]);
-
-  //   const element = customElements.get("home-assistant")
-  //     ? "home-assistant"
-  //     : "hc-main";
-
-  //   while (!document.querySelector(element))
-  //     await new Promise((r) => window.setTimeout(r, 100));
-  //   return document.querySelector(element);
-  // }
 
   render() {
     this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
@@ -1212,9 +1055,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   // TODO: test elimination of updateLoop by using reactive hass @property
   set hass(hass: HomeAssistant) {
-    // this._hassUpdatedTime = new Date().toJSON();
-    // console.log('*** TEMP: set hass() is called at ' + new Date().toJSON() + '; hassUpdatedTime is ' + this._hassUpdatedTime);
-    // console.log('*** TEMP: hassUpdatedTime is ' + this._hassUpdatedTime);
+
     this._hass = hass;
     this._alarmController.hass = hass;
 
@@ -1283,6 +1124,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _updateTime(force = false) {
+
     this._alarmController.evaluateAlarms();
     const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
     const fontFaceClass = 'fontFace' + fontNum;

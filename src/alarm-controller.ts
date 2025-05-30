@@ -66,11 +66,6 @@ export class AlarmController {
                     this._hass.callService('system_log', 'write', { 'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`, 'level': 'info' });
                 }
             }
-            // async () => {
-            //     let hassSensorAttributes = await this._hass.states[`sensor.${this._config.name}`].attributes;
-            //     this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, hassSensorAttributes);
-            //     console.log('*** controllersAlarmConfig: ' + JSON.stringify(this._controllersAlarmConfig));
-            // }
         }
         return this._controllersAlarmConfig;
     }
@@ -122,19 +117,8 @@ export class AlarmController {
     }
 
     get nextAlarm(): NextAlarmObject {
-        // called each time _evaluate is called
-        // console.log('*** controllersAlarmConfig: ' + this?.controllersAlarmConfig + '; nextAlarm: ' + this?.controllersAlarmConfig?.nextAlarm + '; ' + new Date().toJSON());
-
-        // // let nextAlarm: NextAlarmObject;
-        // if (!this.controllersAlarmConfig) {
-        //     console.log('*** TEMP: missing value from controllersAlarmConfig getter. Sensor attributes: ' + JSON.stringify(this._hass.states[`sensor.${this._config.name}`].attributes));
-        //     this._hass.callService('system_log', 'write', { 'message': '*** TEMP: missing value from controllersAlarmConfig getter. Sensor attributes: ' + JSON.stringify(this._hass.states[`sensor.${this._config.name}`].attributes), 'level': 'info' });
-        // } //else {
-        // //     nextAlarm = this.controllersAlarmConfig.nextAlarm;
-        // // }
 
         const nextAlarm = this.controllersAlarmConfig.nextAlarm;
-        // console.log('*** this._controllersAlarmConfig.nextAlarm: ', this._controllersAlarmConfig.nextAlarm);
 
         if (!nextAlarm) {
             return { enabled: false, time: '08:00', date: '', dateTime: '' };
