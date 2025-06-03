@@ -26,7 +26,7 @@ dayjs.extend(relativeTime);
 import type { CardConfig, NextAlarmObject, TimeObject, RingerEntity } from './types';
 
 // HA types
-import type { EntityConfig, HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
+import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
   interface Window {
@@ -150,7 +150,7 @@ class KoboldAlarmClockCard extends LitElement {
 
     if (this._config.alarm_entities) {
       // add any alarm_entities that are not already members of ringerEntities
-      this._config.alarm_entities.forEach((item) => { if (ringerEntitiesIds.indexOf(item) < 0) alarmEntities.push({ enabled: true, entity_id: item }); if (!this._hass.states[item]) console.warn(`*** Entity ${item} does not exist in HA`) });
+      this._config.alarm_entities.forEach((item) => { if (ringerEntitiesIds.indexOf(item) < 0) alarmEntities.push({ enabled: true, entity_id: item }); if (!this._hass.states[item]) console.warn(`*** render(); Entity ${item} does not exist in HA`) });
     } else {
       if (!this._config.alarm_entity_local) alert('No alarm_entities and no alarm_entity_local in YAML configuration. One is required for alarm');
     }
@@ -964,7 +964,7 @@ class KoboldAlarmClockCard extends LitElement {
     if (this._haCardQ) {
       this._buildCard();
     } else {
-      console.warn('*** Missing <ha-card> in shadowRoot')
+      console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot')
     }
 
     if (!this._alarmController.isSafetyConfigSet()) {
@@ -990,13 +990,6 @@ class KoboldAlarmClockCard extends LitElement {
       document.querySelector('body').style.overflow = 'hidden';
       document.querySelector('body').style.position = 'fixed';
       document.querySelector('body').style.width = '100%';
-
-      // update card heights
-      // console.log('*** TEMP: elements: ', this._elements);
-      // this._elements.forEach((element) => {
-      //   console.log('*** TEMP: updating element: ', element);  //how is this block being ignored?
-      //   HeightUpdater.updateHeight(element);
-      // });
 
       // inject style into mdc form fields
       let myStyle: HTMLElement;
@@ -1046,7 +1039,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     if (!config.cards || !Array.isArray(config.cards)) {
-      console.warn('*** No cards available for config');
+      console.warn('*** setConfig(); No cards available for config');
     }
 
     // these settings can be overridden by including them in card's yaml config
@@ -1079,7 +1072,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _buildCard() {
-    if (!this._rootQ) console.warn('*** Root of card not available now');
+    if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id extraInfo) not available');
 
     while (this._rootQ.lastChild) {
       this._rootQ.removeChild(this._rootQ.lastChild);
@@ -1089,14 +1082,6 @@ class KoboldAlarmClockCard extends LitElement {
 
     if (config.cards) {
       const elements = this._elements = [];
-      // config.cards.forEach(async (card: LovelaceCardConfig) => {
-      //   const element = await this._createCardElement(card);
-      //   if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
-      //   elements.push(element);
-      //   this._rootQ.appendChild(element);
-      //   // await this._rootQ.appendChild(element);  //TODO: why await has "no effect" on expression?
-      //   // HeightUpdater.updateHeight(card, element); // move this to updated()?
-      // });
       Promise.all(config.cards.map(async (card: LovelaceCardConfig) => {
         const element = await this._createCardElement(card);
         if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
@@ -1104,7 +1089,7 @@ class KoboldAlarmClockCard extends LitElement {
         this._rootQ.appendChild(element);
       })).
         catch(error => {
-          console.log('*** TEMP: ERROR: ', error.message);
+          console.error('*** Error while creating card element: ', error.message);
         }).
         then(() => {
           this._elements = elements;
@@ -1113,21 +1098,10 @@ class KoboldAlarmClockCard extends LitElement {
             if (this._hass) {
               element.hass = this._hass;
             } else {
-              console.warn('*** No hass object available for config');
+              console.warn('*** _buildCard(); No hass object available for config');
             }
           });
         });
-
-      // this._elements = elements;
-
-      // if (this._hass) {
-      //   this._elements.forEach((element) => {
-      //     console.log('*** TEMP: buildCard element: ', element); //how is this block being ignored?
-      //     element.hass = this._hass;
-      //   });
-      // } else {
-      //   console.warn('*** No hass object available for config');
-      // }
     }
 
     if (!this._alarmController.isConfigCorrect()) {
@@ -1143,7 +1117,7 @@ class KoboldAlarmClockCard extends LitElement {
       if (this._hass) {
         element.hass = this._hass;
       } else {
-        console.warn(`*** Missing hass object for card ${card.type}`);
+        console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
       }
 
     } catch (error) {
@@ -1366,18 +1340,15 @@ class KoboldAlarmClockCard extends LitElement {
 }
 
 class HeightUpdater {
-  // static updateHeight(card: LovelaceCardConfig, element: LovelaceCard): boolean {
   static updateHeight(element: LovelaceCard): boolean {
     if (this._updateHeightOnNormalCard(element)) return true;
     if (this._updateHeightOnNestedCards(element)) return true;
-    // if (this._updateHeightOnMediaControlCards(card, element)) return true;
     if (this._updateHeightOnMediaControlCards(element)) return true;
     return false;
   }
   static _updateHeightOnNormalCard(element: LovelaceCard) {
     if (element.shadowRoot) {
       let cardTag: LovelaceCard = element.shadowRoot.querySelector('ha-card');
-      // console.log('*** updateHeightOnNormalCard: ', cardTag);
       if (cardTag) {
         cardTag.style.height = "100%";
         cardTag.style.boxSizing = "border-box";
@@ -1389,7 +1360,6 @@ class HeightUpdater {
 
   static _updateHeightOnNestedCards(element: LovelaceCard) {
     if (element.firstChild && element.children[0].shadowRoot) {
-      // console.log('*** updateHeightOnNestedCards: ', cardTag);
       let cardTag: LovelaceCard = element.children[0].shadowRoot.querySelector('ha-card');
       if (cardTag) {
         cardTag.style.height = "100%";
@@ -1400,19 +1370,11 @@ class HeightUpdater {
     return false;
   }
 
-  // static _updateHeightOnMediaControlCards(card: LovelaceCardConfig, element: LovelaceCard) {
   static _updateHeightOnMediaControlCards(element: LovelaceCard) {
-    // console.log('*** TEMP: element: ', element);
-    // if (card.type !== 'media-control') {
-    //   return;
-    // }
     if (!element.getAttribute('type-media-control')) return;
-    // console.log('*** updateHeightOnMediaControlCards; element: ', element);
-    // console.log('*** firstChild: ' + element.children[0] + '; firstChild.shadowRoot: ' + element.children[0]?.shadowRoot);
     if (element.children[0] && element.children[0].shadowRoot) {
-      (element.children[0] as LovelaceCard).style.height = '100%';  // TEST
+      (element.children[0] as LovelaceCard).style.height = '100%';
       let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
-      // console.log('*** bannerTag: ', bannerTag);
       if (bannerTag) {
         bannerTag.style.boxSizing = "border-box";
         bannerTag.style.height = "calc(100% - 72px)";

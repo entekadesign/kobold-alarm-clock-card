@@ -105,7 +105,6 @@ export class AlarmController {
         this._alarmRinging(false);
     }
 
-    //TODO: replace nextAlarmReset with set nextAlarm, adding parameters?
     nextAlarmReset(snooze = false) {
         const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) {
@@ -214,7 +213,7 @@ export class AlarmController {
                 if (this._config.debug) {
                     this._hass.callService('system_log', 'write', { 'message': '*** alarmSoundLocalEntity is undefined', 'level': 'info' });
                 }
-                console.warn('*** alarmSoundLocalEntity is undefined');
+                console.warn('*** _callAlarmRingingService(); alarmSoundLocalEntity is undefined');
             }
             if (this._config.alarm_entities) {
                 const entitiesArray = [];
@@ -247,19 +246,18 @@ export class AlarmController {
 
         catch (err) {
             if (this._config.debug) {
-                this._hass.callService('system_log', 'write', { 'message': '*** ERROR while calling ringing service: ' + err, 'level': 'info' });
+                this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; Error while calling service: ' + err, 'level': 'info' });
             }
-            console.warn('*** ERROR while calling ringing service: ' + err);
+            console.warn('*** _callAlarmRingingService(); Error while calling service: ' + err);
             return;
         }
     }
 
     _saveConfiguration(configuration: AlarmConfiguration) {
-        // TODO: do we really need two variables here?
         let actualConfiguration = configuration;
         if (!(configuration instanceof AlarmConfiguration)) {
             actualConfiguration = Object.assign(new AlarmConfiguration, configuration);
-            console.warn('*** _saveConfiguration(); Configuration not an instance of AlarmConfiguration class');
+            console.warn('*** _saveConfiguration(); Submitted configuration is corrupt');
         }
 
         // reset next alarm after being disabled and now being re-enabled
