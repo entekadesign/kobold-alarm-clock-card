@@ -1,6 +1,6 @@
 <br><br>
 <div align="center">
-    <img src="https://raw.githubusercontent.com/entekadesign/kobold-alarm-clock/refs/heads/main/assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
+    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
 
