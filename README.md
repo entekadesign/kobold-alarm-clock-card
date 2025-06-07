@@ -64,13 +64,13 @@ https://github.com/entekadesign/kobold-alarm-clock.git
 
 ## Configuration
 
-Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
+If you didn't install via HACS, then register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
 ```
 /local/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
-Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
+Regardless of how you installed, add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
 - type: custom:kobold-alarm-clock
