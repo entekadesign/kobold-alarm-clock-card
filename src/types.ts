@@ -12,11 +12,6 @@ export interface CardConfig extends LovelaceCardConfig {
     debug?: boolean;
 }
 
-// export interface LovelaceElement extends HTMLElement {
-//     hass?: HomeAssistant;
-//     setConfig(config: any): void;
-// }
-
 export interface TimeObject {
     enabled: boolean;
     time: string;
