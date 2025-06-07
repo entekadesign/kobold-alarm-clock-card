@@ -52,19 +52,21 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Installation
 
-Kobold is available in the Home Assistant Community Store (HACS). Start by [installing the HACS integration](https://hacs.xyz/docs/use/) within HA. Then, in HACS, search for "Kobold Alarm Clock" and click **Download**.
+Install in one of four ways:
 
-Kobold can also be installed as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following URL and the type "Dashboard":
+(1) Kobold is available in the Home Assistant Community Store (HACS). Start by [installing the HACS integration](https://hacs.xyz/docs/use/) within HA. Then, in HACS, search for "Kobold Alarm Clock" and click **Download**.
+
+(2) Kobold can also be installed as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following URL and the type "Dashboard":
 
 ```bash
 https://github.com/entekadesign/kobold-alarm-clock-card.git
 ```
 
-If you have [My Home Assistant](https://my.home-assistant.io) configured and HACS installed, just click below:
+(3) If you have [My Home Assistant](https://my.home-assistant.io) configured and HACS installed, just click below:
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=entekadesign&repository=kobold-alarm-clock-card&category=dashboard)
 
-Finally, Kobold can be installed manually by copying the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock-card/releases) to the `config` directory of your HA instance:
+(4) Finally, Kobold can be installed manually by copying the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock-card/releases) to the `config` directory of your HA instance:
 
 ```bash
 <config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
