@@ -64,7 +64,7 @@ Alternatively, install Kobold as a custom repository in the Home Assistant Commu
 https://github.com/entekadesign/kobold-alarm-clock-card.git
 ```
 
-Or, if HACS is already installed and you have **My Home Assistant** configured, just click below:
+Or, if HACS is already installed and you have [My Home Assistant](https://my.home-assistant.io) configured, just click below:
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=entekadesign&repository=kobold-alarm-clock-card&category=dashboard)
 
