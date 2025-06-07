@@ -1,6 +1,6 @@
 <br><br>
 <div align="center">
-    <img src="https://github.com/entekadesign/kobold-alarm-clock/blob/main/assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
+    <img src="https://raw.githubusercontent.com/entekadesign/kobold-alarm-clock/refs/heads/main/assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
 
@@ -56,7 +56,7 @@ Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/e
 <config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
 ```
 
-Alternatively, install Kobold as a custom repository in HACS (Home Assistant Community Store). Start by [installing the HACS integration](https://hacs.xyz/docs/use/). Then, [install the custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following repository URL, selecting the **Dashboard** type:
+Alternatively, install Kobold as a custom repository in HACS (Home Assistant Community Store). Start by [installing the HACS integration](https://hacs.xyz/docs/use/) in HA. Then, [install the repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following repository URL, selecting the **Dashboard** type:
 
 ```bash
 https://github.com/entekadesign/kobold-alarm-clock.git
