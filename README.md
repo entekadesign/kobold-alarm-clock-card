@@ -52,11 +52,11 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Installation
 
-Install in one of four ways:
+Kobold can be installed in any of four ways:
 
-- Kobold is available in the Home Assistant Community Store (HACS). Start by [installing the HACS integration](https://hacs.xyz/docs/use/) within HA. Then, in HACS, search for "Kobold Alarm Clock" and click **Download**.
+- If you have installed the [Home Assistant Community Store (HACS) integration](https://hacs.xyz/docs/use/), then search for "Kobold Alarm Clock" in HACS and click **Download**.
 
-- Kobold can also be installed as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following URL and the type "Dashboard":
+- Install as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following URL and the type "Dashboard":
 
 ```bash
 https://github.com/entekadesign/kobold-alarm-clock-card.git
