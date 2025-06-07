@@ -1,12 +1,12 @@
 <br><br>
 <div align="center">
-    <img src="./assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
+    <img src="https://github.com/entekadesign/kobold-alarm-clock/blob/main/assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
 </div>
 <br><br>
 
 # Kobold: A multi-alarm clock for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
 
 Install the Kobold custom card on your Home Assistant (HA) instance to turn almost any device running HA Companion or a web browser into a customizable alarm clock.
 
@@ -50,10 +50,16 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 ## Installation
 
-Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance: 
+Copy the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock/releases) to the `config` directory of your HA instance:
 
 ```bash
 <config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
+```
+
+Alternatively, install Kobold as a custom repository in HACS (Home Assistant Community Store). Start by [installing the HACS integration](https://hacs.xyz/docs/use/). Then, [install the custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following repository URL, selecting the *Dashboard* type:
+
+```bash
+https://github.com/entekadesign/kobold-alarm-clock.git
 ```
 
 ## Configuration
@@ -90,7 +96,7 @@ Set an alarm for each day of the week in the **alarm schedule dialog**. The next
 
 ### Alarm actions
 
-You can instruct Kobold to activate an HA integration at other times than when an alarm activates. For example, to configure an input_boolean helper to activate one minute before the alarm, add an `alarm_actions` entry to your lovelace configuration:  
+You can instruct Kobold to activate an HA integration at other times than when an alarm activates. For example, to configure an input_boolean helper to activate one minute before the alarm, add an `alarm_actions` entry to your lovelace configuration:
 
 ```yaml
 - type: custom:kobold-alarm-clock
