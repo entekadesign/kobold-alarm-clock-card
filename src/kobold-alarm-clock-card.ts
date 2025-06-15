@@ -124,6 +124,9 @@ class KoboldAlarmClockCard extends LitElement {
         // If HA restarts, reload browser
         window.hassConnection.then(({ conn }) => {
           conn.subscribeEvents(() => {
+            if (this._config.debug) {
+              this._hass.callService('system_log', 'write', { 'message': '*** HA restart complete. Refreshing browser', 'level': 'info' });
+            };
             location.reload();
           }, 'homeassistant_started');
         });
@@ -1139,10 +1142,10 @@ class KoboldAlarmClockCard extends LitElement {
     const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
-    if (this._clockQ && 
-      (force 
-        || this._time !== time 
-        || this._ringing !== isAlarmRinging 
+    if (this._clockQ &&
+      (force
+        || this._time !== time
+        || this._ringing !== isAlarmRinging
         || this._controllersAlarmConfigLastUpdate !== this._alarmConfiguration.lastUpdated)) {
       this._time = time;
       this._ringing = isAlarmRinging;
