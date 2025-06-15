@@ -127,7 +127,9 @@ class KoboldAlarmClockCard extends LitElement {
             if (this._config.debug) {
               this._hass.callService('system_log', 'write', { 'message': '*** HA restart complete. Refreshing browser', 'level': 'info' });
             };
-            location.reload();
+            window.setTimeout(() => {
+              location.reload();
+            }, 1000);
           }, 'homeassistant_started');
         });
       }
