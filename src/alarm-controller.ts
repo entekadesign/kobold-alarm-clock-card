@@ -1,9 +1,11 @@
-import { HomeAssistant } from 'custom-card-helpers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
 import type { CardConfig, NextAlarmObject, TimeObject } from './types';
+
+// HA types
+import type { HomeAssistant } from "custom-card-helpers";
 
 export class AlarmController {
 
@@ -341,6 +343,99 @@ export class AlarmConfiguration {
 }
 
 export class Helpers {
+    static fireEvent = (event, detail = undefined, element = this.getLovelace()) => {
+        element.dispatchEvent(new CustomEvent(event, { detail, bubbles: true, cancelable: false, composed: true, }));
+    }
+
+    static getHA = () => {
+        let root: any = document.querySelector('home-assistant');
+        return root;
+    }
+
+    // static getEditor = () => {
+    //     let root: any = this.getHA();
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('hui-dialog-edit-card');
+    //     // console.log('*** getEditor(); root: ', root);
+    //     return root;
+    // };
+
+    // static getConfigContent = () => {
+    //     let root: any = this.getEditor();
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('hui-card-element-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('hui-stack-card-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('hui-card-element-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('kobold-card-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('#kobold-card-config');
+    //     // console.log('*** getConfigContent(); root: ', root);
+    //     return root;
+    // };
+
+    // static getConfigContent = () => {
+    //     let root = this.getEditor();
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector("hui-card-element-editor");
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector("my-custom-card-editor");
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector("div#my-card-config");
+    //     // console.log('*** getConfigContent(); root: ', root);
+    //     return root;
+    // };
+
+    // static getConfigContent = () => {
+    //     let root: any = this.getEditor();
+    //     if (!root) return;
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('hui-card-element-editor');
+    //     root = root && root.shadowRoot;
+    //     if (!root) return;
+    //     let els = root.querySelectorAll('*');
+    //     // console.log('*** els: ', els);
+    //     els.forEach((el) => {
+    //         if (el.tagName.slice(-11) === 'CARD-EDITOR') {
+    //             root = root && el;
+    //             // console.log('*** root: ', root);
+    //         }
+    //     });
+    //     // console.log('*** final root: ', root);
+    //     // console.log('*** shadowRoot: ', root instanceof ShadowRoot);
+    //     if (!root || (root instanceof ShadowRoot)) {
+    //         console.warn('*** getConfigContent(); Card editor not found');
+    //         return;
+    //     }
+    //     root = root && root.shadowRoot;
+    //     if (!root) return;
+    //     if (root.querySelector('#kobold-card-config')) {
+    //         root = root && root.querySelector('#kobold-card-config');
+    //         return root;
+    //     }
+    //     root = root && root.querySelector('hui-card-element-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('kobold-card-editor');
+    //     root = root && root.shadowRoot;
+    //     root = root && root.querySelector('#kobold-card-config');
+    //     // console.log('*** getConfigContent(); root: ', root);
+    //     return root;
+    // };
+
+    static getLovelace = () => {
+        let root: any = this.getHA();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('home-assistant-main');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('ha-panel-lovelace');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('hui-root');
+        // console.log('*** getLovelace(); root: ', root);
+        return root;
+    };
+
     static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
         let timerFlag = null;
         return (...args: T) => {

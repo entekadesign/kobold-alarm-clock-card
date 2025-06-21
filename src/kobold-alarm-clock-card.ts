@@ -32,8 +32,27 @@ declare global {
   interface Window {
     hassConnection?: Promise<any>;
     loadCardHelpers(): Promise<void>;
+    // customCards: Array<LovelaceCardConfig>;
+    customCards: Array<any>;
+    setMyEditMode(parameter?: boolean): void;
+  }
+  interface Node {
+    host: any;
+  }
+  interface HuiCardOptions extends LitElement {
+    path: [number, number] | [number, number, number];
   }
 }
+
+// Add our card to the list of custom cards for the card picker
+window.customCards = window.customCards || []; // Create the list if it doesn't exist. Careful not to overwrite it
+window.customCards.push({
+  type: "kobold-alarm-clock-card",
+  name: "Kobold",
+  description: "A multi-alarm clock for Home Assistant",
+  // preview: true,
+  documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme",
+});
 
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
@@ -72,6 +91,7 @@ class KoboldAlarmClockCard extends LitElement {
   @state() _alarmButtonsClasses: { [key: string]: boolean };
   @state() _footClasses: { [key: string]: boolean };
   @state() _clockClasses: { [key: string]: boolean };
+  @state() _koboldEditor: any; //TODO: better type
 
   @query('#clock', true) _clockQ: HTMLElement;
   @query('#date', true) _dateQ: HTMLElement;
@@ -109,26 +129,19 @@ class KoboldAlarmClockCard extends LitElement {
     };
 
     // recover from disconnect, e.g., HA restart
-    window.addEventListener('connection-status', (event: CustomEvent) => {
-      if (event.detail === 'connected') {
-        if (this._config.debug) {
-          this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
-          console.warn('*** Recovering from disconnect');
-        };
-
-        // If temporarily disconnected, reload browser after 90-second delay
-        // window.setTimeout(() => {
-        //   location.reload();
-        // }, 1000 * 90);
-
-        // If HA restarts, reload browser
-        window.hassConnection.then(({ conn }) => {
-          conn.subscribeEvents(() => {
-            location.reload();
-          }, 'homeassistant_started');
-        });
+    window.addEventListener('connection-status', this._connectionStatusEvent);
+    // console.log('*** adding kobold-editor event listener');
+    Helpers.getHA().addEventListener('kobold-editor', this._koboldEditorEvent);
+    // Helpers.getHA().addEventListener('kobold-editor', (event) => { this.koboldEditorEvent(event) });
+    Helpers.getHA().addEventListener('dialog-closed', this._dialogClosedEvent);
+    // function setMyEditMode(mode = true) {
+    window.setMyEditMode = (mode = true) => {
+      const ll = Helpers.getLovelace();
+      if (ll && ll.lovelace.editMode !== mode) {
+        ll.lovelace.setEditMode(mode);
+        // if (!mode) ll.requestUpdate();
       }
-    });
+    };
   }
 
   disconnectedCallback() {
@@ -137,6 +150,59 @@ class KoboldAlarmClockCard extends LitElement {
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
+    };
+    window.removeEventListener('connection-status', this._connectionStatusEvent);
+    Helpers.getHA().removeEventListener('kobold-editor', this._koboldEditorEvent);
+    Helpers.getHA().removeEventListener('dialog-closed', this._dialogClosedEvent);
+  }
+
+  _connectionStatusEvent = (event: CustomEvent) => {
+    if (event.detail === 'connected') {
+      if (this._config.debug) {
+        this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+        console.warn('*** Recovering from disconnect');
+      };
+
+      // If temporarily disconnected, reload browser after 90-second delay
+      // window.setTimeout(() => {
+      //   location.reload();
+      // }, 1000 * 90);
+
+      // If HA restarts, reload browser
+      window.hassConnection.then(({ conn }) => {
+        conn.subscribeEvents(() => {
+          location.reload();
+        }, 'homeassistant_started');
+      });
+    }
+  }
+
+  _dialogClosedEvent = (event: CustomEvent) => {
+    if (event.detail.dialog === 'hui-dialog-edit-card') {
+      window.setMyEditMode(false);
+      window.setTimeout(() => {
+        // replace browser history using path without edit parameter
+        const base = window.location.pathname;
+        window.history.replaceState(null, '', base);
+      }, 500);
+    }
+  }
+
+  _koboldEditorEvent = (event: CustomEvent) => {
+    this._koboldEditor = event.detail.editorEl;
+    // console.log('*** kobold-editor event received: ', this._koboldEditor);
+  }
+
+  static getConfigElement() {
+    // Create and return an editor element
+    return document.createElement("kobold-card-editor");
+  }
+
+  static getStubConfig() {
+    // Return a minimal configuration that will result in a working card configuration
+    return {
+      entity: "",
+      enabled: false,
     };
   }
 
@@ -412,6 +478,12 @@ class KoboldAlarmClockCard extends LitElement {
                 <div id="date"></div>
                 <div class="optionButtons">
                   <ha-icon id="settingsButton" class="button" icon="mdi:cog" @click=${this._showSettingsDialog}></ha-icon>
+                  <button id="tab-0" @click=${this._showEditor}>
+                    EDIT0
+                  </button >
+                  <button id="tab-1" @click=${this._showEditor}>
+                    EDIT1
+                  </button >
                   <ha-icon id="napButton" class="button" icon="mdi:sleep" @click=${this._showNapDialog}></ha-icon>
                 </div>
                 ${this._areAlarmsEnabled() ? html`
@@ -499,6 +571,7 @@ class KoboldAlarmClockCard extends LitElement {
       background-position: center center;
       filter: invert(1) brightness(0.41); /* match --secondary-text-color */
       position: absolute;
+      display: none; /* TEMP */
     }
 
     #clock {
@@ -975,6 +1048,13 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+
+    // this.addEventListener("kobold-card-editor-tab", (event: CustomEvent) => {
+    //   console.log('*** kobold-card-editor-tab event received; tab: ', event.detail.tab);
+    //   Helpers.fireEvent('ll-edit-card', { path: event.detail.path }, this);
+    //   // if (event.detail.dialog === 'hui-dialog-edit-card') {
+    //   // }
+    // });
   }
 
   // updated(changedProperties: Map<string, any>): void {
@@ -1287,6 +1367,71 @@ class KoboldAlarmClockCard extends LitElement {
     this.closeDialog('#napDialog');
   }
 
+  async _showEditor(event) {
+    event.stopPropagation();
+    let tabNo = parseInt(event.target.id.slice(4));
+    // console.log('*** tab: ', tabNo);
+    window.setMyEditMode();
+
+    let rounds = 0;
+    // wait for availability of card-options; kobold card might be nested
+    while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
+      await new Promise((r) => setTimeout(r, 100));
+    if (rounds === 6) {
+      console.warn('*** _showEditor(); Timed out waiting for edit mode');
+    } else {
+      const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
+      // console.log('*** config: ', this._config);
+      // Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
+      // console.log('*** sending event');
+      // Helpers.fireEvent('kobold-card-editor-tab', { tab: tabNo, path: huiCardPath }, this);
+      Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
+
+      let rounds = 0;
+      // const koboldConfigContent = this._koboldEditor.shadowRoot.querySelector('#kobold-card-config');
+      // console.log('*** customElements: ', customElements.get('hui-card-options'));
+      // while (!Helpers.getConfigContent() && rounds++ < 5)
+      while (!this._koboldEditor && rounds++ < 5)
+        await new Promise((r) => setTimeout(r, 100));
+      // while (!Helpers.getEditor() && rounds++ < 5)
+      // console.log('*** koboldConfigContent: ', koboldConfigContent);
+      if (rounds === 6) {
+        console.warn('*** _showEditor(); Timed out waiting for editor');
+      } else {
+        // console.log('*** rounds: ', rounds);
+        // this.fireEvent("kobold-tab", { tab: tabNo });
+        // console.log('*** eventTarget: ', eventTarget);
+        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
+        // Helpers.fireEvent('kobold-card-editor-tab', { tab: tabNo }, document.querySelector('home-assistant'));
+        // console.log('*** sending kobold-tab event; tab: ', tabNo);
+        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
+        Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+        this._koboldEditor = undefined;
+        // console.log('*** this._koboldEditor: ', this._koboldEditor);
+        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
+        // console.log('*** getConfigContent: ', Helpers.getConfigContent());
+        // console.log('*** koboldEditor: ', this._koboldEditor);
+        // Helpers.getConfigContent();
+        // window.setTimeout(() => {
+        //   console.log('*** sending kobold-tab event');
+        //   // Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
+        //   // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor);
+        //   Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
+        // }, 500);
+        // console.log('*** firing kobold-tab event; time: ' + new Date().toJSON());
+      }
+      // customElements.whenDefined('kobold-card-editor').then(() => {
+      //   console.log('*** sending kobold-tab event');
+      //   Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
+      //   // const huiCardPath = customElements.get('hui-dialog-edit-card').prototype;
+      //   // console.log('*** huiCardPath: ', huiCardPath);
+      //   // console.log('*** config: ', this._config);
+      //   // Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
+      //   // Helpers.getConfigContent();
+      // });
+    }
+  }
+
   _showAlarmPicker() {
     this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
     this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
@@ -1336,6 +1481,416 @@ class KoboldAlarmClockCard extends LitElement {
         this._clockLogoQ.style.display = 'block';
       }
     }
+  }
+}
+
+@customElement('kobold-card-editor')
+class KoboldCardEditor extends LitElement {
+
+  private _configSchemaSettings = [
+    {
+      name: "nap_duration",
+      label: "Nap Duration",
+      selector: { duration: {} },
+      // default: { hours: 0, minutes: 0, seconds: 0 },
+      // default: nap_duration_default,
+    },
+  ]
+
+  private _configSchemaSchedule = (alarmsEnabled?: boolean) => {
+    [
+      {
+        name: "alarms_enabled",
+        label: "Alarms Schedule Enabled",
+        selector: { boolean: {} },
+        default: false,
+      },
+      {
+        type: "grid",
+        name: "mo",
+        schema: [
+          {
+            name: "enabled",
+            label: "Monday",
+            selector: { boolean: {} },
+            default: false,
+            // disabled: !alarmsEnabled,
+            disabled: !alarmsEnabled,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            default: "07:00:00",
+            disabled: !alarmsEnabled,
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "tu",
+        schema: [
+          {
+            name: "enabled",
+            label: "Tuesday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "we",
+        schema: [
+          {
+            name: "enabled",
+            label: "Wednesday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "th",
+        schema: [
+          {
+            name: "enabled",
+            label: "Thursday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "fr",
+        schema: [
+          {
+            name: "enabled",
+            label: "Friday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "sa",
+        schema: [
+          {
+            name: "enabled",
+            label: "Saturday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+      {
+        type: "grid",
+        name: "su",
+        schema: [
+          {
+            name: "enabled",
+            label: "Sunday",
+            selector: { boolean: {} },
+            default: false,
+          },
+          {
+            name: "time",
+            label: "",
+            selector: { time: {} },
+            // default: '07:00:00',
+          },
+        ],
+      },
+    ]
+  }
+
+  private _configSchemaNap = [
+    {
+      name: "nap_duration",
+      label: "Nap Duration",
+      selector: { duration: {} },
+      // default: { hours: 0, minutes: 0, seconds: 0 },
+      // default: nap_duration_default,
+    },
+  ]
+
+  // private _alarmController: AlarmController;
+  private _alarmConfiguration: AlarmConfiguration;
+  // private _config: CardConfig;
+
+  @state() _hass: HomeAssistant;
+  @state() _config: CardConfig;
+  @state() _selectedTab = 0;
+  @state() _napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
+
+  constructor() {
+    super();
+    // console.log('*** initializing editor');
+    // document.querySelector('home-assistant').addEventListener('kobold-tab', (event: CustomEvent) => {
+    //   console.log('*** kobold-tab event received; tab: ', event.detail.tab);
+    //   this._selectedTab = event.detail.tab;
+    //   // if (event.detail.dialog === 'hui-dialog-edit-card') {
+    //   // }
+    // });
+
+    Helpers.fireEvent('kobold-editor', { editorEl: this }, document.querySelector('home-assistant'));
+    // this._selectedTab = 0;
+
+    // this._napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
+  }
+
+  // static get properties() {
+  //   return {
+  //     hass: {},
+  //     _config: {},
+  //     _selectedTab: { type: Number },
+  //   };
+  // }
+
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+    // console.log('*** hass fired');
+    // this._alarmController.hass = hass;
+  }
+
+  // setConfig works the same way as for the card itself
+  setConfig(config) {
+    this._config = config;
+    // console.log('*** setting config');
+  }
+
+  firstUpdated() {
+    // console.log('*** selectedTab: ', this._selectedTab);
+    // console.log('*** selectedTab: ', this.tabTest);
+    // console.log('*** adding listener now');
+  }
+  updated() {
+    // console.log('*** selectedTab: ', this.tabTest);
+  }
+  // This function is called when the input element of the editor loses focus
+  configUpdated(ev) {
+
+    // We make a copy of the current config so we don't accidentally overwrite anything too early
+    const _config = Object.assign({}, this._config);
+    // Then we update the entity value with what we just got from the input field
+    // console.log('*** config update event: ', ev);
+    // console.log('*** config update target id: ', (ev.target).id);
+    // console.log('*** config update target value: ', (ev.target).value);
+    // console.log('*** config update target checked: ', (ev.target).checked);
+    const [snPrefix, settingName] = (ev.target).id.split('_');
+    if (snPrefix === 'c') {
+      // console.log('*** settingName: ', settingName);
+      // console.log('*** target.checked: ', (ev.target).checked);
+      // console.log('*** ev.type: ', (ev.type));
+      if (ev.type === 'focusout') {
+        // console.log('*** focusout detected');
+        _config[settingName] = (ev.target).value;
+      } else {
+        _config[settingName] = (ev.target).checked;
+      }
+      // _config.entity = ev.target.value;
+      // And finally write back the updated configuration all at once
+      this._config = _config;
+
+      // A config-changed event will tell lovelace we have made changed to the configuration
+      // this make sure the changes are saved correctly later and will update the preview
+      Helpers.fireEvent("config-changed", { config: _config });
+      // const event = new CustomEvent("config-changed", {
+      //     detail: { config: _config },
+      //     bubbles: true,
+      //     composed: true,
+      // });
+      // this.dispatchEvent(event);
+    }
+  }
+
+  // _configChanged(event: CustomEvent) {
+  _configChanged(event) {
+    event.stopPropagation();
+    if (!this._config) return;
+    console.log('*** event.detail.value: ', event.detail.value);
+    // this._config = { ...event.detail.value };
+    // this.dispatchEvent(
+    //     new CustomEvent("config-changed", { detail: { config: this._config } })
+    // );
+  }
+
+  _napDurationChanged(event) {
+    event.stopPropagation();
+    // TODO: handle clear button
+    // console.log('*** event: ', event);
+    // const myValue = event.detail.value;
+    // this._napDurationData = myValue;
+    this._napDurationData = event.detail.value;
+    // console.log('*** event.detail: ', this._napDurationData);
+    // console.log('*** myValue.nap_duration: ', myValue.nap_duration);
+    // if (myValue.nap_duration && Object.values(myValue.nap_duration).every((value) => value === 0)) {
+    //     delete myValue.nap_duration;
+    //     console.log('*** deleting');
+    // }
+    // console.log('*** napDurationData: ', this._napDurationData);
+    // HelpersTest.fireEvent("value-changed", { value: myValue }, this);
+  }
+
+  _clearNap() {
+    //
+  }
+
+  _handleSwitchTab(event) {
+    // console.log('*** handleSwitchTab');
+    // this._selectedTab = ev.detail.name === "settings" ? 0 : 1;
+
+    switch (event.detail.name) {
+      case 'settings':
+        this._selectedTab = 0;
+        break;
+      case 'nap':
+        this._selectedTab = 1;
+        break;
+      case 'schedule':
+        this._selectedTab = 2;
+        break;
+      default:
+        this._selectedTab = 0;
+    }
+  }
+
+  render() {
+    if (!this._hass || !this._config) {
+      // console.log('*** exiting render. _hass: ' + this._hass + '; _config: ' + this._config);
+      return html``;
+    }
+
+    // @focusout below will call entityChanged when the input field loses focus (e.g. the user tabs away or clicks outside of it)
+    return html`
+    <div id="kobold-card-config" class="card-config"
+        @kobold-tab=${(event) => { this._selectedTab = event.detail.tab }}
+    >
+        <div class="toolbar">
+          <sl-tab-group
+            @sl-tab-show=${this._handleSwitchTab}
+          >
+            <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
+            <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
+            <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
+          </sl-tab-group>
+        </div>
+        <div id="editor">
+          ${[this._renderSettingsEditor, this._renderNapEditor, this._renderScheduleEditor][
+        this._selectedTab
+      ].bind(this)()}
+        </div>
+    </div>
+    `;
+  }
+
+  _renderSettingsEditor() {
+    // console.log('*** rendering settings editor');
+    return html`<div class="box">
+            <ha-form
+                .hass=${this._hass}
+                .data=${this._config}
+                .schema=${this._configSchemaSettings}
+                .computeLabel=${(s) => s.label ?? s.name}
+                @value-changed=${this._configChanged}
+            ></ha-form>
+        </div>`;
+  }
+
+  _renderNapEditor() {
+    return html`<div class="box">
+            <ha-form
+                .hass=${this._hass}
+                .data=${this._napDurationData}
+                .schema=${this._configSchemaNap}
+                .computeLabel=${(s) => s.label ?? s.name}
+                @value-changed=${this._napDurationChanged}
+            ></ha-form>
+            <br>
+            <mwc-button
+                .title=${"Clear schedule override"}
+                @click=${this._clearNap}
+            >
+            CLEAR
+            </mwc-button>
+        </div>`;
+  }
+
+  _renderScheduleEditor() {
+    return html`<div class="box">
+          <ha-form
+            .hass=${this._hass}
+            .data=${this._config}
+            .schema=${this._configSchemaSchedule(this._alarmConfiguration.alarmsEnabled)}
+            .computeLabel=${(s) => s.label ?? s.name}
+            @value-changed=${this._configChanged}
+          ></ha-form>
+        </div>`;
+  }
+
+  static get styles() {
+    return css`
+          sl-tab-group {
+            margin-bottom: 16px;
+          }
+
+          sl-tab {
+            flex: 1;
+          }
+
+          sl-tab::part(base) {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .box {
+            margin-top: 8px;
+            border: 1px solid var(--divider-color);
+            padding: 12px;
+          }
+          .box .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            gap: 8px;
+          }
+          .gui-mode-button {
+            margin-right: auto;
+          }
+        `;
   }
 }
 
