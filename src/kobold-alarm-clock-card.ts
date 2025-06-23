@@ -133,7 +133,7 @@ class KoboldAlarmClockCard extends LitElement {
     // console.log('*** adding kobold-editor event listener');
     Helpers.getHA().addEventListener('kobold-editor', this._koboldEditorEvent);
     // Helpers.getHA().addEventListener('kobold-editor', (event) => { this.koboldEditorEvent(event) });
-    Helpers.getHA().addEventListener('dialog-closed', this._dialogClosedEvent);
+    Helpers.getHA().addEventListener('dialog-closed', this._dialogClosedEvent); //TODO: replace with custom event that sends card id so that closing editor only applies to kobold editor
     // function setMyEditMode(mode = true) {
     window.setMyEditMode = (mode = true) => {
       const ll = Helpers.getLovelace();
@@ -1118,8 +1118,10 @@ class KoboldAlarmClockCard extends LitElement {
       alert('Card config incorrectly formatted or missing.');
     }
 
+    // console.log('*** setting config on card: ', config);
+
     if (!config.cards || !Array.isArray(config.cards)) {
-      console.warn('*** setConfig(); No cards available for config');
+      console.warn('*** setConfig(); No HA cards available to configure');
     }
 
     // these settings can be overridden by including them in card's yaml config
@@ -1381,54 +1383,18 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** _showEditor(); Timed out waiting for edit mode');
     } else {
       const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
-      // console.log('*** config: ', this._config);
-      // Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
-      // console.log('*** sending event');
-      // Helpers.fireEvent('kobold-card-editor-tab', { tab: tabNo, path: huiCardPath }, this);
       Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
 
       let rounds = 0;
-      // const koboldConfigContent = this._koboldEditor.shadowRoot.querySelector('#kobold-card-config');
-      // console.log('*** customElements: ', customElements.get('hui-card-options'));
-      // while (!Helpers.getConfigContent() && rounds++ < 5)
       while (!this._koboldEditor && rounds++ < 5)
         await new Promise((r) => setTimeout(r, 100));
-      // while (!Helpers.getEditor() && rounds++ < 5)
-      // console.log('*** koboldConfigContent: ', koboldConfigContent);
       if (rounds === 6) {
         console.warn('*** _showEditor(); Timed out waiting for editor');
       } else {
-        // console.log('*** rounds: ', rounds);
-        // this.fireEvent("kobold-tab", { tab: tabNo });
-        // console.log('*** eventTarget: ', eventTarget);
-        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
-        // Helpers.fireEvent('kobold-card-editor-tab', { tab: tabNo }, document.querySelector('home-assistant'));
-        // console.log('*** sending kobold-tab event; tab: ', tabNo);
-        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
         Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
         this._koboldEditor = undefined;
-        // console.log('*** this._koboldEditor: ', this._koboldEditor);
-        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
-        // console.log('*** getConfigContent: ', Helpers.getConfigContent());
-        // console.log('*** koboldEditor: ', this._koboldEditor);
-        // Helpers.getConfigContent();
-        // window.setTimeout(() => {
-        //   console.log('*** sending kobold-tab event');
-        //   // Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
-        //   // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor);
-        //   Helpers.fireEvent('kobold-tab', { tab: tabNo }, Helpers.getConfigContent());
-        // }, 500);
-        // console.log('*** firing kobold-tab event; time: ' + new Date().toJSON());
+        // console.log('*** config: ', this._config);
       }
-      // customElements.whenDefined('kobold-card-editor').then(() => {
-      //   console.log('*** sending kobold-tab event');
-      //   Helpers.fireEvent('kobold-tab', { tab: tabNo }, document.querySelector('home-assistant'));
-      //   // const huiCardPath = customElements.get('hui-dialog-edit-card').prototype;
-      //   // console.log('*** huiCardPath: ', huiCardPath);
-      //   // console.log('*** config: ', this._config);
-      //   // Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
-      //   // Helpers.getConfigContent();
-      // });
     }
   }
 
@@ -1497,164 +1463,175 @@ class KoboldCardEditor extends LitElement {
     },
   ]
 
-  private _configSchemaSchedule = (alarmsEnabled?: boolean) => {
-    [
-      {
-        name: "alarms_enabled",
-        label: "Alarms Schedule Enabled",
-        selector: { boolean: {} },
-        default: false,
-      },
-      {
-        type: "grid",
-        name: "mo",
-        schema: [
-          {
-            name: "enabled",
-            label: "Monday",
-            selector: { boolean: {} },
-            default: false,
-            // disabled: !alarmsEnabled,
-            disabled: !alarmsEnabled,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            default: "07:00:00",
-            disabled: !alarmsEnabled,
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "tu",
-        schema: [
-          {
-            name: "enabled",
-            label: "Tuesday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "we",
-        schema: [
-          {
-            name: "enabled",
-            label: "Wednesday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "th",
-        schema: [
-          {
-            name: "enabled",
-            label: "Thursday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "fr",
-        schema: [
-          {
-            name: "enabled",
-            label: "Friday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "sa",
-        schema: [
-          {
-            name: "enabled",
-            label: "Saturday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-      {
-        type: "grid",
-        name: "su",
-        schema: [
-          {
-            name: "enabled",
-            label: "Sunday",
-            selector: { boolean: {} },
-            default: false,
-          },
-          {
-            name: "time",
-            label: "",
-            selector: { time: {} },
-            // default: '07:00:00',
-          },
-        ],
-      },
-    ]
-  }
+  private _configSchemaSchedule = (alarms_disabled?: boolean) => [
+    {
+      name: "alarms_enabled",
+      label: "Alarms Schedule Enabled",
+      selector: { boolean: {} },
+      // default: false,
+    },
+    {
+      type: "grid",
+      name: "mo",
+      schema: [
+        {
+          name: "enabled",
+          label: "Monday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: "07:00:00",
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "tu",
+      schema: [
+        {
+          name: "enabled",
+          label: "Tuesday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "we",
+      schema: [
+        {
+          name: "enabled",
+          label: "Wednesday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "th",
+      schema: [
+        {
+          name: "enabled",
+          label: "Thursday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "fr",
+      schema: [
+        {
+          name: "enabled",
+          label: "Friday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "sa",
+      schema: [
+        {
+          name: "enabled",
+          label: "Saturday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+    {
+      type: "grid",
+      name: "su",
+      schema: [
+        {
+          name: "enabled",
+          label: "Sunday",
+          selector: { boolean: {} },
+          // default: false,
+          disabled: alarms_disabled,
+        },
+        {
+          name: "time",
+          label: "",
+          selector: { time: {} },
+          // default: '07:00:00',
+          disabled: alarms_disabled,
+        },
+      ],
+    },
+  ]
 
   private _configSchemaNap = [
     {
       name: "nap_duration",
       label: "Nap Duration",
       selector: { duration: {} },
-      // default: { hours: 0, minutes: 0, seconds: 0 },
+      // default: { hours: 0, minutes: 7, seconds: 0 },
       // default: nap_duration_default,
     },
   ]
 
   // private _alarmController: AlarmController;
-  private _alarmConfiguration: AlarmConfiguration;
+  // private _alarmConfiguration: AlarmConfiguration;
   // private _config: CardConfig;
 
   @state() _hass: HomeAssistant;
   @state() _config: CardConfig;
   @state() _selectedTab = 0;
-  @state() _napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
+  @state() _alarmsEnabled: boolean;
+
+  // @state() _napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
 
   constructor() {
     super();
@@ -1666,7 +1643,7 @@ class KoboldCardEditor extends LitElement {
     //   // }
     // });
 
-    Helpers.fireEvent('kobold-editor', { editorEl: this }, document.querySelector('home-assistant'));
+    Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHA());
     // this._selectedTab = 0;
 
     // this._napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
@@ -1688,11 +1665,28 @@ class KoboldCardEditor extends LitElement {
 
   // setConfig works the same way as for the card itself
   setConfig(config) {
-    this._config = config;
-    // console.log('*** setting config');
+    // this._config = config;
+
+    this._config = {
+      name: 'alarm_clock',
+      alarms_enabled: false,
+      mo: { enabled: false, time: '07:00:00' },
+      tu: { enabled: false, time: '07:00:00' },
+      we: { enabled: false, time: '07:00:00' },
+      th: { enabled: false, time: '07:00:00' },
+      fr: { enabled: false, time: '07:00:00' },
+      sa: { enabled: false, time: '09:00:00' },
+      su: { enabled: false, time: '09:00:00' },
+      ...config
+    };
+
+    // console.log('*** setting config on editor: ', this._config);
+    // if (!this._alarmController) this._alarmController = new AlarmController(this._config, 'chump');
   }
 
   firstUpdated() {
+    // console.log('*** this._alarmConfiguration: ', this._alarmConfiguration);
+    // this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
     // console.log('*** selectedTab: ', this._selectedTab);
     // console.log('*** selectedTab: ', this.tabTest);
     // console.log('*** adding listener now');
@@ -1737,36 +1731,46 @@ class KoboldCardEditor extends LitElement {
     }
   }
 
-  // _configChanged(event: CustomEvent) {
-  _configChanged(event) {
+  // _valueChanged(event: CustomEvent) {
+  _valueChanged(event) {
     event.stopPropagation();
     if (!this._config) return;
-    console.log('*** event.detail.value: ', event.detail.value);
-    // this._config = { ...event.detail.value };
+    // console.log('*** alarmsEnabled: ', event.detail.value.alarms_enabled);
+
+    // console.log('*** event: ', event);
+    // if (myValue.nap_duration && Object.values(myValue.nap_duration).every((value) => value === 0)) {
+    //   delete myValue.nap_duration;
+    // }
+
+    // this._alarmsEnabled = event.detail.value.alarms_enabled;
+    this._config = { ...event.detail.value };
+    // console.log('*** _config: ', this._config);
+    Helpers.fireEvent('config-changed', { config: this._config }, this);
     // this.dispatchEvent(
     //     new CustomEvent("config-changed", { detail: { config: this._config } })
     // );
   }
 
-  _napDurationChanged(event) {
-    event.stopPropagation();
-    // TODO: handle clear button
-    // console.log('*** event: ', event);
-    // const myValue = event.detail.value;
-    // this._napDurationData = myValue;
-    this._napDurationData = event.detail.value;
-    // console.log('*** event.detail: ', this._napDurationData);
-    // console.log('*** myValue.nap_duration: ', myValue.nap_duration);
-    // if (myValue.nap_duration && Object.values(myValue.nap_duration).every((value) => value === 0)) {
-    //     delete myValue.nap_duration;
-    //     console.log('*** deleting');
-    // }
-    // console.log('*** napDurationData: ', this._napDurationData);
-    // HelpersTest.fireEvent("value-changed", { value: myValue }, this);
-  }
+  // _napDurationChanged(event) {
+  //   event.stopPropagation();
+  //   // TODO: handle clear button
+  //   // console.log('*** event: ', event);
+  //   // const myValue = event.detail.value;
+  //   // this._napDurationData = myValue;
+  //   this._napDurationData = event.detail.value;
+  //   // console.log('*** event.detail: ', this._napDurationData);
+  //   // console.log('*** myValue.nap_duration: ', myValue.nap_duration);
+  //   // if (myValue.nap_duration && Object.values(myValue.nap_duration).every((value) => value === 0)) {
+  //   //     delete myValue.nap_duration;
+  //   //     console.log('*** deleting');
+  //   // }
+  //   // console.log('*** napDurationData: ', this._napDurationData);
+  //   // HelpersTest.fireEvent("value-changed", { value: myValue }, this);
+  // }
 
-  _clearNap() {
-    //
+  _revertNap(event) {
+    event.stopPropagation();
+    console.log('*** event: ', event);
   }
 
   _handleSwitchTab(event) {
@@ -1793,6 +1797,8 @@ class KoboldCardEditor extends LitElement {
       // console.log('*** exiting render. _hass: ' + this._hass + '; _config: ' + this._config);
       return html``;
     }
+
+    // this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
 
     // @focusout below will call entityChanged when the input field loses focus (e.g. the user tabs away or clicks outside of it)
     return html`
@@ -1825,7 +1831,7 @@ class KoboldCardEditor extends LitElement {
                 .data=${this._config}
                 .schema=${this._configSchemaSettings}
                 .computeLabel=${(s) => s.label ?? s.name}
-                @value-changed=${this._configChanged}
+                @value-changed=${this._valueChanged}
             ></ha-form>
         </div>`;
   }
@@ -1834,29 +1840,31 @@ class KoboldCardEditor extends LitElement {
     return html`<div class="box">
             <ha-form
                 .hass=${this._hass}
-                .data=${this._napDurationData}
+                .data=${this._config}
                 .schema=${this._configSchemaNap}
                 .computeLabel=${(s) => s.label ?? s.name}
-                @value-changed=${this._napDurationChanged}
+                @value-changed=${this._valueChanged}
             ></ha-form>
             <br>
             <mwc-button
-                .title=${"Clear schedule override"}
-                @click=${this._clearNap}
+                .title=${"Revert to scheduled alarms"}
+                @click=${this._revertNap}
             >
-            CLEAR
+            REVERT TO SCHEDULE
             </mwc-button>
         </div>`;
   }
 
   _renderScheduleEditor() {
+    // console.log('*** alarmsEnabled: ', this._alarmsEnabled);
+    this._alarmsEnabled = this._config.alarms_enabled;
     return html`<div class="box">
           <ha-form
             .hass=${this._hass}
             .data=${this._config}
-            .schema=${this._configSchemaSchedule(this._alarmConfiguration.alarmsEnabled)}
+            .schema=${this._configSchemaSchedule(!this._alarmsEnabled)}
             .computeLabel=${(s) => s.label ?? s.name}
-            @value-changed=${this._configChanged}
+            @value-changed=${this._valueChanged}
           ></ha-form>
         </div>`;
   }
