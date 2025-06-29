@@ -5,7 +5,7 @@ dayjs.extend(duration);
 import type { CardConfig, NextAlarmObject, TimeObject } from './types';
 
 // HA types
-import type { HomeAssistant } from "custom-card-helpers";
+import { getLovelace, type HomeAssistant } from "custom-card-helpers";
 
 export class AlarmController {
 
@@ -15,12 +15,13 @@ export class AlarmController {
     private _isAlarmRinging: boolean = false;
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _alarmRinging: (state: boolean) => void;
-    private _controllerId?: string;
+    private _cardId?: string;
     private _alarmActionsScripts?: Array<Record<string, boolean>> = [];
+    private _saving: boolean;
 
-    constructor(config: CardConfig, controllerId: string) {
+    constructor(config: CardConfig, cardId?: string) {
 
-        this._controllerId = controllerId;
+        this._cardId = cardId;
         this._config = config;
 
         this._alarmRinging = Helpers.throttle((state) => {
@@ -97,7 +98,7 @@ export class AlarmController {
     }
 
     dismiss() {
-        this.nextAlarmReset();
+        this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
         if (this._config.alarm_actions) {
             this._config.alarm_actions
                 .filter((action) => action.when === 'on_dismiss')
@@ -107,34 +108,118 @@ export class AlarmController {
         this._alarmRinging(false);
     }
 
-    nextAlarmReset(snooze = false) {
-        const controllersAlarmConfig = this.controllersAlarmConfig;
-        if (snooze) {
-            controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-        } else {
-            controllersAlarmConfig.dismiss();
+    snoozeConfig(snoozeTime: string) {
+        const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
+        this.nextAlarm = {
+            ...this.nextAlarm,
+            enabled: true,
+            snooze: true,
+            time: nextAlarmTime.format('HH:mm'),
+            dateTime: nextAlarmTime.format('YYYY-MM-DD HH:mm')
         }
-        this._saveConfiguration(controllersAlarmConfig);
+    }
+
+    //TODO: Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
+    dismissConfig() {
+        const momentTomorrow = dayjs().add(1, 'day');
+        // const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
+        const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+        this.nextAlarm = AlarmController.createNextAlarmNew(alarmTomorrow);
+    }
+
+    nextAlarmReset(snooze = false) {
+        // const controllersAlarmConfig = this.controllersAlarmConfig;
+        if (snooze) {
+            // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
+            this.snoozeConfig(this._config.snoozeDurationDefault.time);
+        } else {
+            // controllersAlarmConfig.dismiss();
+            this.dismissConfig();
+        }
+        // this._saveConfiguration(controllersAlarmConfig);
+        Helpers.fireEvent('config-changed', { config: this._config }, this);
+    }
+
+    static createNextAlarmNew(alarm: TimeObject, forToday = false): NextAlarmObject {
+        let alarmDate = dayjs();
+        // TODO: is forToday named correctly? should it be notToday?
+        if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
+            alarmDate = alarmDate.add(1, 'day');
+        }
+
+        return {
+            ...alarm,
+            date: alarmDate.format('YYYY-MM-DD'),
+            dateTime: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
+        }
     }
 
     get nextAlarm(): NextAlarmObject {
-
-        const nextAlarm = this.controllersAlarmConfig.nextAlarm;
+        // console.log('*** get nextAlarm on contoller');
+        // const nextAlarm = this.controllersAlarmConfig.nextAlarm;
+        const nextAlarm = Object.assign({}, this._config.nextAlarm);
+        // const nextAlarm = this._config.nextAlarm;
 
         if (!nextAlarm) {
-            return { enabled: false, time: '08:00', date: '', dateTime: '' };
+            // return { enabled: false, time: '07:00', date: '', dateTime: '' };
+            return Helpers.defaultConfig.nextAlarm;
         }
         return nextAlarm;
     }
 
     set nextAlarm(nextAlarm) {
-        const controllersAlarmConfig = this.controllersAlarmConfig;
+        console.log('*** set nextAlarm on contoller');
+        // const controllersAlarmConfig = this.controllersAlarmConfig;
         const forToday = true;
-        controllersAlarmConfig.nextAlarm = {
-            ...AlarmConfiguration.createNextAlarm(nextAlarm, forToday),
+        // controllersAlarmConfig.nextAlarm = {
+        //     ...AlarmConfiguration.createNextAlarm(nextAlarm, forToday),
+        //     overridden: true
+        // };
+        // this._config.nextAlarm = {
+        //     ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
+        //     overridden: true
+        // };
+        // console.log('*** set nextAlarm on contoller; saving: ', this._config.nextAlarm);
+        // this._saveConfiguration(controllersAlarmConfig);
+        // Helpers.fireEvent('config-changed', { config: this._config }); //working? no. no koboldeditor reference b/c no editor is open. possibly only listens to config-changed while in edit mode
+        // this._saveConfig(this._config);
+        // const lovelaceConfig = Helpers.getLovelace().lovelace.config;
+
+        // const lovelaceConfigCopy = structuredClone(lovelaceConfig);
+
+        // // console.log('*** lovelaceConfigCopy views: ', lovelaceConfigCopy.views);
+
+        // const cardConfig = Helpers.findNested(lovelaceConfigCopy, 'type', 'custom:kobold-alarm-clock-card');
+        // console.log('*** cardConfig: ', cardConfig);
+        // console.log('*** lovelaceConfig: ', lovelaceConfig);
+        // console.log('*** lovelaceConfig type: ', typeof lovelaceConfig);
+        // console.log('*** keys: ', Object.keys(lovelaceConfig));
+        // const cardConfig = Helpers.findNested(lovelaceConfig, 'type', 'custom:kobold-alarm-clock-card');
+        // const newConfig = Object.assign({}, source);
+        // const newConfig = Object.assign(lovelaceConfig, this._config);
+
+        // let newConfig = lovelaceConfig.map((item) =>
+        //     Object.assign({}, item, this._config)
+        // );
+
+        // const newConfig = Object.assign({}, lovelaceConfig, this._config);
+
+        // cardConfig.nextAlarm = {
+        //     ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
+        //     overridden: true
+        // };
+
+        const keyValue = {
+            ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
             overridden: true
         };
-        this._saveConfiguration(controllersAlarmConfig);
+
+        // console.log('*** cardConfig: ', cardConfig);
+        // console.log('*** lovelaceConfigCopy: ', lovelaceConfigCopy);
+
+        // const newConfig =
+        // console.log('*** newConfig: ', newConfig);
+        this._saveConfig('nextAlarm', keyValue);
     }
 
     get isAlarmEnabled() {
@@ -143,7 +228,42 @@ export class AlarmController {
         if (nextAlarm.overridden && nextAlarm.enabled) {
             return true;
         }
-        return this.controllersAlarmConfig.alarmsEnabled && nextAlarm.enabled;
+        // return this.controllersAlarmConfig.alarmsEnabled && nextAlarm.enabled;
+        return this._config.alarmsEnabled && nextAlarm.enabled; //create accessor on this?
+    }
+
+    async _saveConfig(key, value) {
+        this._saving = true;
+        try {
+            const lovelace = Helpers.getLovelace().lovelace;
+            const newConfig = structuredClone(lovelace.config);
+            const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
+            // const newData = cardConfig[key] = value;
+            // console.log('*** newData: ', newData);
+            if (cardConfig && cardConfig[key]) {
+                cardConfig[key] = value;
+
+                // console.log('*** newConfig: ', newConfig);
+                await lovelace.saveConfig(newConfig);
+            } else throw { message: 'Unable to find kobold card in lovelace configuration' };
+
+            // const newConfig = Helpers.deepMerge(lovelace.config, config);
+            // console.log('*** new config: ', newConfig);
+            // await lovelace.saveConfig(newConfig);
+
+            // const lovelace = this._params!.lovelace;
+            // await lovelace.saveConfig(
+            //     this._emptyConfig
+            //         ? EMPTY_CONFIG
+            //         : await expandLovelaceConfigStrategies(lovelace.config, this.hass)
+            // );
+            // Helpers.getLovelace().lovelace.setEditMode(true);
+            this._saving = false;
+            //   this.closeDialog();
+        } catch (err: any) {
+            alert(`Saving failed: ${err.message}`);
+            this._saving = false;
+        }
     }
 
     isAlarmRinging() {
@@ -166,7 +286,8 @@ export class AlarmController {
             }
         }
 
-        if (!this.controllersAlarmConfig.alarmsEnabled && !nextAlarm.nap) {
+        // if (!this.controllersAlarmConfig.alarmsEnabled && !nextAlarm.nap) {
+        if (!this._config.alarmsEnabled && !nextAlarm.nap) {
             return;
         }
 
@@ -178,7 +299,7 @@ export class AlarmController {
             this._alarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm automatically after alarmdurationdefault time elapses
-            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(this.controllersAlarmConfig['alarmDurationDefault'].time))).format('HH:mm') <= dayjs().format('HH:mm')) {
+            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(this._config.alarmDurationDefault.time))).format('HH:mm') <= dayjs().format('HH:mm')) {
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
@@ -202,7 +323,7 @@ export class AlarmController {
 
     _callAlarmRingingService(action: string) {
         if (this._config.debug) {
-            this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; controllerID: ' + this._controllerId, 'level': 'info' });
+            this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; editor ID: ' + this._cardId, 'level': 'info' });
         }
         try {
             if (this.alarmSoundLocalEntity) {
@@ -264,7 +385,7 @@ export class AlarmController {
 
         // reset next alarm after being disabled and now being re-enabled
         if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) {
-            actualConfiguration.dismiss();
+            actualConfiguration.dismiss();  //TODO: this code moded to editor; test
         }
 
         const configurationWithLastUpdated = {
@@ -325,6 +446,7 @@ export class AlarmConfiguration {
     dismiss() {
         const momentTomorrow = dayjs().add(1, 'day');
         const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
+        // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
         this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
     }
 
@@ -346,6 +468,48 @@ export class Helpers {
     static fireEvent = (event, detail = undefined, element = this.getLovelace()) => {
         element.dispatchEvent(new CustomEvent(event, { detail, bubbles: true, cancelable: false, composed: true, }));
     }
+
+    static deepMerge(obj1, obj2) {
+        const result = { ...obj1 };
+
+        for (let key in obj2) {
+            if (obj2.hasOwnProperty(key)) {
+                if (obj2[key] instanceof Object && obj1[key] instanceof Object) {
+                    result[key] = this.deepMerge(obj1[key], obj2[key]);
+                } else {
+                    result[key] = obj2[key];
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // static findNested(obj, key, value) {
+    //     if (obj[key] === value) {
+    //         return obj;
+    //     } else {
+    //         for (var i = 0, len = Object.keys(obj).length; i < len; i++) {
+    //             if (typeof obj[i] == 'object') {
+    //                 var found = this.findNested(obj[i], key, value);
+    //                 if (found) {
+    //                     return found;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    static findNested(obj, key, val) {
+        let found;
+        JSON.stringify(obj, (_, nestedVal) => {
+            if (nestedVal && nestedVal[key] === val) {
+                found = nestedVal;
+            }
+            return nestedVal;
+        });
+        return found;
+    };
 
     static getHA = () => {
         let root: any = document.querySelector('home-assistant');
@@ -454,5 +618,18 @@ export class Helpers {
         // https://dev.to/emnudge/identifying-negative-zero-2j1o
         let minutes = Math.abs(H) * 60 + M; minutes *= Math.sign(1 / H || H);
         return { 'minutes': minutes };
+    };
+
+    static defaultConfig = {
+        name: 'alarm_clock',
+        alarms_enabled: false,
+        nextAlarm: { enabled: false, time: '07:00', date: '', dateTime: '' },
+        mo: { enabled: false, time: '07:00:00' },
+        tu: { enabled: false, time: '07:00:00' },
+        we: { enabled: false, time: '07:00:00' },
+        th: { enabled: false, time: '07:00:00' },
+        fr: { enabled: false, time: '07:00:00' },
+        sa: { enabled: false, time: '09:00:00' },
+        su: { enabled: false, time: '09:00:00' },
     };
 }

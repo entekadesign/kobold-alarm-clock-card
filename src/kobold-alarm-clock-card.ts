@@ -171,7 +171,13 @@ class KoboldAlarmClockCard extends LitElement {
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
         conn.subscribeEvents(() => {
-          location.reload();
+          window.setTimeout(() => {
+            //TODO: test that logging works here; if not, see https://github.com/search?q=repo%3Ahome-assistant%2Ffrontend+system_log&type=code
+            this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+            window.setTimeout(() => {
+              location.reload();
+            }, 1000 * 5);
+          }, 1000 * 2);
         }, 'homeassistant_started');
       });
     }
@@ -201,14 +207,16 @@ class KoboldAlarmClockCard extends LitElement {
   static getStubConfig() {
     // Return a minimal configuration that will result in a working card configuration
     return {
-      entity: "",
-      enabled: false,
+      ...Helpers.defaultConfig,
+      // entity: "",
+      // enabled: false,
     };
   }
 
   render() {
     this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
     this._nextAlarm = this._alarmController.nextAlarm;
+    // console.log('*** render(); this._nextAlarm: ', this._nextAlarm);
 
     this._ringerEntities = this._ringerEntities || [];
     const alarmEntities = [];
@@ -1055,6 +1063,7 @@ class KoboldAlarmClockCard extends LitElement {
     //   // if (event.detail.dialog === 'hui-dialog-edit-card') {
     //   // }
     // });
+    // console.log('*** firstUpdated(); lovelace: ', Helpers.getLovelace());
   }
 
   // updated(changedProperties: Map<string, any>): void {
@@ -1257,6 +1266,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _setAlarm() {
+    console.log('*** _setAlarm fired on card');
     const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
     const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
     this._alarmController.nextAlarm = {
@@ -1269,14 +1279,17 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _areAlarmsEnabled() {
-    return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
+    // return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
+    // return this._config.alarmsEnabled || !!this._alarmController.nextAlarm.nap; //TODO: shouldn't this be !!this._alarmConfiguration.nextAlarm.nap? (not according to dehuyss clock).
+    return this._config?.alarmsEnabled || this._config.nextAlarm?.overridden;
   }
 
   _onAlarmChanged(event: CustomEvent) {
     // this not triggered by snooze or alarm picker dialogs; only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
     if (!event.detail.alarm.enabled) {
       this._alarmController.nextAlarm = {
-        ...this._alarmConfiguration.nextAlarm,
+        // ...this._alarmConfiguration.nextAlarm,
+        ...this._alarmController.nextAlarm,
         enabled: false,
         overridden: true
       }
@@ -1667,21 +1680,17 @@ class KoboldCardEditor extends LitElement {
   setConfig(config) {
     // this._config = config;
 
-    this._config = {
-      name: 'alarm_clock',
-      alarms_enabled: false,
-      mo: { enabled: false, time: '07:00:00' },
-      tu: { enabled: false, time: '07:00:00' },
-      we: { enabled: false, time: '07:00:00' },
-      th: { enabled: false, time: '07:00:00' },
-      fr: { enabled: false, time: '07:00:00' },
-      sa: { enabled: false, time: '09:00:00' },
-      su: { enabled: false, time: '09:00:00' },
-      ...config
-    };
+    // console.log('*** config deepmerged with default config: ', Helpers.deepMerge(Helpers.defaultConfig, config));
 
+    this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
+
+    // this._config = {
+    //   // ...Helpers.defaultConfig,
+    //   ...config
+    // };
+    // console.log('*** config on editor: ', config);
     // console.log('*** setting config on editor: ', this._config);
-    // if (!this._alarmController) this._alarmController = new AlarmController(this._config, 'chump');
+    // if (!this._alarmController) this._alarmController = new AlarmController(this._config);
   }
 
   firstUpdated() {
@@ -1694,41 +1703,51 @@ class KoboldCardEditor extends LitElement {
   updated() {
     // console.log('*** selectedTab: ', this.tabTest);
   }
-  // This function is called when the input element of the editor loses focus
-  configUpdated(ev) {
+  // // This function is called when the input element of the editor loses focus
+  // configUpdated(ev) {
 
-    // We make a copy of the current config so we don't accidentally overwrite anything too early
-    const _config = Object.assign({}, this._config);
-    // Then we update the entity value with what we just got from the input field
-    // console.log('*** config update event: ', ev);
-    // console.log('*** config update target id: ', (ev.target).id);
-    // console.log('*** config update target value: ', (ev.target).value);
-    // console.log('*** config update target checked: ', (ev.target).checked);
-    const [snPrefix, settingName] = (ev.target).id.split('_');
-    if (snPrefix === 'c') {
-      // console.log('*** settingName: ', settingName);
-      // console.log('*** target.checked: ', (ev.target).checked);
-      // console.log('*** ev.type: ', (ev.type));
-      if (ev.type === 'focusout') {
-        // console.log('*** focusout detected');
-        _config[settingName] = (ev.target).value;
-      } else {
-        _config[settingName] = (ev.target).checked;
-      }
-      // _config.entity = ev.target.value;
-      // And finally write back the updated configuration all at once
-      this._config = _config;
+  //   // We make a copy of the current config so we don't accidentally overwrite anything too early
+  //   const _config = Object.assign({}, this._config); //nb: not a deep copy
+  //   // Then we update the entity value with what we just got from the input field
+  //   // console.log('*** config update event: ', ev);
+  //   // console.log('*** config update target id: ', (ev.target).id);
+  //   // console.log('*** config update target value: ', (ev.target).value);
+  //   // console.log('*** config update target checked: ', (ev.target).checked);
+  //   const [snPrefix, settingName] = (ev.target).id.split('_');
+  //   if (snPrefix === 'c') {
+  //     // console.log('*** settingName: ', settingName);
+  //     // console.log('*** target.checked: ', (ev.target).checked);
+  //     // console.log('*** ev.type: ', (ev.type));
+  //     if (ev.type === 'focusout') {
+  //       // console.log('*** focusout detected');
+  //       _config[settingName] = (ev.target).value;
+  //     } else {
+  //       _config[settingName] = (ev.target).checked;
+  //     }
+  //     // _config.entity = ev.target.value;
+  //     // And finally write back the updated configuration all at once
+  //     this._config = _config;
 
-      // A config-changed event will tell lovelace we have made changed to the configuration
-      // this make sure the changes are saved correctly later and will update the preview
-      Helpers.fireEvent("config-changed", { config: _config });
-      // const event = new CustomEvent("config-changed", {
-      //     detail: { config: _config },
-      //     bubbles: true,
-      //     composed: true,
-      // });
-      // this.dispatchEvent(event);
-    }
+  //     // A config-changed event will tell lovelace we have made changed to the configuration
+  //     // this make sure the changes are saved correctly later and will update the preview
+  //     Helpers.fireEvent("config-changed", { config: _config });
+  //     // const event = new CustomEvent("config-changed", {
+  //     //     detail: { config: _config },
+  //     //     bubbles: true,
+  //     //     composed: true,
+  //     // });
+  //     // this.dispatchEvent(event);
+  //   }
+  // }
+
+  _setNextAlarm(nextAlarm) {
+    const forToday = true;
+    this._config.nextAlarm = {
+      ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
+      overridden: true
+    };
+    // console.log('*** set nextAlarm: ', this._config.nextAlarm);
+    Helpers.fireEvent('config-changed', { config: this._config }, this);
   }
 
   // _valueChanged(event: CustomEvent) {
@@ -1743,9 +1762,50 @@ class KoboldCardEditor extends LitElement {
     // }
 
     // this._alarmsEnabled = event.detail.value.alarms_enabled;
-    this._config = { ...event.detail.value };
+
+    this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
+
+    this._config.lastUpdated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+    // this._config = {
+    //   // ...Helpers.defaultConfig,
+    //   ...event.detail.value,
+
+    // };
     // console.log('*** _config: ', this._config);
-    Helpers.fireEvent('config-changed', { config: this._config }, this);
+
+    // const hasProp = (json: CardConfig, prop: string, wildcard: boolean) =>
+    //   Object.values(json)
+    //     .flatMap(item => Object.keys(item)
+    //       .filter(key => wildcard ? key.includes(prop) : key === prop)
+    //   )
+
+    // // Prevent empty values in config
+    // const dayNames = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
+    // // const test = (json: CardConfig) =>
+    // // Object.keys(json).filter(
+    // //   (item) => (dayItems.indexOf(item) > -1 && (json[item].time === undefined || json[item].enabled === undefined)));
+    // Object.keys(this._config).forEach(
+    //   (item) => {
+    //     if (dayNames.indexOf(item) > -1) {
+    //       // if (this._config[item].enabled === undefined) this._config[item].enabled = false;
+    //       if (this._config[item].enabled === undefined) { console.log('*** replenishing enabled'); this._config[item].enabled = defaultConfig[item].enabled; }
+    //       // if (this._config[item].time === undefined) this._config[item].time = '00:00:00';
+    //       if (this._config[item].time === undefined) { console.log('*** replenishing time'); this._config[item].time = defaultConfig[item].time; }
+    //     }
+    //   }
+    // );
+
+    // console.log('*** test: ', test(this._config));
+    // console.log('*** hasprop: ', hasProp(this._config, 'time', false));
+
+    const momentTomorrow = dayjs().add(1, 'day');
+    const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+    // TODO: arent the following two the same?
+    // this._setNextAlarm(AlarmController.createNextAlarmNew(alarmTomorrow));
+    this._setNextAlarm(alarmTomorrow);
+
+    // Helpers.fireEvent('config-changed', { config: this._config }, this);
     // this.dispatchEvent(
     //     new CustomEvent("config-changed", { detail: { config: this._config } })
     // );
@@ -1798,6 +1858,7 @@ class KoboldCardEditor extends LitElement {
       return html``;
     }
 
+    // console.log('*** render(); _config: ', this._config);
     // this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
 
     // @focusout below will call entityChanged when the input field loses focus (e.g. the user tabs away or clicks outside of it)
@@ -1857,7 +1918,7 @@ class KoboldCardEditor extends LitElement {
 
   _renderScheduleEditor() {
     // console.log('*** alarmsEnabled: ', this._alarmsEnabled);
-    this._alarmsEnabled = this._config.alarms_enabled;
+    this._alarmsEnabled = this._config.alarms_enabled; //TODO: move to _showEditor(), where default data logic should go?
     return html`<div class="box">
           <ha-form
             .hass=${this._hass}

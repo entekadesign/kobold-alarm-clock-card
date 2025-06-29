@@ -243,9 +243,12 @@ class AlarmPicker extends LitElement {
     }
 
     toggleAlarmEnabled(event: Event) {
+        // const alarm = Object.assign({}, this.alarm);
         this.alarm.enabled = (<HTMLInputElement>event.target).checked;
+        // alarm.enabled = (<HTMLInputElement>event.target).checked;
         this.requestUpdate('alarm'); //necessary because lit does not mutate reactive object properties
         this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: { time: this.alarm.time, enabled: this.alarm.enabled } } }));
+        // this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: { time: alarm.time, enabled: alarm.enabled } } }));
     }
 
     openSchedule() {
