@@ -19,7 +19,7 @@ export interface TimeObject {
 
 export interface NextAlarmObject extends TimeObject {
     date: string;
-    dateTime: string;
+    date_time: string;
     snooze?: boolean;
     nap?: boolean;
     overridden?: boolean;

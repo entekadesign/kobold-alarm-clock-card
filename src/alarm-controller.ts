@@ -115,7 +115,7 @@ export class AlarmController {
             enabled: true,
             snooze: true,
             time: nextAlarmTime.format('HH:mm'),
-            dateTime: nextAlarmTime.format('YYYY-MM-DD HH:mm')
+            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
         }
     }
 
@@ -143,26 +143,26 @@ export class AlarmController {
     static createNextAlarmNew(alarm: TimeObject, forToday = false): NextAlarmObject {
         let alarmDate = dayjs();
         // TODO: is forToday named correctly? should it be notToday?
-        if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
+        if (!((alarm.time >= alarmDate.format('HH:mm:ss')) && forToday)) {
             alarmDate = alarmDate.add(1, 'day');
         }
 
         return {
             ...alarm,
             date: alarmDate.format('YYYY-MM-DD'),
-            dateTime: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
+            date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
         }
     }
 
     get nextAlarm(): NextAlarmObject {
         // console.log('*** get nextAlarm on contoller');
         // const nextAlarm = this.controllersAlarmConfig.nextAlarm;
-        const nextAlarm = Object.assign({}, this._config.nextAlarm);
+        const nextAlarm = Object.assign({}, this._config.next_alarm);
         // const nextAlarm = this._config.nextAlarm;
 
         if (!nextAlarm) {
-            // return { enabled: false, time: '07:00', date: '', dateTime: '' };
-            return Helpers.defaultConfig.nextAlarm;
+            // return { enabled: false, time: '07:00', date: '', date_time: '' };
+            return Helpers.defaultConfig.next_alarm;
         }
         return nextAlarm;
     }
@@ -219,7 +219,7 @@ export class AlarmController {
 
         // const newConfig =
         // console.log('*** newConfig: ', newConfig);
-        this._saveConfig('nextAlarm', keyValue);
+        this._saveConfig('next_alarm', keyValue);
     }
 
     get isAlarmEnabled() {
@@ -229,7 +229,7 @@ export class AlarmController {
             return true;
         }
         // return this.controllersAlarmConfig.alarmsEnabled && nextAlarm.enabled;
-        return this._config.alarmsEnabled && nextAlarm.enabled; //create accessor on this?
+        return this._config.alarms_enabled && nextAlarm.enabled; //create accessor on this?
     }
 
     async _saveConfig(key, value) {
@@ -390,7 +390,7 @@ export class AlarmController {
 
         const configurationWithLastUpdated = {
             ...actualConfiguration,
-            lastUpdated: dayjs().format('YYYY-MM-DD HH:mm:ss')
+            last_updated: dayjs().format('YYYY-MM-DD HH:mm:ss')
         }
 
         const alarmClockVariableEntityName = 'sensor.' + this._config.name;
@@ -416,7 +416,7 @@ export class AlarmController {
 export class AlarmConfiguration {
 
     public alarmsEnabled: boolean = false;
-    public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', dateTime: '' };
+    public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', date_time: '' };
     public mo: TimeObject = { enabled: false, time: '07:00' };
     public tu: TimeObject = { enabled: false, time: '07:00' };
     public we: TimeObject = { enabled: false, time: '07:00' };
@@ -430,7 +430,7 @@ export class AlarmConfiguration {
     public snoozeDurationDefault: TimeObject = { enabled: true, time: '00:15' };
     public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
     public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
-    public lastUpdated: string;
+    public last_updated: string;
 
     snooze(snoozeTime: string) {
         const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
@@ -439,7 +439,7 @@ export class AlarmConfiguration {
             enabled: true,
             snooze: true,
             time: nextAlarmTime.format('HH:mm'),
-            dateTime: nextAlarmTime.format('YYYY-MM-DD HH:mm')
+            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
         }
     }
 
@@ -459,7 +459,7 @@ export class AlarmConfiguration {
         return {
             ...alarm,
             date: alarmDate.format('YYYY-MM-DD'),
-            dateTime: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
+            date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
         }
     }
 }
@@ -484,6 +484,103 @@ export class Helpers {
 
         return result;
     }
+
+    // returns object containing all and only changed properties
+    static deepCompareObj(original, current) {
+        if (original === current) return null;
+
+        // Handle non-object types (including null)
+        if (
+            typeof original !== 'object' ||
+            typeof current !== 'object' ||
+            original === null ||
+            current === null
+        ) {
+            // return {
+            //     oldValue: original,
+            //     newValue: current
+            // };
+            return current;
+        }
+
+        // // Handle arrays
+        // if (Array.isArray(original) && Array.isArray(current)) {
+        //   if (original.length !== current.length) {
+        //     return {
+        //       oldValue: original,
+        //       newValue: current
+        //     };
+        //   }
+
+        //   const arrayDiffs = {};
+        //   let hasChanges = false;
+
+        //   for (let i = 0; i < original.length; i++) {
+        //     const diff = deepObjectDiff(original[i], current[i]);
+        //     if (diff !== null) {
+        //       arrayDiffs[i] = diff;
+        //       hasChanges = true;
+        //     }
+        //   }
+
+        //   return hasChanges ? arrayDiffs : null;
+        // }
+
+        const changes = {};
+        let hasChanges = false;
+
+        // Check for changes in current object
+        for (const key of Object.keys(current)) {
+            if (!(key in original)) {
+                // changes[key] = {
+                //     oldValue: undefined,
+                //     newValue: current[key]
+                // };
+                changes[key] = current[key];
+                hasChanges = true;
+                continue;
+            }
+
+            const diff = this.deepCompareObj(original[key], current[key]);
+            if (diff !== null) {
+                changes[key] = diff;
+                hasChanges = true;
+            }
+        }
+
+        // Check for deleted keys
+        for (const key of Object.keys(original)) {
+            if (!(key in current)) {
+                // changes[key] = {
+                //     oldValue: original[key],
+                //     newValue: undefined
+                // };
+                changes[key] = undefined;
+                hasChanges = true;
+            }
+        }
+
+        return hasChanges ? changes : null;
+    }
+
+    // // identical or not? returns boolean
+    // static deepCompareBool(a: any, b: any) {
+    //     if (a === b) return true;
+    //     if (typeof a !== typeof b) return false;
+    //     if (!(a instanceof Object && b instanceof Object)) return false;
+    //     for (const x in a) {
+    //         if (!a.hasOwnProperty(x)) continue;
+    //         if (!b.hasOwnProperty(x)) return false;
+    //         if (a[x] === b[x]) continue;
+    //         if (typeof a[x] !== "object") return false;
+    //         if (!this.deepCompare(a[x], b[x])) return false;
+    //     }
+    //     for (const x in b) {
+    //         if (!b.hasOwnProperty(x)) continue;
+    //         if (!a.hasOwnProperty(x)) return false;
+    //     }
+    //     return true;
+    // }
 
     // static findNested(obj, key, value) {
     //     if (obj[key] === value) {
@@ -511,18 +608,18 @@ export class Helpers {
         return found;
     };
 
-    static getHA = () => {
+    static getHa = () => {
         let root: any = document.querySelector('home-assistant');
         return root;
     }
 
-    // static getEditor = () => {
-    //     let root: any = this.getHA();
-    //     root = root && root.shadowRoot;
-    //     root = root && root.querySelector('hui-dialog-edit-card');
-    //     // console.log('*** getEditor(); root: ', root);
-    //     return root;
-    // };
+    static getEditor = () => {
+        let root: any = this.getHa();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('hui-dialog-edit-card');
+        // console.log('*** getEditor(); root: ', root);
+        return root;
+    };
 
     // static getConfigContent = () => {
     //     let root: any = this.getEditor();
@@ -589,7 +686,7 @@ export class Helpers {
     // };
 
     static getLovelace = () => {
-        let root: any = this.getHA();
+        let root: any = this.getHa();
         root = root && root.shadowRoot;
         root = root && root.querySelector('home-assistant-main');
         root = root && root.shadowRoot;
@@ -623,7 +720,7 @@ export class Helpers {
     static defaultConfig = {
         name: 'alarm_clock',
         alarms_enabled: false,
-        nextAlarm: { enabled: false, time: '07:00', date: '', dateTime: '' },
+        next_alarm: { enabled: false, time: '07:00', date: '', date_time: '' },
         mo: { enabled: false, time: '07:00:00' },
         tu: { enabled: false, time: '07:00:00' },
         we: { enabled: false, time: '07:00:00' },

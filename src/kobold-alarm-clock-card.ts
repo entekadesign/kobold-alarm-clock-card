@@ -70,7 +70,8 @@ class KoboldAlarmClockCard extends LitElement {
   private _controllersAlarmConfigLastUpdate: string;
   private _snoozeDurationDefault: TimeObject;
   private _alarmDurationDefault: TimeObject;
-  private _alarmConfiguration: AlarmConfiguration;
+  // private _alarmConfiguration: AlarmConfiguration;
+  private _alarmConfiguration: any;
 
   @state() _alarmsEnabled: boolean;
   @state() _nextAlarm: NextAlarmObject;
@@ -131,9 +132,9 @@ class KoboldAlarmClockCard extends LitElement {
     // recover from disconnect, e.g., HA restart
     window.addEventListener('connection-status', this._connectionStatusEvent);
     // console.log('*** adding kobold-editor event listener');
-    Helpers.getHA().addEventListener('kobold-editor', this._koboldEditorEvent);
-    // Helpers.getHA().addEventListener('kobold-editor', (event) => { this.koboldEditorEvent(event) });
-    Helpers.getHA().addEventListener('dialog-closed', this._dialogClosedEvent); //TODO: replace with custom event that sends card id so that closing editor only applies to kobold editor
+    Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
+    // Helpers.getHa().addEventListener('kobold-editor', (event) => { this.koboldEditorEvent(event) });
+    Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent); //TODO: replace with custom event that sends card id so that closing editor only applies to kobold editor
     // function setMyEditMode(mode = true) {
     window.setMyEditMode = (mode = true) => {
       const ll = Helpers.getLovelace();
@@ -152,8 +153,8 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
     window.removeEventListener('connection-status', this._connectionStatusEvent);
-    Helpers.getHA().removeEventListener('kobold-editor', this._koboldEditorEvent);
-    Helpers.getHA().removeEventListener('dialog-closed', this._dialogClosedEvent);
+    Helpers.getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
+    Helpers.getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
   }
 
   _connectionStatusEvent = (event: CustomEvent) => {
@@ -188,6 +189,7 @@ class KoboldAlarmClockCard extends LitElement {
       window.setMyEditMode(false);
       window.setTimeout(() => {
         // replace browser history using path without edit parameter
+        // see _handleClosed https://github.com/home-assistant/frontend/blob/f3380891486c01f2a75c83524578b5aeed85f114/src/dialogs/make-dialog-manager.ts
         const base = window.location.pathname;
         window.history.replaceState(null, '', base);
       }, 500);
@@ -496,6 +498,7 @@ class KoboldAlarmClockCard extends LitElement {
                 </div>
                 ${this._areAlarmsEnabled() ? html`
                     <alarm-picker id="alarmpicker" show-icon="true" .alarm=${this._nextAlarm}
+                        .config=${this._config}
                         .alarmConfiguration=${this._alarmConfiguration}
                         .time=${this._time}
                         @alarm-button-clicked=${this._showAlarmPicker}
@@ -1234,10 +1237,12 @@ class KoboldAlarmClockCard extends LitElement {
       (force
         || this._time !== time
         || this._ringing !== isAlarmRinging
-        || this._controllersAlarmConfigLastUpdate !== this._alarmConfiguration.lastUpdated)) {
+        // || this._controllersAlarmConfigLastUpdate !== this._alarmConfiguration.lastUpdated)) {
+        // TODO: test if it is possible for these lastupdated variables to come apart now
+        || this._controllersAlarmConfigLastUpdate !== this._config.last_updated)) {
       this._time = time;
       this._ringing = isAlarmRinging;
-      this._controllersAlarmConfigLastUpdate = this._alarmConfiguration.lastUpdated;
+      this._controllersAlarmConfigLastUpdate = this._config.last_updated;
 
       let timeDisplay: string;
 
@@ -1280,8 +1285,12 @@ class KoboldAlarmClockCard extends LitElement {
 
   _areAlarmsEnabled() {
     // return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
-    // return this._config.alarmsEnabled || !!this._alarmController.nextAlarm.nap; //TODO: shouldn't this be !!this._alarmConfiguration.nextAlarm.nap? (not according to dehuyss clock).
-    return this._config?.alarmsEnabled || this._config.nextAlarm?.overridden;
+    return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap; //TODO: shouldn't this be !!this._alarmConfiguration.nextAlarm.nap? (not according to dehuyss clock).
+
+    // console.log("*** this config: ", this._config);
+
+
+    // return this._config?.alarms_enabled || this._config.nextAlarm?.overridden; //TODO: should be accessors on alarmcontroller; why overridden and not nap?
   }
 
   _onAlarmChanged(event: CustomEvent) {
@@ -1382,6 +1391,10 @@ class KoboldAlarmClockCard extends LitElement {
     this.closeDialog('#napDialog');
   }
 
+  // _editorSaveEvent = (event: CustomEvent) => {
+  //   console.log('*** editor-save event received: ', event.detail);
+  // }
+
   async _showEditor(event) {
     event.stopPropagation();
     let tabNo = parseInt(event.target.id.slice(4));
@@ -1405,7 +1418,11 @@ class KoboldAlarmClockCard extends LitElement {
         console.warn('*** _showEditor(); Timed out waiting for editor');
       } else {
         Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+
+        // this._koboldEditor.getRootNode().host.closest('hui-card-element-editor').addEventListener('editor-save', this._editorSaveEvent);
+        // console.log('*** get editor', this._koboldEditor.getRootNode().host.closest('hui-card-element-editor'));
         this._koboldEditor = undefined;
+
         // console.log('*** config: ', this._config);
       }
     }
@@ -1626,6 +1643,25 @@ class KoboldCardEditor extends LitElement {
   ]
 
   private _configSchemaNap = [
+    // {
+    //   type: "grid",
+    //   name: "",
+    //   schema: [
+    //     {
+    //       name: "nap_duration",
+    //       label: "Nap Duration",
+    //       selector: { duration: {} },
+    //       // default: { hours: 0, minutes: 7, seconds: 0 },
+    //       // default: nap_duration_default,
+    //     },
+    //     {
+    //       name: "schedule_override",
+    //       label: "Schedule Override",
+    //       selector: { boolean: {} },
+    //       // default: false,
+    //     },
+    //   ],
+    // },
     {
       name: "nap_duration",
       label: "Nap Duration",
@@ -1633,11 +1669,46 @@ class KoboldCardEditor extends LitElement {
       // default: { hours: 0, minutes: 7, seconds: 0 },
       // default: nap_duration_default,
     },
+    {
+      type: "grid",
+      name: "next_alarm",
+      schema: [
+        // {
+        //   name: "enabled",
+        //   label: "Next Alarm Enabled",
+        //   selector: { boolean: {} },
+        //   // default: false,
+        // },
+        // {
+        //   name: "time",
+        //   label: "Time",
+        //   selector: { time: {} },
+        // },
+        // {
+        //   name: "date",
+        //   label: "Date",
+        //   selector: { date: {} },
+        // },
+        // {
+        //   name: "datetime",
+        //   label: "Date Time",
+        //   selector: { datetime: {} },
+        // },
+        {
+          name: "overridden",
+          label: "Override Schedule",
+          selector: { boolean: {} },
+          // default: override_default,
+        },
+      ],
+    },
   ]
 
   // private _alarmController: AlarmController;
   // private _alarmConfiguration: AlarmConfiguration;
   // private _config: CardConfig;
+  private _oldConfig: CardConfig;
+  private _allConfigChanges: CardConfig;
 
   @state() _hass: HomeAssistant;
   @state() _config: CardConfig;
@@ -1656,7 +1727,8 @@ class KoboldCardEditor extends LitElement {
     //   // }
     // });
 
-    Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHA());
+    Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHa());
+    // Helpers.getEditor().addEventListener('click', this._clickEvent);
     // this._selectedTab = 0;
 
     // this._napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
@@ -1684,6 +1756,7 @@ class KoboldCardEditor extends LitElement {
 
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
 
+    if (!this._oldConfig) this._oldConfig = this._config;
     // this._config = {
     //   // ...Helpers.defaultConfig,
     //   ...config
@@ -1740,12 +1813,51 @@ class KoboldCardEditor extends LitElement {
   //   }
   // }
 
-  _setNextAlarm(nextAlarm) {
-    const forToday = true;
-    this._config.nextAlarm = {
-      ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
-      overridden: true
-    };
+  // _clickEvent(event) {
+  //   console.log('*** click detected. target: ', event.target);
+  // }
+
+  _setNextAlarm(nextAlarmTime?: string, snooze?, nap?) {
+    console.log('*** setting nextAlarm; arguments: nextAlarm: ' + nextAlarmTime + '; snooze: ' + snooze + '; nap: ' + nap);
+    // console.log('*** nextalarm is type: ', typeof nextAlarmTime);
+    if (nap) {
+      console.log('*** nap fired');
+      this._config.next_alarm = {
+        ...this._config.next_alarm,
+        enabled: true,
+        nap: true,
+        time: nextAlarmTime,
+        // date_time: alarmTime.format('YYYY-MM-DD HH:mm:ss'),
+        // overridden: true
+      }
+    }
+    if (snooze) {
+      console.log('*** snooze fired');
+      const nextAlarmTime = dayjs(this._config.next_alarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(this._config.snoozeDurationDefault.time)));
+      this._config.next_alarm = {
+        ...this._config.next_alarm,
+        enabled: true,
+        snooze: true,
+        time: nextAlarmTime.format('HH:mm:ss'),
+        date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
+      }
+    }
+    if (nextAlarmTime && !snooze && !nap) {
+      console.log('*** nextAlarm fired');
+      const alarm = { enabled: true, time: nextAlarmTime }; // is enabled necessarily true?
+      const forToday = true;
+      this._config.next_alarm = {
+        ...AlarmController.createNextAlarmNew(alarm, forToday),
+        overridden: true
+      };
+    }
+    if (!nextAlarmTime && !snooze) {
+      console.log('*** reset nextalarm fired');
+      // same as nextalarmreset
+      const momentTomorrow = dayjs().add(1, 'day');
+      const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
+      this._config.next_alarm = AlarmController.createNextAlarmNew(alarmTomorrow);
+    }
     // console.log('*** set nextAlarm: ', this._config.nextAlarm);
     Helpers.fireEvent('config-changed', { config: this._config }, this);
   }
@@ -1755,6 +1867,7 @@ class KoboldCardEditor extends LitElement {
     event.stopPropagation();
     if (!this._config) return;
     // console.log('*** alarmsEnabled: ', event.detail.value.alarms_enabled);
+    // console.log('*** value changed');
 
     // console.log('*** event: ', event);
     // if (myValue.nap_duration && Object.values(myValue.nap_duration).every((value) => value === 0)) {
@@ -1765,8 +1878,25 @@ class KoboldCardEditor extends LitElement {
 
     this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
 
-    this._config.lastUpdated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
+    const configChanges = Helpers.deepCompareObj(this._oldConfig, this._config);
+
+    this._allConfigChanges = { ...this._allConfigChanges, ...configChanges };
+
+    let params = [];
+
+    // console.log('*** configChanges: ', configChanges);
+
+    if (this._allConfigChanges.nap_duration) {
+      // console.log('*** nap duration: ', configChanges.nap_duration);
+      // console.log('*** nap duration: ', this._config.nap_duration);
+      const nextAlarmTime = dayjs().add(dayjs.duration(this._config.nap_duration));
+      params = [nextAlarmTime.format('HH:mm:ss'), false, true];
+      // console.log('*** alarmTime: ', alarmTime.format('HH:mm:ss'));
+    }
+
+    console.log('*** _allConfigChanges: ', this._allConfigChanges);
     // this._config = {
     //   // ...Helpers.defaultConfig,
     //   ...event.detail.value,
@@ -1799,11 +1929,17 @@ class KoboldCardEditor extends LitElement {
     // console.log('*** test: ', test(this._config));
     // console.log('*** hasprop: ', hasProp(this._config, 'time', false));
 
-    const momentTomorrow = dayjs().add(1, 'day');
-    const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
-    // TODO: arent the following two the same?
-    // this._setNextAlarm(AlarmController.createNextAlarmNew(alarmTomorrow));
-    this._setNextAlarm(alarmTomorrow);
+    // const momentTomorrow = dayjs().add(1, 'day');
+    // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+    // // TODO: arent the following two the same?
+    // // this._setNextAlarm(AlarmController.createNextAlarmNew(alarmTomorrow));
+    // this._setNextAlarm(alarmTomorrow);
+
+    // console.log('*** this._selectedTab: ', this._selectedTab);
+    if (params.length > 0) {
+      // console.log('*** params: ', params);
+      this._setNextAlarm(params[0], params[1], params[2]);
+    }
 
     // Helpers.fireEvent('config-changed', { config: this._config }, this);
     // this.dispatchEvent(
@@ -1828,10 +1964,17 @@ class KoboldCardEditor extends LitElement {
   //   // HelpersTest.fireEvent("value-changed", { value: myValue }, this);
   // }
 
-  _revertNap(event) {
-    event.stopPropagation();
-    console.log('*** event: ', event);
-  }
+  // _revertNap(event) {
+  //   event.stopPropagation();
+  //   // console.log('*** event: ', event);
+  //   this._setNextAlarm();
+  //   // Helpers.fireEvent('dialog-closed', { dialog: Helpers.getEditor().localName }, this);
+  //   // () => { Helpers.getEditor().closeDialog(); }
+  //   Helpers.getEditor().closeDialog();
+  //   // Helpers.fireEvent('dialog-closed', { dialog: 'hui-card-options' }, this);
+
+  //   // console.log('*** this.localName: ', Helpers.getEditor().localName);
+  // }
 
   _handleSwitchTab(event) {
     // console.log('*** handleSwitchTab');
@@ -1906,24 +2049,25 @@ class KoboldCardEditor extends LitElement {
                 .computeLabel=${(s) => s.label ?? s.name}
                 @value-changed=${this._valueChanged}
             ></ha-form>
-            <br>
-            <mwc-button
-                .title=${"Revert to scheduled alarms"}
-                @click=${this._revertNap}
-            >
-            REVERT TO SCHEDULE
-            </mwc-button>
         </div>`;
   }
 
+  // <br>
+  // <mwc-button
+  //     .title=${"Revert to scheduled alarms and exit without saving"}
+  //     @click=${this._revertNap}
+  // >
+  // REVERT TO SCHEDULE
+  // </mwc-button>
+
   _renderScheduleEditor() {
     // console.log('*** alarmsEnabled: ', this._alarmsEnabled);
-    this._alarmsEnabled = this._config.alarms_enabled; //TODO: move to _showEditor(), where default data logic should go?
+    // this._alarmsEnabled = this._config.alarms_enabled; //TODO: move to _showEditor(), where default data logic should go?
     return html`<div class="box">
           <ha-form
             .hass=${this._hass}
             .data=${this._config}
-            .schema=${this._configSchemaSchedule(!this._alarmsEnabled)}
+            .schema=${this._configSchemaSchedule(!this._config.alarms_enabled)}
             .computeLabel=${(s) => s.label ?? s.name}
             @value-changed=${this._valueChanged}
           ></ha-form>

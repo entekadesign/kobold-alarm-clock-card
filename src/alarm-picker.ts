@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
-import type { NextAlarmObject } from './types';
+import type { CardConfig, NextAlarmObject } from './types';
 
 @customElement('alarm-picker')
 class AlarmPicker extends LitElement {
@@ -17,6 +17,7 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueH: string;
     @state() private _displayedValueM: string;
 
+    @property({ reflect: false }) config: CardConfig;
     @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
     @property({ reflect: false }) alarm: NextAlarmObject;
     @property({ reflect: false }) time: string;
@@ -28,7 +29,6 @@ class AlarmPicker extends LitElement {
     @query('#alarmPicker', true) _alarmPickerQ: HTMLElement;
 
     render() {
-
         return html`
             <div class="alarm" id="alarmPicker">
                 ${this.getAttribute('show-icon') ? html`
@@ -62,7 +62,7 @@ class AlarmPicker extends LitElement {
                         maxlength="8"
                         ?disabled=${this.disabled}
                         .value=${!this.alarm ? '' : dayjs(this.alarm.time, 'HH:mm').format(this._alarmTimeFormat())}
-                        ?overridden=${this.id === 'alarmpicker' && this.alarmConfiguration.nextAlarm.overridden}
+                        ?overridden=${this.id === 'alarmpicker' && this.config?.next_alarm.overridden}
                         @click=${this._clickHandler}
                         readonly
                         >
@@ -189,7 +189,8 @@ class AlarmPicker extends LitElement {
         if (this.id === 'alarmpicker') {
             if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             const isEnabled = this.alarm.enabled;
-            const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
+            // const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
+            const isOverridden = this.config.next_alarm.overridden;
             if (isEnabled && !isOverridden || !isEnabled && !isOverridden) {
                 // set sliders to current time
                 timeArray = dayjs(this.time, 'h:mm A').format('HH:mm').split(':');
