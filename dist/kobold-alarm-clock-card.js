@@ -2,6 +2,7 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
+// import { AlarmController, AlarmConfiguration, Helpers } from './alarm-controller';
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -1154,13 +1155,13 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     nextAlarmReset(snooze = false) {
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-        this.snoozeConfig(this._config.snoozeDurationDefault.time);
+        this.snoozeConfig(this._config['snooze_duration_default'].time);
         else // controllersAlarmConfig.dismiss();
         this.dismissConfig();
         // this._saveConfiguration(controllersAlarmConfig);
         $b2cd7c9abb677932$export$4dc2b60021baefca.fireEvent('config-changed', {
             config: this._config
-        }, this);
+        });
     }
     static createNextAlarmNew(alarm, forToday = false) {
         let alarmDate = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))();
@@ -1677,42 +1678,57 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         };
     }
     static #_5 = this.defaultConfig = {
-        name: 'alarm_clock',
+        name: "alarm_clock",
         alarms_enabled: false,
         next_alarm: {
             enabled: false,
-            time: '07:00',
-            date: '',
-            date_time: ''
+            time: "07:00",
+            date: "",
+            date_time: "",
+            overridden: false
         },
         mo: {
             enabled: false,
-            time: '07:00:00'
+            time: "07:00:00"
         },
         tu: {
             enabled: false,
-            time: '07:00:00'
+            time: "07:00:00"
         },
         we: {
             enabled: false,
-            time: '07:00:00'
+            time: "07:00:00"
         },
         th: {
             enabled: false,
-            time: '07:00:00'
+            time: "07:00:00"
         },
         fr: {
             enabled: false,
-            time: '07:00:00'
+            time: "07:00:00"
         },
         sa: {
             enabled: false,
-            time: '09:00:00'
+            time: "09:00:00"
         },
         su: {
             enabled: false,
-            time: '09:00:00'
-        }
+            time: "09:00:00"
+        },
+        snooze_duration_default: {
+            hours: 0,
+            minutes: 15,
+            seconds: 0
+        },
+        alarm_duration_default: {
+            hours: 0,
+            minutes: 30,
+            seconds: 0
+        },
+        time_format: "12hr",
+        clock_display_font: 0,
+        hide_cards_default: true,
+        debug: false
     };
 }
 
@@ -2779,7 +2795,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
                 ` : ''}
 
                 <slot></slot>
-                <div class=${this.id === 'alarmpicker' ? 'sliders picker' : 'sliders'}>
+                <div class=${this.id === 'tab-2' ? 'sliders picker' : 'sliders'}>
                     <ha-slider
                         id="hoursSlider"
                         labeled
@@ -2805,7 +2821,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
                         maxlength="8"
                         ?disabled=${this.disabled}
                         .value=${!this.alarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this.alarm.time, 'HH:mm').format(this._alarmTimeFormat())}
-                        ?overridden=${this.id === 'alarmpicker' && this.config?.next_alarm.overridden}
+                        ?overridden=${this.id === 'tab-2' && this.config?.next_alarm.overridden}
                         @click=${this._clickHandler}
                         readonly
                         >
@@ -2850,7 +2866,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             margin: 0 1em;
         }
 
-        :host([id="alarmpicker"]) #alarmTimeInput {
+        :host([id="tab-2"]) #alarmTimeInput {
             filter: invert(1);
             margin: 0 0.5em;
         }
@@ -2875,7 +2891,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             transition: width 120ms;
             width: 0;
         }
-        :host([id="alarmpicker"]) .alarm > .sliders {
+        :host([id="tab-2"]) .alarm > .sliders {
             padding-top: 6rem; backdrop-filter: blur(10px);
         }
 
@@ -2887,7 +2903,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             cursor: pointer;
         }
 
-        :host([id="alarmpicker"]) #alarmEnabledToggleButton {
+        :host([id="tab-2"]) #alarmEnabledToggleButton {
             filter: invert(1);
             scale: 1.25;
             margin: 0 0.5rem;
@@ -2905,7 +2921,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             let pickerStyle = '';
             let pickerOrOptionsDialogStyle = '';
             let myStyle;
-            if (this.id == 'alarmpicker') {
+            if (this.id == 'tab-2') {
                 pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
                 myStyle = document.createElement('style');
                 let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
@@ -2924,7 +2940,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
     }
     _clickHandler() {
         let timeArray;
-        if (this.id === 'alarmpicker') {
+        if (this.id === 'tab-2') {
             if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             const isEnabled = this.alarm.enabled;
             // const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
@@ -2945,13 +2961,14 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
     }
     _clickOutsideAlarmTimeInput(event) {
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            if (this.id === 'alarmpicker' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+            if (this.id === 'tab-2' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ.classList.remove('open');
             document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
         }
     }
     _alarmTimeFormat() {
-        return this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker' ? 'HH:mm' : 'h:mm A';
+        // return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
+        return this.config['time_format'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker' ? 'HH:mm' : 'h:mm A';
     }
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
@@ -3570,27 +3587,21 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 <div id="clockLogo"></div>
                 <div id="date"></div>
                 <div class="optionButtons">
-                  <ha-icon id="settingsButton" class="button" icon="mdi:cog" @click=${this._showSettingsDialog}></ha-icon>
-                  <button id="tab-0" @click=${this._showEditor}>
-                    EDIT0
-                  </button >
-                  <button id="tab-1" @click=${this._showEditor}>
-                    EDIT1
-                  </button >
-                  <ha-icon id="napButton" class="button" icon="mdi:sleep" @click=${this._showNapDialog}></ha-icon>
+                  <ha-icon id="tab-0" class="settingsButton button" icon="mdi:cog" @click=${this._showEditor}></ha-icon>
+                  <ha-icon id="tab-1" class="napButton button" icon="mdi:sleep" @click=${this._showEditor}></ha-icon>
                 </div>
                 ${this._areAlarmsEnabled() ? (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
-                    <alarm-picker id="alarmpicker" show-icon="true" .alarm=${this._nextAlarm}
+                    <alarm-picker id="tab-2" show-icon="true" .alarm=${this._nextAlarm}
                         .config=${this._config}
                         .alarmConfiguration=${this._alarmConfiguration}
                         .time=${this._time}
-                        @alarm-button-clicked=${this._showAlarmPicker}
+                        @alarm-button-clicked=${this._showEditor}
                         @alarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
                         ></alarm-picker>
                   ` : (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
-                  <ha-icon id="alarmpickerButton" class="button" icon="mdi:alarm"
-                                @click=${this._showAlarmPicker}></ha-icon>
+                  <ha-icon id="tab-2" class="alarmpickerButton button" icon="mdi:alarm"
+                                @click=${this._showEditor}></ha-icon>
                   `}
               </div>
               <div id="clock" class=${(0, $b5ce948eee6979f0$export$56cc687933817664)(this._clockClasses)} @click=${this._toggleAlarmFullscreen}>TIME</div>
@@ -3664,7 +3675,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       background-position: center center;
       filter: invert(1) brightness(0.41); /* match --secondary-text-color */
       position: absolute;
-      display: none; /* TEMP */
     }
 
     #clock {
@@ -3754,7 +3764,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       justify-content: space-between;
     }
 
-    #settingsButton {
+    .settingsButton.button {
       margin: 0 1em;
     }
 
@@ -4119,9 +4129,12 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
   `;
     firstUpdated(changedProperties) {
         super.firstUpdated(changedProperties);
-        this._timeFormat = this._alarmConfiguration['timeFormat'];
-        this._clockFontFace = this._alarmConfiguration['clockFontFace'];
-        this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
+        // this._timeFormat = this._alarmConfiguration['timeFormat'];
+        this._timeFormat = this._config['time_format'];
+        // this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+        this._clockFontFace = this._config['clock_display_font'];
+        // this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
+        this._toggleAlarmFullscreen(this._config['hide_cards_default']);
         this._updateTime();
         this._updateLoop();
         if (this._haCardQ) this._buildCard();
@@ -4258,7 +4271,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     _updateTime(force = false) {
         this._alarmController.evaluateAlarms();
-        const fontNum = !this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace'] ? '0' : this._alarmConfiguration['clockFontFace'];
+        // const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
+        const fontNum = !this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._config['clock_display_font'] ? '0' : this._config['clock_display_font'];
         const fontFaceClass = 'fontFace' + fontNum;
         this._clockClasses = fontNum === '0' ? {
             clock: true
@@ -4266,14 +4280,16 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             clock: true,
             [fontFaceClass]: true
         };
-        const time = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
+        // const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
+        const time = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(this._config['time_format'] === '24hr' ? 'HH:mm' : 'h:mm A');
         const isAlarmRinging = this._alarmController.isAlarmRinging();
         if (this._clockQ && (force || this._time !== time || this._ringing !== isAlarmRinging || this._controllersAlarmConfigLastUpdate !== this._config.last_updated)) {
             this._time = time;
             this._ringing = isAlarmRinging;
             this._controllersAlarmConfigLastUpdate = this._config.last_updated;
             let timeDisplay;
-            if (this._alarmConfiguration['timeFormat'] === '24hr') timeDisplay = time;
+            // if (this._alarmConfiguration['timeFormat'] === '24hr') {
+            if (this._config['time_format'] === '24hr') timeDisplay = time;
             else {
                 const [timeNum, timeTxt] = time.split(' ');
                 let periodKern = '';
@@ -4289,7 +4305,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
           ${timeDisplay}
         </div>
       `;
-            const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
+            // const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
+            const dateFormat = this._config['time_format'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D'; //TODO: convert all these to standard dot syntax? (this._config.time_format)
             this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(dateFormat);
         }
     }
@@ -4357,49 +4374,49 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // returns day of week in language set in set hass() method
         return (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))('2018-08-27').add(days, 'days').format('dddd');
     }
-    saveAndCloseAlarmPicker() {
-        const controllersAlarmConfig = Object.assign(new (0, $b2cd7c9abb677932$export$5df46671f5b4cca6), {
-            ...this._alarmConfiguration,
-            alarmsEnabled: this._haSwitchQ.checked,
-            mo: this._alarmPickerMoQ.value,
-            tu: this._alarmPickerTuQ.value,
-            we: this._alarmPickerWeQ.value,
-            th: this._alarmPickerThQ.value,
-            fr: this._alarmPickerFrQ.value,
-            sa: this._alarmPickerSaQ.value,
-            su: this._alarmPickerSuQ.value
-        });
-        controllersAlarmConfig.dismiss();
-        this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
-        this.closeDialog('#scheduleDialog');
-    }
-    saveAndCloseSettings() {
-        const controllersAlarmConfig = Object.assign(new (0, $b2cd7c9abb677932$export$5df46671f5b4cca6), {
-            ...this._alarmConfiguration,
-            ringerEntities: JSON.stringify(this._ringerEntities),
-            timeFormat: this._timeFormatQ.value,
-            clockFontFace: this._clockFontFaceQ.value,
-            clockDefaultFullscreen: this._clockDefaultFullscreenQ.checked,
-            snoozeDurationDefault: this._snoozeDurationPickerQ.value,
-            alarmDurationDefault: this._alarmDurationPickerQ.value
-        });
-        this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
-        if (this._alarmClockClasses.fullscreen !== this._clockDefaultFullscreen) this._toggleAlarmFullscreen(this._clockDefaultFullscreen);
-        this.closeDialog('#settingsDialog');
-    }
-    saveAndCloseNap() {
-        this._setAlarm();
-        const controllersAlarmConfig = Object.assign(new (0, $b2cd7c9abb677932$export$5df46671f5b4cca6), {
-            ...this._alarmConfiguration,
-            napDurationDefault: this._napTimePickerQ.value
-        });
-        this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
-        this.closeDialog('#napDialog');
-    }
-    clearAndCloseNap() {
-        this._alarmController.nextAlarmReset();
-        this.closeDialog('#napDialog');
-    }
+    // saveAndCloseAlarmPicker() {
+    //   const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+    //     ...this._alarmConfiguration,
+    //     alarmsEnabled: (this._haSwitchQ).checked,
+    //     mo: (this._alarmPickerMoQ).value,
+    //     tu: (this._alarmPickerTuQ).value,
+    //     we: (this._alarmPickerWeQ).value,
+    //     th: (this._alarmPickerThQ).value,
+    //     fr: (this._alarmPickerFrQ).value,
+    //     sa: (this._alarmPickerSaQ).value,
+    //     su: (this._alarmPickerSuQ).value,
+    //   });
+    //   controllersAlarmConfig.dismiss();
+    //   this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    //   this.closeDialog('#scheduleDialog');
+    // }
+    // saveAndCloseSettings() {
+    //   const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+    //     ...this._alarmConfiguration,
+    //     ringerEntities: JSON.stringify(this._ringerEntities),
+    //     timeFormat: (this._timeFormatQ).value,
+    //     clockFontFace: (this._clockFontFaceQ).value,
+    //     clockDefaultFullscreen: (this._clockDefaultFullscreenQ).checked,
+    //     snoozeDurationDefault: (this._snoozeDurationPickerQ).value,
+    //     alarmDurationDefault: (this._alarmDurationPickerQ).value,
+    //   });
+    //   this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    //   if (this._alarmClockClasses.fullscreen !== this._clockDefaultFullscreen) this._toggleAlarmFullscreen(this._clockDefaultFullscreen);
+    //   this.closeDialog('#settingsDialog');
+    // }
+    // saveAndCloseNap() {
+    //   this._setAlarm();
+    //   const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+    //     ...this._alarmConfiguration,
+    //     napDurationDefault: (this._napTimePickerQ).value,
+    //   });
+    //   this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    //   this.closeDialog('#napDialog');
+    // }
+    // clearAndCloseNap() {
+    //   this._alarmController.nextAlarmReset();
+    //   this.closeDialog('#napDialog');
+    // }
     // _editorSaveEvent = (event: CustomEvent) => {
     //   console.log('*** editor-save event received: ', event.detail);
     // }
@@ -4450,7 +4467,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     _showSettingsDialog() {
         this._timeFormat = this._alarmConfiguration['timeFormat'];
-        this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+        // this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+        this._clockDefaultFullscreen = this._config['hide_cards_default'];
         this._clockFontFace = this._alarmConfiguration['clockFontFace'];
         this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
         this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
@@ -4669,10 +4687,145 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     constructor(){
         super(), this._configSchemaSettings = [
             {
-                name: "nap_duration",
-                label: "Nap Duration",
+                name: "alarm_entities",
+                label: "Alarm Ringer Entities",
+                selector: {
+                    entity: {
+                        multiple: true,
+                        filter: {
+                            domain: [
+                                "input_boolean",
+                                "switch",
+                                "media_player"
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                name: "alarm_entity_local",
+                label: "Local Alarm Ringer Entity",
+                selector: {
+                    entity: {
+                        filter: {
+                            domain: [
+                                "input_boolean",
+                                "switch",
+                                "media_player"
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                name: "ping_entity",
+                label: "Ping Entity",
+                selector: {
+                    entity: {
+                        filter: {
+                            domain: "binary_sensor"
+                        }
+                    }
+                }
+            },
+            {
+                name: "time_format",
+                label: "Time Format",
+                selector: {
+                    select: {
+                        options: [
+                            "12hr",
+                            "24hr"
+                        ]
+                    }
+                }
+            },
+            {
+                name: "clock_display_font",
+                label: "Clock Display Font",
+                selector: {
+                    select: {
+                        options: [
+                            {
+                                label: "System",
+                                value: 0
+                            },
+                            {
+                                label: "1",
+                                value: 1
+                            },
+                            {
+                                label: "2",
+                                value: 2
+                            },
+                            {
+                                label: "3",
+                                value: 3
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name: "hide_cards_default",
+                label: "Hide Cards by Default",
+                selector: {
+                    boolean: {}
+                }
+            },
+            {
+                name: "snooze_duration_default",
+                label: "Snooze Duration Default",
                 selector: {
                     duration: {}
+                }
+            },
+            // {
+            //   type: "grid",
+            //   name: "",
+            //   schema: [
+            //     {},
+            //     {
+            //       name: "snooze_duration_default2",
+            //       label: "Snooze Duration",
+            //       selector: { duration: {} },
+            //     },
+            //   ],
+            // },
+            {
+                name: "alarm_duration_default",
+                label: "Alarm Duration Default",
+                selector: {
+                    duration: {}
+                }
+            },
+            // {
+            //   name: "alarm_triggers",
+            //   label: "Alarm Triggers",
+            //   selector: { trigger: {} },
+            // },
+            // {
+            //   name: "alarm_conditions",
+            //   label: "Alarm Conditions",
+            //   selector: { condition: {} },
+            // },
+            // {
+            //   name: "alarm_actions_new",
+            //   label: "Alarm Actions",
+            //   selector: { select: { multiple: true, custom_value: true, options: [] } },
+            // },
+            {
+                name: "alarm_actions",
+                label: "Alarm Actions",
+                selector: {
+                    object: {}
+                }
+            },
+            {
+                name: "debug",
+                label: "Debug Mode",
+                selector: {
+                    boolean: {}
                 }
             }
         ], this._configSchemaSchedule = (alarms_disabled)=>[
@@ -5000,8 +5153,9 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     // _clickEvent(event) {
     //   console.log('*** click detected. target: ', event.target);
     // }
+    //TODO: can we eliminate date_time property anywhere/everywhere?
     _setNextAlarm(nextAlarmTime, snooze, nap) {
-        console.log('*** setting nextAlarm; arguments: nextAlarm: ' + nextAlarmTime + '; snooze: ' + snooze + '; nap: ' + nap);
+        // console.log('*** setting nextAlarm; arguments: nextAlarm: ' + nextAlarmTime + '; snooze: ' + snooze + '; nap: ' + nap);
         // console.log('*** nextalarm is type: ', typeof nextAlarmTime);
         if (nap) {
             console.log('*** nap fired');
@@ -5009,12 +5163,15 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 ...this._config.next_alarm,
                 enabled: true,
                 nap: true,
-                time: nextAlarmTime
+                time: nextAlarmTime.format('HH:mm:ss'),
+                date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
+                date: nextAlarmTime.format('YYYY-MM-DD'),
+                overridden: true
             };
         }
         if (snooze) {
             console.log('*** snooze fired');
-            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, $b2cd7c9abb677932$export$4dc2b60021baefca).convertToMinutes(this._config.snoozeDurationDefault.time)));
+            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, $b2cd7c9abb677932$export$4dc2b60021baefca).convertToMinutes(this._config['snooze_duration_default'].time))); // this won't work: snooze_duration_default is a duration
             this._config.next_alarm = {
                 ...this._config.next_alarm,
                 enabled: true,
@@ -5037,15 +5194,24 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         }
         if (!nextAlarmTime && !snooze) {
             console.log('*** reset nextalarm fired');
-            // same as nextalarmreset
+            // nextalarmreset
+            // console.log('*** next alarm before: ', this._config.next_alarm);
             const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
             const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-            this._config.next_alarm = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarmNew(alarmTomorrow);
+            // console.log('*** alarmTomorrow: ', alarmTomorrow);
+            // this._config.next_alarm = {
+            //   ...Helpers.defaultConfig.next_alarm,
+            //   ...AlarmController.createNextAlarmNew(alarmTomorrow),
+            // }
+            this._config.next_alarm = {
+                ...this._config.next_alarm,
+                ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarmNew(alarmTomorrow)
+            };
+        // this._config.next_alarm = AlarmController.createNextAlarmNew(alarmTomorrow);
+        // console.log('*** set next alarm: ', this._config.next_alarm);
+        // console.log('*** create next alarm: ', AlarmController.createNextAlarmNew(alarmTomorrow));
         }
-        // console.log('*** set nextAlarm: ', this._config.nextAlarm);
-        (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
-            config: this._config
-        }, this);
+    // Helpers.fireEvent('config-changed', { config: this._config }, this); // will be saved in _valueChanged method
     }
     // _valueChanged(event: CustomEvent) {
     _valueChanged(event) {
@@ -5058,27 +5224,48 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         //   delete myValue.nap_duration;
         // }
         // this._alarmsEnabled = event.detail.value.alarms_enabled;
+        const configChanges = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
+        // console.log('*** configChanges: ', configChanges);
+        if (!configChanges) return;
         this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, event.detail.value);
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
-        const configChanges = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, this._config);
-        this._allConfigChanges = {
-            ...this._allConfigChanges,
-            ...configChanges
-        };
-        let params = [];
-        // console.log('*** configChanges: ', configChanges);
-        if (this._allConfigChanges.nap_duration) {
+        // const configChanges = Helpers.deepCompareObj(this._oldConfig, this._config);
+        // this._allConfigChanges = { ...this._allConfigChanges, ...configChanges };
+        // let params = [];
+        // nap tab
+        // if (this._allConfigChanges.nap_duration) {
+        if (configChanges.nap_duration || configChanges.next_alarm && configChanges.next_alarm.overridden) {
             // console.log('*** nap duration: ', configChanges.nap_duration);
             // console.log('*** nap duration: ', this._config.nap_duration);
+            // console.log('*** next_alarm.overridden: ', configChanges.next_alarm.overridden);
+            // console.log('*** next_alarm: ', configChanges.next_alarm);
+            // console.log('*** nap_duration: ', this._config.nap_duration);
             const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.nap_duration));
-            params = [
-                nextAlarmTime.format('HH:mm:ss'),
-                false,
-                true
-            ];
+            // console.log('*** nextAlarmTime: ', nextAlarmTime.format('HH:mm:ss'));
+            // params = [nextAlarmTime.format('HH:mm:ss'), false, true];
+            // this._setNextAlarm(nextAlarmTime, false, true);
+            this._config.next_alarm = {
+                ...this._config.next_alarm,
+                enabled: true,
+                nap: true,
+                time: nextAlarmTime.format('HH:mm:ss'),
+                date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
+                date: nextAlarmTime.format('YYYY-MM-DD'),
+                overridden: true
+            };
+            // console.log('*** config: ', this._config);
+            (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
+                config: this._config
+            }, this);
+            return;
         // console.log('*** alarmTime: ', alarmTime.format('HH:mm:ss'));
         }
-        console.log('*** _allConfigChanges: ', this._allConfigChanges);
+        // if (this._allConfigChanges.next_alarm && !this._allConfigChanges.next_alarm.overridden) {
+        // if (configChanges.next_alarm && !configChanges.next_alarm.overridden) {
+        //   // console.log('*** reset alarm; nextAlarm: ', configChanges.next_alarm);
+        //   this._setNextAlarm();
+        // }
+        // console.log('*** _allConfigChanges: ', this._allConfigChanges);
         // this._config = {
         //   // ...Helpers.defaultConfig,
         //   ...event.detail.value,
@@ -5090,17 +5277,15 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         //       .filter(key => wildcard ? key.includes(prop) : key === prop)
         //   )
         // // Prevent empty values in config
+        // // schedule tab
         // const dayNames = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
-        // // const test = (json: CardConfig) =>
-        // // Object.keys(json).filter(
-        // //   (item) => (dayItems.indexOf(item) > -1 && (json[item].time === undefined || json[item].enabled === undefined)));
-        // Object.keys(this._config).forEach(
+        // // // const test = (json: CardConfig) =>
+        // // // Object.keys(json).filter(
+        // // //   (item) => (dayItems.indexOf(item) > -1 && (json[item].time === undefined || json[item].enabled === undefined)));
+        // Object.keys(configChanges).forEach(
         //   (item) => {
         //     if (dayNames.indexOf(item) > -1) {
-        //       // if (this._config[item].enabled === undefined) this._config[item].enabled = false;
-        //       if (this._config[item].enabled === undefined) { console.log('*** replenishing enabled'); this._config[item].enabled = defaultConfig[item].enabled; }
-        //       // if (this._config[item].time === undefined) this._config[item].time = '00:00:00';
-        //       if (this._config[item].time === undefined) { console.log('*** replenishing time'); this._config[item].time = defaultConfig[item].time; }
+        //       console.log('*** configChanges contains: ', item);
         //     }
         //   }
         // );
@@ -5112,9 +5297,31 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         // // this._setNextAlarm(AlarmController.createNextAlarmNew(alarmTomorrow));
         // this._setNextAlarm(alarmTomorrow);
         // console.log('*** this._selectedTab: ', this._selectedTab);
-        if (params.length > 0) // console.log('*** params: ', params);
-        this._setNextAlarm(params[0], params[1], params[2]);
-    // Helpers.fireEvent('config-changed', { config: this._config }, this);
+        // if (params.length > 0) {
+        //   // console.log('*** params: ', params);
+        //   this._setNextAlarm(params[0], params[1], params[2]);
+        // }
+        // this._setNextAlarm();
+        const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
+        const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+        Object.keys(configChanges).forEach((item)=>{
+            if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
+                // console.log('*** reset nextalarm');
+                // change made to tomorrow's scheduled alarm
+                const alarmTomorrow = this._config[dayTomorrow];
+                // this._config.next_alarm = {
+                //   ...this._config.next_alarm,
+                //   ...AlarmController.createNextAlarmNew(alarmTomorrow),
+                //   nap: false,
+                //   overridden: false,
+                // }
+                this._config.next_alarm = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarmNew(alarmTomorrow);
+            }
+        });
+        this._oldConfig = this._config;
+        (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
+            config: this._config
+        }, this);
     // this.dispatchEvent(
     //     new CustomEvent("config-changed", { detail: { config: this._config } })
     // );

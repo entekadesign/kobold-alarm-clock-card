@@ -36,7 +36,7 @@ class AlarmPicker extends LitElement {
                 ` : ''}
 
                 <slot></slot>
-                <div class=${this.id === 'alarmpicker' ? 'sliders picker' : 'sliders'}>
+                <div class=${this.id === 'tab-2' ? 'sliders picker' : 'sliders'}>
                     <ha-slider
                         id="hoursSlider"
                         labeled
@@ -62,7 +62,7 @@ class AlarmPicker extends LitElement {
                         maxlength="8"
                         ?disabled=${this.disabled}
                         .value=${!this.alarm ? '' : dayjs(this.alarm.time, 'HH:mm').format(this._alarmTimeFormat())}
-                        ?overridden=${this.id === 'alarmpicker' && this.config?.next_alarm.overridden}
+                        ?overridden=${this.id === 'tab-2' && this.config?.next_alarm.overridden}
                         @click=${this._clickHandler}
                         readonly
                         >
@@ -108,7 +108,7 @@ class AlarmPicker extends LitElement {
             margin: 0 1em;
         }
 
-        :host([id="alarmpicker"]) #alarmTimeInput {
+        :host([id="tab-2"]) #alarmTimeInput {
             filter: invert(1);
             margin: 0 0.5em;
         }
@@ -133,7 +133,7 @@ class AlarmPicker extends LitElement {
             transition: width 120ms;
             width: 0;
         }
-        :host([id="alarmpicker"]) .alarm > .sliders {
+        :host([id="tab-2"]) .alarm > .sliders {
             padding-top: 6rem; backdrop-filter: blur(10px);
         }
 
@@ -145,7 +145,7 @@ class AlarmPicker extends LitElement {
             cursor: pointer;
         }
 
-        :host([id="alarmpicker"]) #alarmEnabledToggleButton {
+        :host([id="tab-2"]) #alarmEnabledToggleButton {
             filter: invert(1);
             scale: 1.25;
             margin: 0 0.5rem;
@@ -164,7 +164,7 @@ class AlarmPicker extends LitElement {
             let pickerStyle = '';
             let pickerOrOptionsDialogStyle = '';
             let myStyle: HTMLElement;
-            if (this.id == 'alarmpicker') {
+            if (this.id == 'tab-2') {
                 pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
                 myStyle = document.createElement('style');
                 let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
@@ -186,7 +186,7 @@ class AlarmPicker extends LitElement {
 
     _clickHandler() {
         let timeArray: Array<string>;
-        if (this.id === 'alarmpicker') {
+        if (this.id === 'tab-2') {
             if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             const isEnabled = this.alarm.enabled;
             // const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
@@ -211,14 +211,15 @@ class AlarmPicker extends LitElement {
 
     _clickOutsideAlarmTimeInput(event: Event) {
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            if (this.id === 'alarmpicker' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+            if (this.id === 'tab-2' && this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ.classList.remove('open');
             document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
         }
     }
 
     _alarmTimeFormat() {
-        return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
+        // return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
+        return (this.config['time_format'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
     }
 
     _updateValue(event: Event) {

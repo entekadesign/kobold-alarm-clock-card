@@ -131,13 +131,13 @@ export class AlarmController {
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) {
             // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-            this.snoozeConfig(this._config.snoozeDurationDefault.time);
+            this.snoozeConfig(this._config['snooze_duration_default'].time);
         } else {
             // controllersAlarmConfig.dismiss();
             this.dismissConfig();
         }
         // this._saveConfiguration(controllersAlarmConfig);
-        Helpers.fireEvent('config-changed', { config: this._config }, this);
+        Helpers.fireEvent('config-changed', { config: this._config });
     }
 
     static createNextAlarmNew(alarm: TimeObject, forToday = false): NextAlarmObject {
@@ -718,15 +718,21 @@ export class Helpers {
     };
 
     static defaultConfig = {
-        name: 'alarm_clock',
+        name: "alarm_clock",
         alarms_enabled: false,
-        next_alarm: { enabled: false, time: '07:00', date: '', date_time: '' },
-        mo: { enabled: false, time: '07:00:00' },
-        tu: { enabled: false, time: '07:00:00' },
-        we: { enabled: false, time: '07:00:00' },
-        th: { enabled: false, time: '07:00:00' },
-        fr: { enabled: false, time: '07:00:00' },
-        sa: { enabled: false, time: '09:00:00' },
-        su: { enabled: false, time: '09:00:00' },
+        next_alarm: { enabled: false, time: "07:00", date: "", date_time: "", overridden: false },
+        mo: { enabled: false, time: "07:00:00" },
+        tu: { enabled: false, time: "07:00:00" },
+        we: { enabled: false, time: "07:00:00" },
+        th: { enabled: false, time: "07:00:00" },
+        fr: { enabled: false, time: "07:00:00" },
+        sa: { enabled: false, time: "09:00:00" },
+        su: { enabled: false, time: "09:00:00" },
+        snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
+        alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
+        time_format: "12hr",
+        clock_display_font: 0,
+        hide_cards_default: true,
+        debug: false,
     };
 }
