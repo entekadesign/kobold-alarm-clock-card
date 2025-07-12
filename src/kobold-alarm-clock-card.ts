@@ -69,10 +69,10 @@ class KoboldAlarmClockCard extends LitElement {
   private _time: string;
   private _ringing: boolean;
   private _controllersAlarmConfigLastUpdate: string;
-  private _snoozeDurationDefault: TimeObject;
-  private _alarmDurationDefault: TimeObject;
+  // private _snoozeDurationDefault: TimeObject;
+  // private _alarmDurationDefault: TimeObject;
   // private _alarmConfiguration: AlarmConfiguration;
-  private _alarmConfiguration: any;
+  // private _alarmConfiguration: any;
 
   @state() _alarmsEnabled: boolean;
   @state() _nextAlarm: NextAlarmObject;
@@ -217,7 +217,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   render() {
-    this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
+    // this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
     this._nextAlarm = this._alarmController.nextAlarm;
     // console.log('*** render(); this._nextAlarm: ', this._nextAlarm);
 
@@ -259,230 +259,6 @@ class KoboldAlarmClockCard extends LitElement {
         <ha-card>
           <div>
 
-            <dialog id="scheduleDialog" class="mdc-dialog alarm-picker-dialog"
-                role="alertdialog"
-                aria-modal="true"
-                aria-labelledby="alarm-picker-dialog-title"
-                aria-describedby="alarm-picker-dialog-content"
-                >
-                <div class="mdc-dialog__container">
-                    <div class="mdc-dialog__surface">
-                        <header id="alarm-picker-dialog-title" class="header-bar mdc-dialog__title">
-                          <ha-icon-button
-                          slot="navigationIcon"
-                          dialogAction="cancel"
-                          label="Close"
-                          >
-                            <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${() => this.closeDialog('#scheduleDialog')}></ha-icon>
-                          </ha-icon-button>
-                          <span class="header-title">Set Schedule</span>
-                          <ha-switch ?checked=${this._alarmsEnabled} @change=${() => { this._alarmsEnabled = !this._alarmsEnabled }}></ha-switch>
-                        </header>
-                        <div id="alarm-picker-dialog-content" class="mdc-dialog__content alarm-picker-dialog-content">
-                          <div class="workweek">
-                              <alarm-picker id="alarmPickerMo" .alarm=${this._alarmPickerMo} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(0)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTu" .alarm=${this._alarmPickerTu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(1)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerWe" .alarm=${this._alarmPickerWe} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(2)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTh" .alarm=${this._alarmPickerTh} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(3)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerFr" .alarm=${this._alarmPickerFr} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(4)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSa" .alarm=${this._alarmPickerSa} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(5)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSu" .alarm=${this._alarmPickerSu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(6)}: </span></alarm-picker>
-                          </div>
-                          <div class="alarm-picker-dialog-buttons dialog-buttons">
-                            <ha-button @click=${this.saveAndCloseAlarmPicker} raised>Save</ha-button>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mdc-dialog__scrim" @click=${() => this.closeDialog('#scheduleDialog')}></div>
-            </dialog>
-
-            <dialog id="napDialog" class="mdc-dialog alarm-nap-dialog"
-                role="alertdialog"
-                aria-modal="true"
-                aria-labelledby="alarm-nap-dialog-title"
-                aria-describedby="alarm-nap-dialog-content"
-                >
-                <div class="mdc-dialog__container">
-                    <div class="mdc-dialog__surface">
-                        <header id="alarm-nap-dialog-title" class="header-bar mdc-dialog__title">
-                          <ha-icon-button
-                          slot="navigationIcon"
-                          dialogAction="cancel"
-                          label="Close"
-                          >
-                            <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${() => this.closeDialog('#napDialog')}></ha-icon>
-                          </ha-icon-button>
-                          <span class="header-title">Set Nap Length</span>
-                        </header>
-                        <div id="alarm-nap-dialog-content" class="mdc-dialog__content alarm-nap-dialog-content">
-                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                              <span>Nap Duration: </span>
-                          </alarm-picker>
-                          <div class="alarm-nap-dialog-buttons dialog-buttons">
-                              <ha-button @click=${this.saveAndCloseNap} raised>Save</ha-button>
-                              <ha-button @click=${this.clearAndCloseNap} raised>Clear</ha-button>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mdc-dialog__scrim" @click=${() => this.closeDialog('#napDialog')}></div>
-            </dialog>
-
-            <dialog id="settingsDialog" class="mdc-dialog alarm-settings-dialog"
-              role="alertdialog"
-              aria-modal="true"
-              aria-labelledby="alarm-settings-dialog-title"
-              aria-describedby="alarm-settings-dialog-content"
-              >
-              <div class="mdc-dialog__container">
-                <div class="mdc-dialog__surface">
-                  <header id="alarm-settings-dialog-title" class="header-bar mdc-dialog__title">
-                    <ha-icon-button
-                    slot="navigationIcon"
-                    dialogAction="cancel"
-                    label="Close"
-                    >
-                      <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${() => this.closeDialog('#settingsDialog')}></ha-icon>
-                    </ha-icon-button>
-                    <span class="header-title">Set Preferences</span>
-                  </header>
-                  <div id="alarm-settings-dialog-content" class="mdc-dialog__content alarm-settings-dialog-content">
-                    <div id="alarmRingers" class="switches-group-table">
-                      <div class="switches-group-row">
-                        <span>Alarm Ringers:</span>
-                        <div class="switches-group-options">
-                          ${this._ringerEntities.map((entity, i) =>
-      html`
-                              <div class="switch-row">
-                                <div class="switch-row-group">
-                                  <ha-textfield
-                                    id="ringer-text-${i}"
-                                    class="ringer-text"
-                                    .value=${this._hass.states[entity.entity_id] ? this._hass.states[entity.entity_id].attributes.friendly_name : 'No ringer entity found'}
-                                    readonly
-                                    >
-                                  </ha-textfield>
-                                  <ha-switch id="ringer-switch-${i}" class="ringer-switch" ?checked=${entity.enabled} @change=${this._handleSwitchRingerEntity}></ha-switch>
-                                </div>
-                              </div>
-                            `
-    )}
-                        </div>
-                      </div>
-                    </div>
-                    <div id="timeFormat" class="radio-row">
-                      <div class="radio-row-group">
-                        <span>Time Format:</span>
-                        <div class="radio-row-options">
-                          <ha-formfield
-                          label="24hr"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueTimeFormat}
-                                value="24hr"
-                                name="24hr"
-                                ?checked=${this._timeFormat === '24hr'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="12hr"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueTimeFormat}
-                                value="12hr"
-                                name="12hr"
-                                ?checked=${this._timeFormat === '12hr'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="clockFontFace" class="radio-row">
-                      <div class="radio-row-group">
-                        <span>Clock Display Font:</span>
-                        <div class="radio-row-options">
-                          <ha-formfield
-                          label="System"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="0"
-                                name="0"
-                                ?checked=${this._clockFontFace === '0'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="1"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="1"
-                                name="1"
-                                ?checked=${this._clockFontFace === '1'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="2"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="2"
-                                name="2"
-                                ?checked=${this._clockFontFace === '2'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="3"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="3"
-                                name="3"
-                                ?checked=${this._clockFontFace === '3'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="switches-group-table">
-                        <div class="switches-group-row fullscreen-row">
-                        <span>Hide Cards Default:</span>
-                            <div class="switches-group-options">
-                                <div class="switch-row">
-                                    <div class="switch-row-group">
-                                        <ha-switch
-                                            id="clockDefaultFullscreen"
-                                            class="fullscreen-switch"
-                                            ?checked=${this._clockDefaultFullscreen}
-                                            @change=${(e: Event) => { this._clockDefaultFullscreen = (<HTMLInputElement>e.target).checked }}>
-                                        </ha-switch>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                      <span>Snooze Duration: </span>
-                    </alarm-picker>
-                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                      <span>Alarm Duration: </span>
-                    </alarm-picker>
-                    <div class="alarm-settings-dialog-buttons dialog-buttons">
-                      <ha-button @click=${this.saveAndCloseSettings} raised>Save</ha-button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="mdc-dialog__scrim" @click=${() => this.closeDialog('#settingsDialog')}></div>
-            </dialog>
-
             <div id="alarmclock" class=${classMap(this._alarmClockClasses)}>
               <div id="alarm-top" class="meta">
                 <div id="clockLogo"></div>
@@ -494,7 +270,6 @@ class KoboldAlarmClockCard extends LitElement {
                 ${this._areAlarmsEnabled() ? html`
                     <alarm-picker id="tab-2" show-icon="true" .alarm=${this._nextAlarm}
                         .config=${this._config}
-                        .alarmConfiguration=${this._alarmConfiguration}
                         .time=${this._time}
                         @alarm-button-clicked=${this._showEditor}
                         @alarm-changed=${this._onAlarmChanged}
@@ -737,308 +512,17 @@ class KoboldAlarmClockCard extends LitElement {
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
     }
-
-    /* *************** */
-    /* *** dialogs *** */
-    /* *************** */
-
-    /* mobile screen sizes */
-    @media (max-width: 600px), (max-height: 600px) {
-      dialog {
-        --dialog-surface-margin-top: 0px;
-        --mdc-dialog-min-width: calc( 100vw - env(safe-area-inset-right) - env(safe-area-inset-left) );
-        --mdc-dialog-max-width: calc( 100vw - env(safe-area-inset-right) - env(safe-area-inset-left) );
-        --mdc-dialog-min-height: 100%;
-        --mdc-dialog-max-height: 100%;
-        --ha-dialog-border-radius: 0;
-      }
-
-      .mdc-dialog .mdc-dialog__content {
-        padding-top: 0 !important;
-      }
-
-      #alarm-nap-dialog-content {
-        padding-top: 25vh !important;
-      }
-      #alarm-nap-dialog-content .alarm-nap-dialog-buttons {
-        padding-top: 10vh !important;
-      }
-
-      #alarm-settings-dialog-content div.radio-row span {
-        line-height: 2em;
-        display: block;
-      }
-      #alarm-settings-dialog-content div.radio-row .radio-row-group .radio-row-options {
-        height: 2em;
-      }
-
-      #alarm-settings-dialog-content div.radio-row .radio-row-group .radio-row-options ha-radio {
-        margin-left: 0;
-      }
-
-      #alarm-settings-dialog-content div.switch-row .switch-row-group {
-        height: 2em;
-      }
-    }
-
-    @media (min-width: 601px) and (min-height: 601px) {
-      dialog {
-        --mdc-dialog-min-width: 580px;
-        --mdc-dialog-max-width: 580px;
-        --mdc-dialog-max-height: calc(100% - 72px);
-      }
-    }
-
-    dialog[open] {
-      z-index: 99;
-    }
-
-    dialog {
-      background: none;
-      padding: 0;
-      border: medium none;
-    }
-
-    .mdc-dialog, .mdc-dialog__scrim {
-      background-color: var(--mdc-dialog-scrim-color,rgba(0,0,0,.32));
-      position: fixed;
-      top: 0px;
-      left: 0px;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-    }
-
-    .mdc-dialog__container {
-      align-items: var(--vertical-align-dialog,center);
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      box-sizing: border-box;
-      height: 100%;
-    }
-
-    .mdc-dialog__surface {
-      border: 1px solid var(--primary-background-color);
-      z-index: var(--dialog-z-index, 8);
-      transform: scale(.8);
-      opacity: 0;
-      transition: opacity 120ms, transform 120ms;
-      position: var(--dialog-surface-position, relative);
-      top: var(--dialog-surface-top);
-      margin-top: var(--dialog-surface-margin-top);
-      min-height: var(--mdc-dialog-min-height, auto);
-      min-width: var(--mdc-dialog-min-width,280px);
-      border-radius: 28px;
-      -webkit-backdrop-filter: var(--ha-dialog-surface-backdrop-filter, none);
-      backdrop-filter: var(--ha-dialog-surface-backdrop-filter, none);
-      background: var(
-        --ha-dialog-surface-background,
-        var(--mdc-theme-surface, #fff)
-      );
-      box-shadow: var(
-        --mdc-dialog-box-shadow,0px 11px 15px -7px rgba(0,0,0,.2),0px 24px 38px 3px rgba(0,0,0,.14),0px 9px 46px 8px rgba(0,0,0,.12)
-      );
-    }
-
-    .mdc-dialog.open .mdc-dialog__surface {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .mdc-dialog.open {
-      backdrop-filter: var(--ha-dialog-scrim-backdrop-filter,var(--dialog-backdrop-filter,none));
-    }
-
-    .mdc-dialog__content {
-      padding: var(--dialog-content-padding,24px);
-      position: var(--dialog-content-position,relative);
-      text-align: center;
-    }
-
-    .mdc-dialog {
-      --mdc-dialog-scroll-divider-color: var(
-        --dialog-scroll-divider-color,
-        var(--divider-color)
-      );
-      -webkit-backdrop-filter: var(
-        --ha-dialog-scrim-backdrop-filter,
-        var(--dialog-backdrop-filter, none)
-      );
-      backdrop-filter: var(
-        --ha-dialog-scrim-backdrop-filter,
-        var(--dialog-backdrop-filter, none)
-      );
-      --mdc-dialog-box-shadow: var(--dialog-box-shadow, none);
-      --mdc-typography-headline6-font-weight: 400;
-      --mdc-typography-headline6-font-size: 1.574rem;
-    }
-
-    .mdc-dialog__container {
-      align-items: var(--vertical-align-dialog, center);
-    }
-
-    .header-bar {
-      padding: 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      box-sizing: border-box;
-    }
-
-    .header-bar ha-switch {
-      padding: 16px 12px 0 0;
-    }
-
-    .header-navigation-icon {
-      flex: 0 0 auto;
-      min-width: 8px;
-      height: 100%;
-      display: flex;
-      flex-direction: row;
-    }
-
-    .header-title {
-      flex: 1 1 0%;
-      font-size: 22px;
-      line-height: 28px;
-      font-weight: 400;
-      padding: 10px 4px;
-      min-width: 0px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .mdc-dialog__title {
-      padding: 24px 24px 0 24px;
-    }
-    .mdc-dialog__actions {
-      padding: 12px 24px 12px 24px;
-    }
-    .mdc-dialog__title::before {
-      content: unset;
-    }
-    .mdc-dialog .mdc-dialog__content {
-      position: var(--dialog-content-position, relative);
-      padding: var(--dialog-content-padding, 24px);
-    }
-
-    .dialog-buttons {
-      display: flex;
-      padding: 16px;
-      justify-content: space-between;
-    }
-
-    /* *************************** */
-    /* *** alarm-picker-dialog *** */
-    /* *************************** */
-
-    .workweek {
-      display: flex;
-      flex-direction: column;
-    }
-
-    alarm-picker span {
-      width: 6.5em;
-      text-align: right;
-    }
-
-    /* ************************ */
-    /* *** alarm-nap-dialog *** */
-    /* ************************ */
-
-    #napTimePicker > span {
-      width: auto;
-    }
-
-    /* ***************************** */
-    /* *** alarm-settings-dialog *** */
-    /* ***************************** */
-
-    div.radio-row, div.switch-row {
-      display: block;
-    }
-
-    div.radio-row .radio-row-group, div.switch-row .switch-row-group {
-      display: inline-flex;
-    }
-
-    div.switch-row .switch-row-group {
-      width: 22em;
-      height: 4em;
-    }
-
-    .radio-row .radio-row-group .radio-row-options {
-      display: inline-flex;
-      width: 22em;
-      height: 4em;
-    }
-
-    div.switches-group-table {
-      display: table;
-      margin: 0 auto;
-    }
-
-    div.switches-group-table .ringer-text {
-      width: 17em;
-      margin: auto 1em;
-    }
-
-    div.switches-group-table .switches-group-row {
-      display: table-row;
-    }
-
-    div.switches-group-table .switches-group-row.fullscreen-row {
-      display: flex;
-      align-items: center;
-    }
-
-    #clockDefaultFullscreen {
-      margin: 0 0 0 2em;
-    }
-
-    div.switches-group-table .switches-group-row span, div.switches-group-table .switches-group-row .switches-group-options {
-      display: table-cell;
-    }
-
-    div.switches-group-table .switches-group-row span {
-      text-align: right;
-      width: 10em;
-    }
-
-    .radio-row-group span {
-      display: block;
-      text-align: right;
-      width: 10em;
-      line-height: 4em;
-    }
-
-    ha-radio {
-      margin-left: 1em;
-    }
-
-    alarm-picker#snoozeDurationPicker, alarm-picker#alarmDurationPicker {
-      display: block;
-    }
-
-    alarm-picker#snoozeDurationPicker span, alarm-picker#alarmDurationPicker span {
-      width: 10em;
-      white-space: nowrap;
-    }
   `;
 
   firstUpdated(changedProperties: Map<string, any>): void {
     super.firstUpdated(changedProperties);
 
     // this._timeFormat = this._alarmConfiguration['timeFormat'];
-    this._timeFormat = this._config['time_format'];
+    this._timeFormat = this._config.time_format;
     // this._clockFontFace = this._alarmConfiguration['clockFontFace'];
-    this._clockFontFace = this._config['clock_display_font'];
+    this._clockFontFace = this._config.clock_display_font;
     // this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
-    this._toggleAlarmFullscreen(this._config['hide_cards_default']);
+    this._toggleAlarmFullscreen(this._config.hide_cards_default);
     this._updateTime();
     this._updateLoop();
 
@@ -1055,7 +539,8 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
     }
 
-    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+    // this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+    this._alarmsEnabled = this._config.alarms_enabled;
 
     // this.addEventListener("kobold-card-editor-tab", (event: CustomEvent) => {
     //   console.log('*** kobold-card-editor-tab event received; tab: ', event.detail.tab);
@@ -1225,11 +710,11 @@ class KoboldAlarmClockCard extends LitElement {
 
     this._alarmController.evaluateAlarms();
     // const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
-    const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._config['clock_display_font']) ? '0' : this._config['clock_display_font'];
+    const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._config.clock_display_font) ? '0' : this._config.clock_display_font;
     const fontFaceClass = 'fontFace' + fontNum;
     this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
     // const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
-    const time = dayjs().format(this._config['time_format'] === '24hr' ? 'HH:mm' : 'h:mm A');
+    const time = dayjs().format(this._config.time_format === '24hr' ? 'HH:mm' : 'h:mm A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
     if (this._clockQ &&
@@ -1246,7 +731,7 @@ class KoboldAlarmClockCard extends LitElement {
       let timeDisplay: string;
 
       // if (this._alarmConfiguration['timeFormat'] === '24hr') {
-      if (this._config['time_format'] === '24hr') {
+      if (this._config.time_format === '24hr') {
         timeDisplay = time;
       } else {
         const [timeNum, timeTxt] = time.split(' ');
@@ -1266,23 +751,23 @@ class KoboldAlarmClockCard extends LitElement {
         </div>
       `;
       // const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
-      const dateFormat = this._config['time_format'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';  //TODO: convert all these to standard dot syntax? (this._config.time_format)
+      const dateFormat = this._config.time_format === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
       this._dateQ.innerHTML = dayjs().format(dateFormat);
     }
   }
 
-  _setAlarm() {
-    console.log('*** _setAlarm fired on card');
-    const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
-    const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
-    this._alarmController.nextAlarm = {
-      ...this._alarmController.nextAlarm,
-      enabled: true,
-      time: alarmTime.format('HH:mm'),
-      nap: true,
-      overridden: true
-    }
-  }
+  // _setAlarm() {
+  //   console.log('*** _setAlarm fired on card');
+  //   const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
+  //   const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
+  //   this._alarmController.nextAlarm = {
+  //     ...this._alarmController.nextAlarm,
+  //     enabled: true,
+  //     time: alarmTime.format('HH:mm'),
+  //     nap: true,
+  //     overridden: true
+  //   }
+  // }
 
   _areAlarmsEnabled() {
     // return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
@@ -1337,10 +822,10 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _getDayOfWeek(days: number) {
-    // returns day of week in language set in set hass() method
-    return dayjs('2018-08-27').add(days, 'days').format('dddd');
-  }
+  // _getDayOfWeek(days: number) {
+  //   // returns day of week in language set in set hass() method
+  //   return dayjs('2018-08-27').add(days, 'days').format('dddd');
+  // }
 
   // saveAndCloseAlarmPicker() {
   //   const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
@@ -1429,41 +914,41 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _showAlarmPicker() {
-    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
-    this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
-    this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
-    this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
-    this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
-    this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
-    this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
-    this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
-    this._scheduleDialogQ.show();
-    this._scheduleDialogQ.classList.add('open');
-  }
+  // _showAlarmPicker() {
+  //   this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+  //   this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
+  //   this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
+  //   this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
+  //   this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
+  //   this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
+  //   this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
+  //   this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
+  //   this._scheduleDialogQ.show();
+  //   this._scheduleDialogQ.classList.add('open');
+  // }
 
-  _showNapDialog() {
-    this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
-    this._napDialogQ.show();
-    this._napDialogQ.classList.add('open');
-  }
+  // _showNapDialog() {
+  //   this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
+  //   this._napDialogQ.show();
+  //   this._napDialogQ.classList.add('open');
+  // }
 
-  _showSettingsDialog() {
-    this._timeFormat = this._alarmConfiguration['timeFormat'];
-    // this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
-    this._clockDefaultFullscreen = this._config['hide_cards_default'];
-    this._clockFontFace = this._alarmConfiguration['clockFontFace'];
-    this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
-    this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
-    const alarmEntities = [];
-    const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
-    const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
+  // _showSettingsDialog() {
+  //   this._timeFormat = this._alarmConfiguration['timeFormat'];
+  //   // this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+  //   this._clockDefaultFullscreen = this._config['hide_cards_default'];
+  //   this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+  //   this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
+  //   this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
+  //   const alarmEntities = [];
+  //   const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
+  //   const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
 
-    ringerEntitiesConfig.forEach((item: RingerEntity) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
-    this._ringerEntities = alarmEntities;
-    this._settingsDialogQ.show();
-    this._settingsDialogQ.classList.add('open');
-  }
+  //   ringerEntitiesConfig.forEach((item: RingerEntity) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
+  //   this._ringerEntities = alarmEntities;
+  //   this._settingsDialogQ.show();
+  //   this._settingsDialogQ.classList.add('open');
+  // }
 
   closeDialog(target: string) {
     const dialogElement: HTMLDialogElement = this.shadowRoot.querySelector(target);
@@ -1739,58 +1224,82 @@ class KoboldCardEditor extends LitElement {
     //     },
     //   ],
     // },
-    {
-      name: "nap_duration",
-      label: "Nap Duration",
-      selector: { duration: {} },
-      // default: { hours: 0, minutes: 7, seconds: 0 },
-      // default: nap_duration_default,
-    },
+    // {
+    //   name: "nap_duration",
+    //   label: "Nap Duration",
+    //   selector: { duration: {} },
+    //   // default: { hours: 0, minutes: 7, seconds: 0 },
+    //   // default: nap_duration_default,
+    // },
+    // {
+    //   type: "grid",
+    //   name: "next_alarm",
+    //   schema: [
+    //     // {
+    //     //   name: "enabled",
+    //     //   label: "Next Alarm Enabled",
+    //     //   selector: { boolean: {} },
+    //     //   // default: false,
+    //     // },
+    //     // {
+    //     //   name: "time",
+    //     //   label: "Time",
+    //     //   selector: { time: {} },
+    //     // },
+    //     // {
+    //     //   name: "date",
+    //     //   label: "Date",
+    //     //   selector: { date: {} },
+    //     // },
+    //     // {
+    //     //   name: "datetime",
+    //     //   label: "Date Time",
+    //     //   selector: { datetime: {} },
+    //     // },
+    //     {
+    //       name: "overridden",
+    //       label: "Override Schedule",
+    //       selector: { boolean: {} },
+    //       // default: override_default,
+    //     },
+    //   ],
+    // },
     {
       type: "grid",
-      name: "next_alarm",
+      name: "",
       schema: [
-        // {
-        //   name: "enabled",
-        //   label: "Next Alarm Enabled",
-        //   selector: { boolean: {} },
-        //   // default: false,
-        // },
-        // {
-        //   name: "time",
-        //   label: "Time",
-        //   selector: { time: {} },
-        // },
-        // {
-        //   name: "date",
-        //   label: "Date",
-        //   selector: { date: {} },
-        // },
-        // {
-        //   name: "datetime",
-        //   label: "Date Time",
-        //   selector: { datetime: {} },
-        // },
         {
-          name: "overridden",
-          label: "Override Schedule",
-          selector: { boolean: {} },
-          // default: override_default,
+          type: "grid",
+          name: "next_alarm",
+          schema: [
+            {
+              name: "overridden",
+              label: "Nap Duration",
+              selector: { boolean: {} },
+            },
+          ],
         },
-      ],
-    },
+        {
+          name: "nap_duration",
+          label: "",
+          selector: { duration: {} },
+        },
+      ]
+    }
+
   ]
 
   // private _alarmController: AlarmController;
   // private _alarmConfiguration: AlarmConfiguration;
   // private _config: CardConfig;
   private _oldConfig: CardConfig;
-  private _allConfigChanges: CardConfig;
+  // private _allConfigChanges: CardConfig;
 
   @state() _hass: HomeAssistant;
   @state() _config: CardConfig;
   @state() _selectedTab = 0;
   @state() _alarmsEnabled: boolean;
+  @state() _nextAlarmConfig: CardConfig;
 
   // @state() _napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
 
@@ -1803,9 +1312,12 @@ class KoboldCardEditor extends LitElement {
     //   // if (event.detail.dialog === 'hui-dialog-edit-card') {
     //   // }
     // });
-
     Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHa());
+    // Helpers.getHa().addEventListener('kobold-editor-save', this._editorSave);
     // Helpers.getEditor().addEventListener('click', this._clickEvent);
+    // add listener to second button (save button)
+    // Helpers.getEditorButtons().querySelectorAll('mwc-button')[1].addEventListener('click', this._savePreprocessing(this._nextAlarmChange));
+    Helpers.getEditorButtons().querySelectorAll('mwc-button')[1].addEventListener('click', (event) => this._saveNextAlarm(event, this._nextAlarmConfig));
     // this._selectedTab = 0;
 
     // this._napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
@@ -1912,7 +1424,7 @@ class KoboldCardEditor extends LitElement {
     }
     if (snooze) {
       console.log('*** snooze fired');
-      const nextAlarmTime = dayjs(this._config.next_alarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(this._config['snooze_duration_default'].time))); // this won't work: snooze_duration_default is a duration
+      const nextAlarmTime = dayjs(this._config.next_alarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(this._config.snooze_duration_default.time))); // this won't work: snooze_duration_default is a duration
       this._config.next_alarm = {
         ...this._config.next_alarm,
         enabled: true,
@@ -1972,6 +1484,40 @@ class KoboldCardEditor extends LitElement {
 
     if (!configChanges) return;
 
+    // nap tab
+    // if (this._allConfigChanges.nap_duration) {
+    if (configChanges.nap_duration || (configChanges.next_alarm && configChanges.next_alarm.overridden)) {
+      // console.log('*** nap duration: ', configChanges.nap_duration);
+      // console.log('*** nap duration: ', this._config.nap_duration);
+      // console.log('*** next_alarm.overridden: ', configChanges.next_alarm.overridden);
+      // console.log('*** next_alarm: ', configChanges.next_alarm);
+      // console.log('*** nap_duration: ', this._config.nap_duration);
+      // const nextAlarmTime = dayjs().add(dayjs.duration(this._config.nap_duration));
+      const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value.nap_duration));
+      // console.log('*** nextAlarmTime: ', nextAlarmTime.format('HH:mm:ss'));
+      // params = [nextAlarmTime.format('HH:mm:ss'), false, true];
+      // this._setNextAlarm(nextAlarmTime, false, true);
+      // this._config.next_alarm = {
+      const nextAlarm = {
+        ...event.detail.value.next_alarm,
+        enabled: true,
+        nap: true,
+        time: nextAlarmTime.format('HH:mm:ss'),
+        date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
+        date: nextAlarmTime.format('YYYY-MM-DD'),
+        overridden: true
+      }
+
+      this._nextAlarmConfig = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
+      this._nextAlarmConfig.next_alarm = nextAlarm;
+      this._nextAlarmConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+      // console.log('*** config: ', this._config);
+      // Helpers.fireEvent('config-changed', { config: this._config }, this);
+      return;
+      // console.log('*** alarmTime: ', alarmTime.format('HH:mm:ss'));
+    }
+
     this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
 
     this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -1982,32 +1528,7 @@ class KoboldCardEditor extends LitElement {
 
     // let params = [];
 
-    // nap tab
-    // if (this._allConfigChanges.nap_duration) {
-    if (configChanges.nap_duration || (configChanges.next_alarm && configChanges.next_alarm.overridden)) {
-      // console.log('*** nap duration: ', configChanges.nap_duration);
-      // console.log('*** nap duration: ', this._config.nap_duration);
-      // console.log('*** next_alarm.overridden: ', configChanges.next_alarm.overridden);
-      // console.log('*** next_alarm: ', configChanges.next_alarm);
-      // console.log('*** nap_duration: ', this._config.nap_duration);
-      const nextAlarmTime = dayjs().add(dayjs.duration(this._config.nap_duration));
-      // console.log('*** nextAlarmTime: ', nextAlarmTime.format('HH:mm:ss'));
-      // params = [nextAlarmTime.format('HH:mm:ss'), false, true];
-      // this._setNextAlarm(nextAlarmTime, false, true);
-      this._config.next_alarm = {
-        ...this._config.next_alarm,
-        enabled: true,
-        nap: true,
-        time: nextAlarmTime.format('HH:mm:ss'),
-        date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
-        date: nextAlarmTime.format('YYYY-MM-DD'),
-        overridden: true
-      }
-      // console.log('*** config: ', this._config);
-      Helpers.fireEvent('config-changed', { config: this._config }, this);
-      return;
-      // console.log('*** alarmTime: ', alarmTime.format('HH:mm:ss'));
-    }
+
     // if (this._allConfigChanges.next_alarm && !this._allConfigChanges.next_alarm.overridden) {
     // if (configChanges.next_alarm && !configChanges.next_alarm.overridden) {
     //   // console.log('*** reset alarm; nextAlarm: ', configChanges.next_alarm);
@@ -2112,6 +1633,34 @@ class KoboldCardEditor extends LitElement {
   //   // console.log('*** this.localName: ', Helpers.getEditor().localName);
   // }
 
+
+  // _editorSave() {
+  //   // console.log('*** save config: ', this._config);
+  //   // console.log('*** this: ', this);
+  //   console.log('*** kobold Editor: ', this._koboldEditor);
+  // }
+
+  _saveNextAlarm(event, nextAlarmConfig) {
+    event.stopPropagation();
+    // not working; this fires AFTER config already saved
+    // this._config = {
+    //   ...this._config,
+    //   chump: true,
+    // }
+    // console.log('*** savePreprocessing: ', event);
+    console.log('*** nextAlarm: ', nextAlarmConfig);
+    // console.log('*** lovelace config: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0]);
+    // console.log('*** lovelace config nextAlarm: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0].next_alarm);
+    // console.log('*** lovelace config nap duration: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0].nap_duration);
+    // console.log('*** this: ', this); // this = 'mwc-button' on hui-dialog-edit-card; _config is on kobold-card-editor
+    // Helpers.fireEvent('config-changed', { config: Helpers.getLovelace().lovelace.config }, this);
+    // console.log('*** lovelace.config: ', Helpers.getLovelace().lovelace.config);
+
+    // Helpers.fireEvent('config-changed', { Helpers.getLovelace().lovelace.config }, this);
+    // Helpers.getLovelace().lovelace.saveConfig(Helpers.getLovelace().lovelace.config);
+    // Helpers.fireEvent('kobold-editor-save', null, Helpers.getHa());
+  }
+
   _handleSwitchTab(event) {
     // console.log('*** handleSwitchTab');
     // this._selectedTab = ev.detail.name === "settings" ? 0 : 1;
@@ -2177,15 +1726,22 @@ class KoboldCardEditor extends LitElement {
   }
 
   _renderNapEditor() {
-    return html`<div class="box">
-            <ha-form
-                .hass=${this._hass}
-                .data=${this._config}
-                .schema=${this._configSchemaNap}
-                .computeLabel=${(s) => s.label ?? s.name}
-                @value-changed=${this._valueChanged}
-            ></ha-form>
-        </div>`;
+    return html`
+      <div class="box">
+        <ha-form
+            .hass=${this._hass}
+            .data=${this._config}
+            .schema=${this._configSchemaNap}
+            .computeLabel=${(s) => s.label ?? s.name}
+            @value-changed=${this._valueChanged}
+        ></ha-form>
+
+        <ha-duration-input
+          .data=${null}
+          @value-changed=${null}
+        ></ha-duration-input>
+
+      </div>`;
   }
 
   // <br>
@@ -2275,7 +1831,7 @@ class HeightUpdater {
   }
 
   static _updateHeightOnMediaControlCards(element: LovelaceCard) {
-    if (!element.getAttribute('type-media-control')) return;
+    if (!element.getAttribute('type-media-control')) return; // TODO: could not find this attribute anywhere in github for HA frontend; eliminate, modify?
     if (element.children[0] && element.children[0].shadowRoot) {
       (element.children[0] as LovelaceCard).style.height = '100%';
       let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');

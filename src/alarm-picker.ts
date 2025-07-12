@@ -1,4 +1,4 @@
-import { AlarmConfiguration } from './alarm-controller';
+// import { AlarmConfiguration } from './alarm-controller';
 
 import { LitElement, html, css } from 'lit';
 import { property, state, customElement, query } from "lit/decorators.js";
@@ -18,7 +18,7 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueM: string;
 
     @property({ reflect: false }) config: CardConfig;
-    @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
+    // @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
     @property({ reflect: false }) alarm: NextAlarmObject;
     @property({ reflect: false }) time: string;
     @property({ reflect: false }) disabled: boolean;
@@ -219,7 +219,7 @@ class AlarmPicker extends LitElement {
 
     _alarmTimeFormat() {
         // return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
-        return (this.config['time_format'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
+        return (this.config.time_format === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
     }
 
     _updateValue(event: Event) {

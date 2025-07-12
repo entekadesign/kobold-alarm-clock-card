@@ -9,7 +9,7 @@ import { getLovelace, type HomeAssistant } from "custom-card-helpers";
 
 export class AlarmController {
 
-    private _controllersAlarmConfig: AlarmConfiguration;
+    // private _controllersAlarmConfig: AlarmConfiguration;
     private _hass: any;
     private _config: CardConfig;
     private _isAlarmRinging: boolean = false;
@@ -37,7 +37,7 @@ export class AlarmController {
 
     set hass(hass: HomeAssistant) {
         this._hass = hass;
-        this._controllersAlarmConfig = null;
+        // this._controllersAlarmConfig = null;
         this._evaluate();
     }
 
@@ -59,23 +59,23 @@ export class AlarmController {
         }
     }
 
-    get controllersAlarmConfig() {
-        if (!this._controllersAlarmConfig) {
-            if (this._hass.states[`sensor.${this._config.name}`]) {
-                this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
-            } else {
-                alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
-                if (this._config.debug) {
-                    this._hass.callService('system_log', 'write', { 'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`, 'level': 'info' });
-                }
-            }
-        }
-        return this._controllersAlarmConfig;
-    }
+    // get controllersAlarmConfig() {
+    //     if (!this._controllersAlarmConfig) {
+    //         if (this._hass.states[`sensor.${this._config.name}`]) {
+    //             this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
+    //         } else {
+    //             alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
+    //             if (this._config.debug) {
+    //                 this._hass.callService('system_log', 'write', { 'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`, 'level': 'info' });
+    //             }
+    //         }
+    //     }
+    //     return this._controllersAlarmConfig;
+    // }
 
-    saveControllersAlarmConfig(configuration: AlarmConfiguration) {
-        this._saveConfiguration(configuration);
-    }
+    // saveControllersAlarmConfig(configuration: AlarmConfiguration) {
+    //     this._saveConfiguration(configuration);
+    // }
 
     isConfigCorrect() {
         return this.alarmClockVariableEntity
@@ -131,7 +131,7 @@ export class AlarmController {
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) {
             // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-            this.snoozeConfig(this._config['snooze_duration_default'].time);
+            this.snoozeConfig(this._config.snooze_duration_default.time);
         } else {
             // controllersAlarmConfig.dismiss();
             this.dismissConfig();
@@ -225,6 +225,7 @@ export class AlarmController {
     get isAlarmEnabled() {
         const nextAlarm = this.nextAlarm;
 
+        //TODO: can nextalarm ever be disabled (except when first defined)? why just just keep it enabled always? or, better, since picker not used anywhere else, eliminate enabled from nextalarm?)
         if (nextAlarm.overridden && nextAlarm.enabled) {
             return true;
         }
@@ -294,12 +295,13 @@ export class AlarmController {
         if (!nextAlarm.enabled) {
             return;
         }
-
+        console.log('*** current time>nextalarm: ' + dayjs().format('HH:mm') + '; ' + nextAlarm.time);
         if (!this.isAlarmRinging() && dayjs().format('HH:mm') >= nextAlarm.time && nextAlarm.date === dateToday) {
+            console.log('*** alarm ringing');
             this._alarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm automatically after alarmdurationdefault time elapses
-            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(this._config.alarmDurationDefault.time))).format('HH:mm') <= dayjs().format('HH:mm')) {
+            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(this._config.alarmDurationDefault)).format('HH:mm') <= dayjs().format('HH:mm')) {
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
@@ -338,32 +340,47 @@ export class AlarmController {
                 }
                 console.warn('*** _callAlarmRingingService(); alarmSoundLocalEntity is undefined');
             }
+            // if (this._config.alarm_entities) {
+            //     const entitiesArray = [];
+            //     const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
+            //     for (const entity of this._config.alarm_entities) {
+            //         if (ringerEntities) {
+            //             for (const ringerEntity of ringerEntities) {
+            //                 if (ringerEntity.entity_id === entity && ringerEntity.enabled) {
+            //                     entitiesArray.push(entity);
+            //                 }
+            //             }
+            //         } else {
+            //             entitiesArray.push(entity);
+            //         }
+            //     }
+            //     for (const entitiesArrayElement of entitiesArray) {
+            //         const entityState = this._hass.states[entitiesArrayElement].state;
+            //         if (entitiesArrayElement.startsWith('media_player')) {
+            //             if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
+            //                 this._hass.callService('media_player', this._mappingMediaPlayer[action], { 'entity_id': entitiesArrayElement });
+            //             }
+            //         } else {
+            //             if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
+            //                 this._hass.callService('homeassistant', action, { 'entity_id': entitiesArrayElement });
+            //             }
+            //         }
+            //     }
+            // }
             if (this._config.alarm_entities) {
-                const entitiesArray = [];
-                const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
-                for (const entity of this._config.alarm_entities) {
-                    if (ringerEntities) {
-                        for (const ringerEntity of ringerEntities) {
-                            if (ringerEntity.entity_id === entity && ringerEntity.enabled) {
-                                entitiesArray.push(entity);
-                            }
-                        }
-                    } else {
-                        entitiesArray.push(entity);
-                    }
-                }
-                for (const entitiesArrayElement of entitiesArray) {
-                    const entityState = this._hass.states[entitiesArrayElement].state;
-                    if (entitiesArrayElement.startsWith('media_player')) {
+                this._config.alarm_entities.forEach(entity => {
+                    // for (const entity of this._config.alarm_entities) {
+                    const entityState = this._hass.states[entity].state;
+                    if (entity.startsWith('media_player')) {
                         if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
-                            this._hass.callService('media_player', this._mappingMediaPlayer[action], { 'entity_id': entitiesArrayElement });
+                            this._hass.callService('media_player', this._mappingMediaPlayer[action], { 'entity_id': entity });
                         }
                     } else {
                         if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
-                            this._hass.callService('homeassistant', action, { 'entity_id': entitiesArrayElement });
+                            this._hass.callService('homeassistant', action, { 'entity_id': entity });
                         }
                     }
-                }
+                });
             }
         }
 
@@ -376,93 +393,93 @@ export class AlarmController {
         }
     }
 
-    _saveConfiguration(configuration: AlarmConfiguration) {
-        let actualConfiguration = configuration;
-        if (!(configuration instanceof AlarmConfiguration)) {
-            actualConfiguration = Object.assign(new AlarmConfiguration, configuration);
-            console.warn('*** _saveConfiguration(); Submitted configuration is corrupt');
-        }
+    //     _saveConfiguration(configuration: AlarmConfiguration) {
+    //         let actualConfiguration = configuration;
+    //         if (!(configuration instanceof AlarmConfiguration)) {
+    //             actualConfiguration = Object.assign(new AlarmConfiguration, configuration);
+    //             console.warn('*** _saveConfiguration(); Submitted configuration is corrupt');
+    //         }
 
-        // reset next alarm after being disabled and now being re-enabled
-        if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) {
-            actualConfiguration.dismiss();  //TODO: this code moded to editor; test
-        }
+    //         // reset next alarm after being disabled and now being re-enabled
+    //         if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) {
+    //             actualConfiguration.dismiss();  //TODO: this code moded to editor; test
+    //         }
 
-        const configurationWithLastUpdated = {
-            ...actualConfiguration,
-            last_updated: dayjs().format('YYYY-MM-DD HH:mm:ss')
-        }
+    //         const configurationWithLastUpdated = {
+    //             ...actualConfiguration,
+    //             last_updated: dayjs().format('YYYY-MM-DD HH:mm:ss')
+    //         }
 
-        const alarmClockVariableEntityName = 'sensor.' + this._config.name;
+    //         const alarmClockVariableEntityName = 'sensor.' + this._config.name;
 
-        const param = {
-            entity_id: alarmClockVariableEntityName,
-            attributes: configurationWithLastUpdated,
-            replace_attributes: true
-        };
+    //         const param = {
+    //             entity_id: alarmClockVariableEntityName,
+    //             attributes: configurationWithLastUpdated,
+    //             replace_attributes: true
+    //         };
 
-        if (this.alarmClockPingEntity.state === 'on') {
-            this._hass.callService('variable', 'update_sensor', param);
-            this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
-        } else {
-            if (this._config.debug) {
-                this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
-            }
-            alert('Save failed. No connection to Home Assistant.');
-        }
-    }
+    //         if (this.alarmClockPingEntity.state === 'on') {
+    //             this._hass.callService('variable', 'update_sensor', param);
+    //             this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
+    //         } else {
+    //             if (this._config.debug) {
+    //                 this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
+    //             }
+    //             alert('Save failed. No connection to Home Assistant.');
+    //         }
+    //     }
 }
 
-export class AlarmConfiguration {
+// export class AlarmConfiguration {
 
-    public alarmsEnabled: boolean = false;
-    public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', date_time: '' };
-    public mo: TimeObject = { enabled: false, time: '07:00' };
-    public tu: TimeObject = { enabled: false, time: '07:00' };
-    public we: TimeObject = { enabled: false, time: '07:00' };
-    public th: TimeObject = { enabled: false, time: '07:00' };
-    public fr: TimeObject = { enabled: false, time: '07:00' };
-    public sa: TimeObject = { enabled: false, time: '09:00' };
-    public su: TimeObject = { enabled: false, time: '09:00' };
-    public timeFormat: string = '12hr';
-    public clockFontFace: string = '0';
-    public clockDefaultFullscreen: boolean = false;
-    public snoozeDurationDefault: TimeObject = { enabled: true, time: '00:15' };
-    public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
-    public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
-    public last_updated: string;
+//     public alarmsEnabled: boolean = false;
+//     public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', date_time: '' };
+//     public mo: TimeObject = { enabled: false, time: '07:00' };
+//     public tu: TimeObject = { enabled: false, time: '07:00' };
+//     public we: TimeObject = { enabled: false, time: '07:00' };
+//     public th: TimeObject = { enabled: false, time: '07:00' };
+//     public fr: TimeObject = { enabled: false, time: '07:00' };
+//     public sa: TimeObject = { enabled: false, time: '09:00' };
+//     public su: TimeObject = { enabled: false, time: '09:00' };
+//     public timeFormat: string = '12hr';
+//     public clockFontFace: string = '0';
+//     public clockDefaultFullscreen: boolean = false;
+//     public snoozeDurationDefault: TimeObject = { enabled: true, time: '00:15' };
+//     public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
+//     public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
+//     public last_updated: string;
 
-    snooze(snoozeTime: string) {
-        const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
-        this.nextAlarm = {
-            ...this.nextAlarm,
-            enabled: true,
-            snooze: true,
-            time: nextAlarmTime.format('HH:mm'),
-            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
-        }
-    }
+//     snooze(snoozeTime: string) {
+//         const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
+//         this.nextAlarm = {
+//             ...this.nextAlarm,
+//             enabled: true,
+//             snooze: true,
+//             time: nextAlarmTime.format('HH:mm'),
+//             date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
+//         }
+//     }
 
-    dismiss() {
-        const momentTomorrow = dayjs().add(1, 'day');
-        const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
-        // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-        this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
-    }
+//     dismiss() {
+//         const momentTomorrow = dayjs().add(1, 'day');
+//         const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
+//         // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
+//         this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
+//     }
 
-    static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
-        let alarmDate = dayjs();
-        if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
-            alarmDate = alarmDate.add(1, 'day');
-        }
+//     static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
+//         let alarmDate = dayjs();
+//         if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
+//             alarmDate = alarmDate.add(1, 'day');
+//         }
 
-        return {
-            ...alarm,
-            date: alarmDate.format('YYYY-MM-DD'),
-            date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
-        }
-    }
-}
+//         return {
+//             ...alarm,
+//             date: alarmDate.format('YYYY-MM-DD'),
+//             date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
+//         }
+//     }
+// }
 
 export class Helpers {
     static fireEvent = (event, detail = undefined, element = this.getLovelace()) => {
@@ -621,6 +638,15 @@ export class Helpers {
         return root;
     };
 
+    static getEditorButtons = () => {
+        let root: any = this.getEditor();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('div[slot="primaryAction"]');
+        // console.log('*** getEditorButtons(); root: ', root);
+        return root;
+    }
+
+
     // static getConfigContent = () => {
     //     let root: any = this.getEditor();
     //     root = root && root.shadowRoot;
@@ -730,6 +756,7 @@ export class Helpers {
         su: { enabled: false, time: "09:00:00" },
         snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
         alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
+        nap_duration: { hours: 0, minutes: 30, seconds: 0 },
         time_format: "12hr",
         clock_display_font: 0,
         hide_cards_default: true,

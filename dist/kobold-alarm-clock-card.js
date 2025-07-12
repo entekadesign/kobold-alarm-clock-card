@@ -1085,7 +1085,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     }
     set hass(hass) {
         this._hass = hass;
-        this._controllersAlarmConfig = null;
+        // this._controllersAlarmConfig = null;
         this._evaluate();
     }
     get alarmRingingEntity() {
@@ -1100,22 +1100,22 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     get alarmClockPingEntity() {
         if (this._config.ping_entity) return this._hass.states[this._config.ping_entity];
     }
-    get controllersAlarmConfig() {
-        if (!this._controllersAlarmConfig) {
-            if (this._hass.states[`sensor.${this._config.name}`]) this._controllersAlarmConfig = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, this._hass.states[`sensor.${this._config.name}`].attributes);
-            else {
-                alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
-                if (this._config.debug) this._hass.callService('system_log', 'write', {
-                    'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`,
-                    'level': 'info'
-                });
-            }
-        }
-        return this._controllersAlarmConfig;
-    }
-    saveControllersAlarmConfig(configuration) {
-        this._saveConfiguration(configuration);
-    }
+    // get controllersAlarmConfig() {
+    //     if (!this._controllersAlarmConfig) {
+    //         if (this._hass.states[`sensor.${this._config.name}`]) {
+    //             this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, this._hass.states[`sensor.${this._config.name}`].attributes);
+    //         } else {
+    //             alert(`Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`);
+    //             if (this._config.debug) {
+    //                 this._hass.callService('system_log', 'write', { 'message': `*** Card requires Variables+History integration whose entity ID is sensor.${this._config.name}`, 'level': 'info' });
+    //             }
+    //         }
+    //     }
+    //     return this._controllersAlarmConfig;
+    // }
+    // saveControllersAlarmConfig(configuration: AlarmConfiguration) {
+    //     this._saveConfiguration(configuration);
+    // }
     isConfigCorrect() {
         return this.alarmClockVariableEntity && this.alarmRingingEntity;
     }
@@ -1155,7 +1155,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     nextAlarmReset(snooze = false) {
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-        this.snoozeConfig(this._config['snooze_duration_default'].time);
+        this.snoozeConfig(this._config.snooze_duration_default.time);
         else // controllersAlarmConfig.dismiss();
         this.dismissConfig();
         // this._saveConfiguration(controllersAlarmConfig);
@@ -1229,6 +1229,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     }
     get isAlarmEnabled() {
         const nextAlarm = this.nextAlarm;
+        //TODO: can nextalarm ever be disabled (except when first defined)? why just just keep it enabled always? or, better, since picker not used anywhere else, eliminate enabled from nextalarm?)
         if (nextAlarm.overridden && nextAlarm.enabled) return true;
         // return this.controllersAlarmConfig.alarmsEnabled && nextAlarm.enabled;
         return this._config.alarms_enabled && nextAlarm.enabled; //create accessor on this?
@@ -1285,10 +1286,13 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // if (!this.controllersAlarmConfig.alarmsEnabled && !nextAlarm.nap) {
         if (!this._config.alarmsEnabled && !nextAlarm.nap) return;
         if (!nextAlarm.enabled) return;
-        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm') >= nextAlarm.time && nextAlarm.date === dateToday) this._alarmRinging(true);
-        else if (this.isAlarmRinging()) // dismiss alarm automatically after alarmdurationdefault time elapses
+        console.log('*** current time>nextalarm: ' + (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm') + '; ' + nextAlarm.time);
+        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm') >= nextAlarm.time && nextAlarm.date === dateToday) {
+            console.log('*** alarm ringing');
+            this._alarmRinging(true);
+        } else if (this.isAlarmRinging()) // dismiss alarm automatically after alarmdurationdefault time elapses
         {
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration($b2cd7c9abb677932$export$4dc2b60021baefca.convertToMinutes(this._config.alarmDurationDefault.time))).format('HH:mm') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm')) this.dismiss();
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.alarmDurationDefault)).format('HH:mm') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm')) this.dismiss();
         } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScripts[`${action.entity}-${action.when}`]).filter((action)=>(0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration($b2cd7c9abb677932$export$4dc2b60021baefca.convertToMinutes(action.when))).format('HH:mm') === (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm')).forEach((action)=>this._runAction(action));
     }
     _runAction(action) {
@@ -1321,23 +1325,44 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 });
                 console.warn('*** _callAlarmRingingService(); alarmSoundLocalEntity is undefined');
             }
-            if (this._config.alarm_entities) {
-                const entitiesArray = [];
-                const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
-                for (const entity of this._config.alarm_entities)if (ringerEntities) {
-                    for (const ringerEntity of ringerEntities)if (ringerEntity.entity_id === entity && ringerEntity.enabled) entitiesArray.push(entity);
-                } else entitiesArray.push(entity);
-                for (const entitiesArrayElement of entitiesArray){
-                    const entityState = this._hass.states[entitiesArrayElement].state;
-                    if (entitiesArrayElement.startsWith('media_player')) {
-                        if (action === 'turn_on' && entityState !== 'on' || action === 'turn_off' && entityState !== 'off') this._hass.callService('media_player', this._mappingMediaPlayer[action], {
-                            'entity_id': entitiesArrayElement
-                        });
-                    } else if (action === 'turn_on' && entityState !== 'on' || action === 'turn_off' && entityState !== 'off') this._hass.callService('homeassistant', action, {
-                        'entity_id': entitiesArrayElement
+            // if (this._config.alarm_entities) {
+            //     const entitiesArray = [];
+            //     const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
+            //     for (const entity of this._config.alarm_entities) {
+            //         if (ringerEntities) {
+            //             for (const ringerEntity of ringerEntities) {
+            //                 if (ringerEntity.entity_id === entity && ringerEntity.enabled) {
+            //                     entitiesArray.push(entity);
+            //                 }
+            //             }
+            //         } else {
+            //             entitiesArray.push(entity);
+            //         }
+            //     }
+            //     for (const entitiesArrayElement of entitiesArray) {
+            //         const entityState = this._hass.states[entitiesArrayElement].state;
+            //         if (entitiesArrayElement.startsWith('media_player')) {
+            //             if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
+            //                 this._hass.callService('media_player', this._mappingMediaPlayer[action], { 'entity_id': entitiesArrayElement });
+            //             }
+            //         } else {
+            //             if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
+            //                 this._hass.callService('homeassistant', action, { 'entity_id': entitiesArrayElement });
+            //             }
+            //         }
+            //     }
+            // }
+            if (this._config.alarm_entities) this._config.alarm_entities.forEach((entity)=>{
+                // for (const entity of this._config.alarm_entities) {
+                const entityState = this._hass.states[entity].state;
+                if (entity.startsWith('media_player')) {
+                    if (action === 'turn_on' && entityState !== 'on' || action === 'turn_off' && entityState !== 'off') this._hass.callService('media_player', this._mappingMediaPlayer[action], {
+                        'entity_id': entity
                     });
-                }
-            }
+                } else if (action === 'turn_on' && entityState !== 'on' || action === 'turn_off' && entityState !== 'off') this._hass.callService('homeassistant', action, {
+                    'entity_id': entity
+                });
+            });
         } catch (err) {
             if (this._config.debug) this._hass.callService('system_log', 'write', {
                 'message': '*** _callAlarmRingingService; Error while calling service: ' + err,
@@ -1346,114 +1371,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             console.warn('*** _callAlarmRingingService(); Error while calling service: ' + err);
             return;
         }
-    }
-    _saveConfiguration(configuration) {
-        let actualConfiguration = configuration;
-        if (!(configuration instanceof $b2cd7c9abb677932$export$5df46671f5b4cca6)) {
-            actualConfiguration = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, configuration);
-            console.warn('*** _saveConfiguration(); Submitted configuration is corrupt');
-        }
-        // reset next alarm after being disabled and now being re-enabled
-        if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) actualConfiguration.dismiss(); //TODO: this code moded to editor; test
-        const configurationWithLastUpdated = {
-            ...actualConfiguration,
-            last_updated: (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss')
-        };
-        const alarmClockVariableEntityName = 'sensor.' + this._config.name;
-        const param = {
-            entity_id: alarmClockVariableEntityName,
-            attributes: configurationWithLastUpdated,
-            replace_attributes: true
-        };
-        if (this.alarmClockPingEntity.state === 'on') {
-            this._hass.callService('variable', 'update_sensor', param);
-            this._controllersAlarmConfig = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, configurationWithLastUpdated);
-        } else {
-            if (this._config.debug) this._hass.callService('system_log', 'write', {
-                'message': '*** Save attempted while clock disconnected from Home Assistant',
-                'level': 'info'
-            });
-            alert('Save failed. No connection to Home Assistant.');
-        }
-    }
-}
-class $b2cd7c9abb677932$export$5df46671f5b4cca6 {
-    snooze(snoozeTime) {
-        const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this.nextAlarm.time, 'HH:mm').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration($b2cd7c9abb677932$export$4dc2b60021baefca.convertToMinutes(snoozeTime)));
-        this.nextAlarm = {
-            ...this.nextAlarm,
-            enabled: true,
-            snooze: true,
-            time: nextAlarmTime.format('HH:mm'),
-            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
-        };
-    }
-    dismiss() {
-        const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
-        const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
-        // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-        this.nextAlarm = $b2cd7c9abb677932$export$5df46671f5b4cca6.createNextAlarm(alarmTomorrow);
-    }
-    static createNextAlarm(alarm, forToday = false) {
-        let alarmDate = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))();
-        if (!(alarm.time >= alarmDate.format('HH:mm') && forToday)) alarmDate = alarmDate.add(1, 'day');
-        return {
-            ...alarm,
-            date: alarmDate.format('YYYY-MM-DD'),
-            date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`
-        };
-    }
-    constructor(){
-        this.alarmsEnabled = false;
-        this.nextAlarm = {
-            enabled: false,
-            time: '08:00',
-            date: '',
-            date_time: ''
-        };
-        this.mo = {
-            enabled: false,
-            time: '07:00'
-        };
-        this.tu = {
-            enabled: false,
-            time: '07:00'
-        };
-        this.we = {
-            enabled: false,
-            time: '07:00'
-        };
-        this.th = {
-            enabled: false,
-            time: '07:00'
-        };
-        this.fr = {
-            enabled: false,
-            time: '07:00'
-        };
-        this.sa = {
-            enabled: false,
-            time: '09:00'
-        };
-        this.su = {
-            enabled: false,
-            time: '09:00'
-        };
-        this.timeFormat = '12hr';
-        this.clockFontFace = '0';
-        this.clockDefaultFullscreen = false;
-        this.snoozeDurationDefault = {
-            enabled: true,
-            time: '00:15'
-        };
-        this.alarmDurationDefault = {
-            enabled: true,
-            time: '00:30'
-        };
-        this.napDurationDefault = {
-            enabled: true,
-            time: '00:30'
-        };
     }
 }
 class $b2cd7c9abb677932$export$4dc2b60021baefca {
@@ -1584,7 +1501,14 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         // console.log('*** getEditor(); root: ', root);
         return root;
     };
-    static #_4 = // static getConfigContent = () => {
+    static #_4 = this.getEditorButtons = ()=>{
+        let root = this.getEditor();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('div[slot="primaryAction"]');
+        // console.log('*** getEditorButtons(); root: ', root);
+        return root;
+    };
+    static #_5 = // static getConfigContent = () => {
     //     let root: any = this.getEditor();
     //     root = root && root.shadowRoot;
     //     root = root && root.querySelector('hui-card-element-editor');
@@ -1677,7 +1601,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             'minutes': minutes
         };
     }
-    static #_5 = this.defaultConfig = {
+    static #_6 = this.defaultConfig = {
         name: "alarm_clock",
         alarms_enabled: false,
         next_alarm: {
@@ -1725,6 +1649,11 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             minutes: 30,
             seconds: 0
         },
+        nap_duration: {
+            hours: 0,
+            minutes: 30,
+            seconds: 0
+        },
         time_format: "12hr",
         clock_display_font: 0,
         hide_cards_default: true,
@@ -1733,6 +1662,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
 }
 
 
+// import { AlarmConfiguration } from './alarm-controller';
 
 /**
  * @license
@@ -2968,7 +2898,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
     }
     _alarmTimeFormat() {
         // return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
-        return this.config['time_format'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker' ? 'HH:mm' : 'h:mm A';
+        return this.config.time_format === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker' ? 'HH:mm' : 'h:mm A';
     }
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
@@ -3023,11 +2953,6 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         reflect: false
     })
 ], $3ce236f40c9404d3$var$AlarmPicker.prototype, "config", void 0);
-(0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
-    (0, $6bc2845c2b7eed7f$export$d541bacb2bda4494)({
-        reflect: false
-    })
-], $3ce236f40c9404d3$var$AlarmPicker.prototype, "alarmConfiguration", void 0);
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $6bc2845c2b7eed7f$export$d541bacb2bda4494)({
         reflect: false
@@ -3302,7 +3227,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         };
     }
     render() {
-        this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
+        // this._alarmConfiguration = this._alarmController.controllersAlarmConfig;
         this._nextAlarm = this._alarmController.nextAlarm;
         // console.log('*** render(); this._nextAlarm: ', this._nextAlarm);
         this._ringerEntities = this._ringerEntities || [];
@@ -3356,232 +3281,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         <ha-card>
           <div>
 
-            <dialog id="scheduleDialog" class="mdc-dialog alarm-picker-dialog"
-                role="alertdialog"
-                aria-modal="true"
-                aria-labelledby="alarm-picker-dialog-title"
-                aria-describedby="alarm-picker-dialog-content"
-                >
-                <div class="mdc-dialog__container">
-                    <div class="mdc-dialog__surface">
-                        <header id="alarm-picker-dialog-title" class="header-bar mdc-dialog__title">
-                          <ha-icon-button
-                          slot="navigationIcon"
-                          dialogAction="cancel"
-                          label="Close"
-                          >
-                            <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${()=>this.closeDialog('#scheduleDialog')}></ha-icon>
-                          </ha-icon-button>
-                          <span class="header-title">Set Schedule</span>
-                          <ha-switch ?checked=${this._alarmsEnabled} @change=${()=>{
-            this._alarmsEnabled = !this._alarmsEnabled;
-        }}></ha-switch>
-                        </header>
-                        <div id="alarm-picker-dialog-content" class="mdc-dialog__content alarm-picker-dialog-content">
-                          <div class="workweek">
-                              <alarm-picker id="alarmPickerMo" .alarm=${this._alarmPickerMo} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(0)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTu" .alarm=${this._alarmPickerTu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(1)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerWe" .alarm=${this._alarmPickerWe} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(2)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerTh" .alarm=${this._alarmPickerTh} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(3)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerFr" .alarm=${this._alarmPickerFr} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(4)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSa" .alarm=${this._alarmPickerSa} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(5)}: </span></alarm-picker>
-                              <alarm-picker id="alarmPickerSu" .alarm=${this._alarmPickerSu} disabled=${!this._alarmsEnabled} .alarmConfiguration=${this._alarmConfiguration}><span>${this._getDayOfWeek(6)}: </span></alarm-picker>
-                          </div>
-                          <div class="alarm-picker-dialog-buttons dialog-buttons">
-                            <ha-button @click=${this.saveAndCloseAlarmPicker} raised>Save</ha-button>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mdc-dialog__scrim" @click=${()=>this.closeDialog('#scheduleDialog')}></div>
-            </dialog>
-
-            <dialog id="napDialog" class="mdc-dialog alarm-nap-dialog"
-                role="alertdialog"
-                aria-modal="true"
-                aria-labelledby="alarm-nap-dialog-title"
-                aria-describedby="alarm-nap-dialog-content"
-                >
-                <div class="mdc-dialog__container">
-                    <div class="mdc-dialog__surface">
-                        <header id="alarm-nap-dialog-title" class="header-bar mdc-dialog__title">
-                          <ha-icon-button
-                          slot="navigationIcon"
-                          dialogAction="cancel"
-                          label="Close"
-                          >
-                            <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${()=>this.closeDialog('#napDialog')}></ha-icon>
-                          </ha-icon-button>
-                          <span class="header-title">Set Nap Length</span>
-                        </header>
-                        <div id="alarm-nap-dialog-content" class="mdc-dialog__content alarm-nap-dialog-content">
-                          <alarm-picker id="napTimePicker" .alarm=${this._napTime} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                              <span>Nap Duration: </span>
-                          </alarm-picker>
-                          <div class="alarm-nap-dialog-buttons dialog-buttons">
-                              <ha-button @click=${this.saveAndCloseNap} raised>Save</ha-button>
-                              <ha-button @click=${this.clearAndCloseNap} raised>Clear</ha-button>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mdc-dialog__scrim" @click=${()=>this.closeDialog('#napDialog')}></div>
-            </dialog>
-
-            <dialog id="settingsDialog" class="mdc-dialog alarm-settings-dialog"
-              role="alertdialog"
-              aria-modal="true"
-              aria-labelledby="alarm-settings-dialog-title"
-              aria-describedby="alarm-settings-dialog-content"
-              >
-              <div class="mdc-dialog__container">
-                <div class="mdc-dialog__surface">
-                  <header id="alarm-settings-dialog-title" class="header-bar mdc-dialog__title">
-                    <ha-icon-button
-                    slot="navigationIcon"
-                    dialogAction="cancel"
-                    label="Close"
-                    >
-                      <ha-icon .icon=${'mdi:close'} class="header-navigation-icon" @click=${()=>this.closeDialog('#settingsDialog')}></ha-icon>
-                    </ha-icon-button>
-                    <span class="header-title">Set Preferences</span>
-                  </header>
-                  <div id="alarm-settings-dialog-content" class="mdc-dialog__content alarm-settings-dialog-content">
-                    <div id="alarmRingers" class="switches-group-table">
-                      <div class="switches-group-row">
-                        <span>Alarm Ringers:</span>
-                        <div class="switches-group-options">
-                          ${this._ringerEntities.map((entity, i)=>(0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
-                              <div class="switch-row">
-                                <div class="switch-row-group">
-                                  <ha-textfield
-                                    id="ringer-text-${i}"
-                                    class="ringer-text"
-                                    .value=${this._hass.states[entity.entity_id] ? this._hass.states[entity.entity_id].attributes.friendly_name : 'No ringer entity found'}
-                                    readonly
-                                    >
-                                  </ha-textfield>
-                                  <ha-switch id="ringer-switch-${i}" class="ringer-switch" ?checked=${entity.enabled} @change=${this._handleSwitchRingerEntity}></ha-switch>
-                                </div>
-                              </div>
-                            `)}
-                        </div>
-                      </div>
-                    </div>
-                    <div id="timeFormat" class="radio-row">
-                      <div class="radio-row-group">
-                        <span>Time Format:</span>
-                        <div class="radio-row-options">
-                          <ha-formfield
-                          label="24hr"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueTimeFormat}
-                                value="24hr"
-                                name="24hr"
-                                ?checked=${this._timeFormat === '24hr'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="12hr"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueTimeFormat}
-                                value="12hr"
-                                name="12hr"
-                                ?checked=${this._timeFormat === '12hr'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="clockFontFace" class="radio-row">
-                      <div class="radio-row-group">
-                        <span>Clock Display Font:</span>
-                        <div class="radio-row-options">
-                          <ha-formfield
-                          label="System"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="0"
-                                name="0"
-                                ?checked=${this._clockFontFace === '0'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="1"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="1"
-                                name="1"
-                                ?checked=${this._clockFontFace === '1'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="2"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="2"
-                                name="2"
-                                ?checked=${this._clockFontFace === '2'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                          <ha-formfield
-                          label="3"
-                          >
-                            <ha-radio
-                                @change=${this._handleRadioValueClockFontFace}
-                                value="3"
-                                name="3"
-                                ?checked=${this._clockFontFace === '3'}
-                            >
-                            </ha-radio>
-                          </ha-formfield>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="switches-group-table">
-                        <div class="switches-group-row fullscreen-row">
-                        <span>Hide Cards Default:</span>
-                            <div class="switches-group-options">
-                                <div class="switch-row">
-                                    <div class="switch-row-group">
-                                        <ha-switch
-                                            id="clockDefaultFullscreen"
-                                            class="fullscreen-switch"
-                                            ?checked=${this._clockDefaultFullscreen}
-                                            @change=${(e)=>{
-            this._clockDefaultFullscreen = e.target.checked;
-        }}>
-                                        </ha-switch>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <alarm-picker id="snoozeDurationPicker" .alarm=${this._snoozeDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                      <span>Snooze Duration: </span>
-                    </alarm-picker>
-                    <alarm-picker id="alarmDurationPicker" .alarm=${this._alarmDurationDefault} hide-toggle-button .alarmConfiguration=${this._alarmConfiguration}>
-                      <span>Alarm Duration: </span>
-                    </alarm-picker>
-                    <div class="alarm-settings-dialog-buttons dialog-buttons">
-                      <ha-button @click=${this.saveAndCloseSettings} raised>Save</ha-button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="mdc-dialog__scrim" @click=${()=>this.closeDialog('#settingsDialog')}></div>
-            </dialog>
-
             <div id="alarmclock" class=${(0, $b5ce948eee6979f0$export$56cc687933817664)(this._alarmClockClasses)}>
               <div id="alarm-top" class="meta">
                 <div id="clockLogo"></div>
@@ -3593,7 +3292,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 ${this._areAlarmsEnabled() ? (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
                     <alarm-picker id="tab-2" show-icon="true" .alarm=${this._nextAlarm}
                         .config=${this._config}
-                        .alarmConfiguration=${this._alarmConfiguration}
                         .time=${this._time}
                         @alarm-button-clicked=${this._showEditor}
                         @alarm-changed=${this._onAlarmChanged}
@@ -3835,306 +3533,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
     }
-
-    /* *************** */
-    /* *** dialogs *** */
-    /* *************** */
-
-    /* mobile screen sizes */
-    @media (max-width: 600px), (max-height: 600px) {
-      dialog {
-        --dialog-surface-margin-top: 0px;
-        --mdc-dialog-min-width: calc( 100vw - env(safe-area-inset-right) - env(safe-area-inset-left) );
-        --mdc-dialog-max-width: calc( 100vw - env(safe-area-inset-right) - env(safe-area-inset-left) );
-        --mdc-dialog-min-height: 100%;
-        --mdc-dialog-max-height: 100%;
-        --ha-dialog-border-radius: 0;
-      }
-
-      .mdc-dialog .mdc-dialog__content {
-        padding-top: 0 !important;
-      }
-
-      #alarm-nap-dialog-content {
-        padding-top: 25vh !important;
-      }
-      #alarm-nap-dialog-content .alarm-nap-dialog-buttons {
-        padding-top: 10vh !important;
-      }
-
-      #alarm-settings-dialog-content div.radio-row span {
-        line-height: 2em;
-        display: block;
-      }
-      #alarm-settings-dialog-content div.radio-row .radio-row-group .radio-row-options {
-        height: 2em;
-      }
-
-      #alarm-settings-dialog-content div.radio-row .radio-row-group .radio-row-options ha-radio {
-        margin-left: 0;
-      }
-
-      #alarm-settings-dialog-content div.switch-row .switch-row-group {
-        height: 2em;
-      }
-    }
-
-    @media (min-width: 601px) and (min-height: 601px) {
-      dialog {
-        --mdc-dialog-min-width: 580px;
-        --mdc-dialog-max-width: 580px;
-        --mdc-dialog-max-height: calc(100% - 72px);
-      }
-    }
-
-    dialog[open] {
-      z-index: 99;
-    }
-
-    dialog {
-      background: none;
-      padding: 0;
-      border: medium none;
-    }
-
-    .mdc-dialog, .mdc-dialog__scrim {
-      background-color: var(--mdc-dialog-scrim-color,rgba(0,0,0,.32));
-      position: fixed;
-      top: 0px;
-      left: 0px;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-    }
-
-    .mdc-dialog__container {
-      align-items: var(--vertical-align-dialog,center);
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      box-sizing: border-box;
-      height: 100%;
-    }
-
-    .mdc-dialog__surface {
-      border: 1px solid var(--primary-background-color);
-      z-index: var(--dialog-z-index, 8);
-      transform: scale(.8);
-      opacity: 0;
-      transition: opacity 120ms, transform 120ms;
-      position: var(--dialog-surface-position, relative);
-      top: var(--dialog-surface-top);
-      margin-top: var(--dialog-surface-margin-top);
-      min-height: var(--mdc-dialog-min-height, auto);
-      min-width: var(--mdc-dialog-min-width,280px);
-      border-radius: 28px;
-      -webkit-backdrop-filter: var(--ha-dialog-surface-backdrop-filter, none);
-      backdrop-filter: var(--ha-dialog-surface-backdrop-filter, none);
-      background: var(
-        --ha-dialog-surface-background,
-        var(--mdc-theme-surface, #fff)
-      );
-      box-shadow: var(
-        --mdc-dialog-box-shadow,0px 11px 15px -7px rgba(0,0,0,.2),0px 24px 38px 3px rgba(0,0,0,.14),0px 9px 46px 8px rgba(0,0,0,.12)
-      );
-    }
-
-    .mdc-dialog.open .mdc-dialog__surface {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .mdc-dialog.open {
-      backdrop-filter: var(--ha-dialog-scrim-backdrop-filter,var(--dialog-backdrop-filter,none));
-    }
-
-    .mdc-dialog__content {
-      padding: var(--dialog-content-padding,24px);
-      position: var(--dialog-content-position,relative);
-      text-align: center;
-    }
-
-    .mdc-dialog {
-      --mdc-dialog-scroll-divider-color: var(
-        --dialog-scroll-divider-color,
-        var(--divider-color)
-      );
-      -webkit-backdrop-filter: var(
-        --ha-dialog-scrim-backdrop-filter,
-        var(--dialog-backdrop-filter, none)
-      );
-      backdrop-filter: var(
-        --ha-dialog-scrim-backdrop-filter,
-        var(--dialog-backdrop-filter, none)
-      );
-      --mdc-dialog-box-shadow: var(--dialog-box-shadow, none);
-      --mdc-typography-headline6-font-weight: 400;
-      --mdc-typography-headline6-font-size: 1.574rem;
-    }
-
-    .mdc-dialog__container {
-      align-items: var(--vertical-align-dialog, center);
-    }
-
-    .header-bar {
-      padding: 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      box-sizing: border-box;
-    }
-
-    .header-bar ha-switch {
-      padding: 16px 12px 0 0;
-    }
-
-    .header-navigation-icon {
-      flex: 0 0 auto;
-      min-width: 8px;
-      height: 100%;
-      display: flex;
-      flex-direction: row;
-    }
-
-    .header-title {
-      flex: 1 1 0%;
-      font-size: 22px;
-      line-height: 28px;
-      font-weight: 400;
-      padding: 10px 4px;
-      min-width: 0px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .mdc-dialog__title {
-      padding: 24px 24px 0 24px;
-    }
-    .mdc-dialog__actions {
-      padding: 12px 24px 12px 24px;
-    }
-    .mdc-dialog__title::before {
-      content: unset;
-    }
-    .mdc-dialog .mdc-dialog__content {
-      position: var(--dialog-content-position, relative);
-      padding: var(--dialog-content-padding, 24px);
-    }
-
-    .dialog-buttons {
-      display: flex;
-      padding: 16px;
-      justify-content: space-between;
-    }
-
-    /* *************************** */
-    /* *** alarm-picker-dialog *** */
-    /* *************************** */
-
-    .workweek {
-      display: flex;
-      flex-direction: column;
-    }
-
-    alarm-picker span {
-      width: 6.5em;
-      text-align: right;
-    }
-
-    /* ************************ */
-    /* *** alarm-nap-dialog *** */
-    /* ************************ */
-
-    #napTimePicker > span {
-      width: auto;
-    }
-
-    /* ***************************** */
-    /* *** alarm-settings-dialog *** */
-    /* ***************************** */
-
-    div.radio-row, div.switch-row {
-      display: block;
-    }
-
-    div.radio-row .radio-row-group, div.switch-row .switch-row-group {
-      display: inline-flex;
-    }
-
-    div.switch-row .switch-row-group {
-      width: 22em;
-      height: 4em;
-    }
-
-    .radio-row .radio-row-group .radio-row-options {
-      display: inline-flex;
-      width: 22em;
-      height: 4em;
-    }
-
-    div.switches-group-table {
-      display: table;
-      margin: 0 auto;
-    }
-
-    div.switches-group-table .ringer-text {
-      width: 17em;
-      margin: auto 1em;
-    }
-
-    div.switches-group-table .switches-group-row {
-      display: table-row;
-    }
-
-    div.switches-group-table .switches-group-row.fullscreen-row {
-      display: flex;
-      align-items: center;
-    }
-
-    #clockDefaultFullscreen {
-      margin: 0 0 0 2em;
-    }
-
-    div.switches-group-table .switches-group-row span, div.switches-group-table .switches-group-row .switches-group-options {
-      display: table-cell;
-    }
-
-    div.switches-group-table .switches-group-row span {
-      text-align: right;
-      width: 10em;
-    }
-
-    .radio-row-group span {
-      display: block;
-      text-align: right;
-      width: 10em;
-      line-height: 4em;
-    }
-
-    ha-radio {
-      margin-left: 1em;
-    }
-
-    alarm-picker#snoozeDurationPicker, alarm-picker#alarmDurationPicker {
-      display: block;
-    }
-
-    alarm-picker#snoozeDurationPicker span, alarm-picker#alarmDurationPicker span {
-      width: 10em;
-      white-space: nowrap;
-    }
   `;
     firstUpdated(changedProperties) {
         super.firstUpdated(changedProperties);
         // this._timeFormat = this._alarmConfiguration['timeFormat'];
-        this._timeFormat = this._config['time_format'];
+        this._timeFormat = this._config.time_format;
         // this._clockFontFace = this._alarmConfiguration['clockFontFace'];
-        this._clockFontFace = this._config['clock_display_font'];
+        this._clockFontFace = this._config.clock_display_font;
         // this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
-        this._toggleAlarmFullscreen(this._config['hide_cards_default']);
+        this._toggleAlarmFullscreen(this._config.hide_cards_default);
         this._updateTime();
         this._updateLoop();
         if (this._haCardQ) this._buildCard();
@@ -4146,7 +3553,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             });
             console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
         }
-        this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+        // this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+        this._alarmsEnabled = this._config.alarms_enabled;
     // this.addEventListener("kobold-card-editor-tab", (event: CustomEvent) => {
     //   console.log('*** kobold-card-editor-tab event received; tab: ', event.detail.tab);
     //   Helpers.fireEvent('ll-edit-card', { path: event.detail.path }, this);
@@ -4272,7 +3680,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     _updateTime(force = false) {
         this._alarmController.evaluateAlarms();
         // const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
-        const fontNum = !this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._config['clock_display_font'] ? '0' : this._config['clock_display_font'];
+        const fontNum = !this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._config.clock_display_font ? '0' : this._config.clock_display_font;
         const fontFaceClass = 'fontFace' + fontNum;
         this._clockClasses = fontNum === '0' ? {
             clock: true
@@ -4281,7 +3689,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             [fontFaceClass]: true
         };
         // const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
-        const time = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(this._config['time_format'] === '24hr' ? 'HH:mm' : 'h:mm A');
+        const time = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(this._config.time_format === '24hr' ? 'HH:mm' : 'h:mm A');
         const isAlarmRinging = this._alarmController.isAlarmRinging();
         if (this._clockQ && (force || this._time !== time || this._ringing !== isAlarmRinging || this._controllersAlarmConfigLastUpdate !== this._config.last_updated)) {
             this._time = time;
@@ -4289,7 +3697,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             this._controllersAlarmConfigLastUpdate = this._config.last_updated;
             let timeDisplay;
             // if (this._alarmConfiguration['timeFormat'] === '24hr') {
-            if (this._config['time_format'] === '24hr') timeDisplay = time;
+            if (this._config.time_format === '24hr') timeDisplay = time;
             else {
                 const [timeNum, timeTxt] = time.split(' ');
                 let periodKern = '';
@@ -4306,22 +3714,22 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         </div>
       `;
             // const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
-            const dateFormat = this._config['time_format'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D'; //TODO: convert all these to standard dot syntax? (this._config.time_format)
+            const dateFormat = this._config.time_format === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
             this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(dateFormat);
         }
     }
-    _setAlarm() {
-        console.log('*** _setAlarm fired on card');
-        const alarm = JSON.parse(JSON.stringify(this._napTimePickerQ.value));
-        const alarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, $b2cd7c9abb677932$export$4dc2b60021baefca).convertToMinutes(alarm.time)));
-        this._alarmController.nextAlarm = {
-            ...this._alarmController.nextAlarm,
-            enabled: true,
-            time: alarmTime.format('HH:mm'),
-            nap: true,
-            overridden: true
-        };
-    }
+    // _setAlarm() {
+    //   console.log('*** _setAlarm fired on card');
+    //   const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
+    //   const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
+    //   this._alarmController.nextAlarm = {
+    //     ...this._alarmController.nextAlarm,
+    //     enabled: true,
+    //     time: alarmTime.format('HH:mm'),
+    //     nap: true,
+    //     overridden: true
+    //   }
+    // }
     _areAlarmsEnabled() {
         // return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
         return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap; //TODO: shouldn't this be !!this._alarmConfiguration.nextAlarm.nap? (not according to dehuyss clock).
@@ -4370,10 +3778,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             }
         }
     }
-    _getDayOfWeek(days) {
-        // returns day of week in language set in set hass() method
-        return (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))('2018-08-27').add(days, 'days').format('dddd');
-    }
+    // _getDayOfWeek(days: number) {
+    //   // returns day of week in language set in set hass() method
+    //   return dayjs('2018-08-27').add(days, 'days').format('dddd');
+    // }
     // saveAndCloseAlarmPicker() {
     //   const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
     //     ...this._alarmConfiguration,
@@ -4448,40 +3856,38 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             }
         }
     }
-    _showAlarmPicker() {
-        this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
-        this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
-        this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
-        this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
-        this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
-        this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
-        this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
-        this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
-        this._scheduleDialogQ.show();
-        this._scheduleDialogQ.classList.add('open');
-    }
-    _showNapDialog() {
-        this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
-        this._napDialogQ.show();
-        this._napDialogQ.classList.add('open');
-    }
-    _showSettingsDialog() {
-        this._timeFormat = this._alarmConfiguration['timeFormat'];
-        // this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
-        this._clockDefaultFullscreen = this._config['hide_cards_default'];
-        this._clockFontFace = this._alarmConfiguration['clockFontFace'];
-        this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
-        this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
-        const alarmEntities = [];
-        const ringerEntitiesIds = this._ringerEntities.map((item)=>item.entity_id);
-        const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
-        ringerEntitiesConfig.forEach((item)=>{
-            if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item);
-        });
-        this._ringerEntities = alarmEntities;
-        this._settingsDialogQ.show();
-        this._settingsDialogQ.classList.add('open');
-    }
+    // _showAlarmPicker() {
+    //   this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+    //   this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
+    //   this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
+    //   this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
+    //   this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
+    //   this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
+    //   this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
+    //   this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
+    //   this._scheduleDialogQ.show();
+    //   this._scheduleDialogQ.classList.add('open');
+    // }
+    // _showNapDialog() {
+    //   this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
+    //   this._napDialogQ.show();
+    //   this._napDialogQ.classList.add('open');
+    // }
+    // _showSettingsDialog() {
+    //   this._timeFormat = this._alarmConfiguration['timeFormat'];
+    //   // this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+    //   this._clockDefaultFullscreen = this._config['hide_cards_default'];
+    //   this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+    //   this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
+    //   this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
+    //   const alarmEntities = [];
+    //   const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
+    //   const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
+    //   ringerEntitiesConfig.forEach((item: RingerEntity) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
+    //   this._ringerEntities = alarmEntities;
+    //   this._settingsDialogQ.show();
+    //   this._settingsDialogQ.classList.add('open');
+    // }
     closeDialog(target) {
         const dialogElement = this.shadowRoot.querySelector(target);
         dialogElement.classList.remove('open');
@@ -5024,43 +4430,68 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             //     },
             //   ],
             // },
-            {
-                name: "nap_duration",
-                label: "Nap Duration",
-                selector: {
-                    duration: {}
-                }
-            },
+            // {
+            //   name: "nap_duration",
+            //   label: "Nap Duration",
+            //   selector: { duration: {} },
+            //   // default: { hours: 0, minutes: 7, seconds: 0 },
+            //   // default: nap_duration_default,
+            // },
+            // {
+            //   type: "grid",
+            //   name: "next_alarm",
+            //   schema: [
+            //     // {
+            //     //   name: "enabled",
+            //     //   label: "Next Alarm Enabled",
+            //     //   selector: { boolean: {} },
+            //     //   // default: false,
+            //     // },
+            //     // {
+            //     //   name: "time",
+            //     //   label: "Time",
+            //     //   selector: { time: {} },
+            //     // },
+            //     // {
+            //     //   name: "date",
+            //     //   label: "Date",
+            //     //   selector: { date: {} },
+            //     // },
+            //     // {
+            //     //   name: "datetime",
+            //     //   label: "Date Time",
+            //     //   selector: { datetime: {} },
+            //     // },
+            //     {
+            //       name: "overridden",
+            //       label: "Override Schedule",
+            //       selector: { boolean: {} },
+            //       // default: override_default,
+            //     },
+            //   ],
+            // },
             {
                 type: "grid",
-                name: "next_alarm",
+                name: "",
                 schema: [
-                    // {
-                    //   name: "enabled",
-                    //   label: "Next Alarm Enabled",
-                    //   selector: { boolean: {} },
-                    //   // default: false,
-                    // },
-                    // {
-                    //   name: "time",
-                    //   label: "Time",
-                    //   selector: { time: {} },
-                    // },
-                    // {
-                    //   name: "date",
-                    //   label: "Date",
-                    //   selector: { date: {} },
-                    // },
-                    // {
-                    //   name: "datetime",
-                    //   label: "Date Time",
-                    //   selector: { datetime: {} },
-                    // },
                     {
-                        name: "overridden",
-                        label: "Override Schedule",
+                        type: "grid",
+                        name: "next_alarm",
+                        schema: [
+                            {
+                                name: "overridden",
+                                label: "Nap Duration",
+                                selector: {
+                                    boolean: {}
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        name: "nap_duration",
+                        label: "",
                         selector: {
-                            boolean: {}
+                            duration: {}
                         }
                     }
                 ]
@@ -5076,7 +4507,11 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('kobold-editor', {
             editorEl: this
         }, (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getHa());
-    // Helpers.getEditor().addEventListener('click', this._clickEvent);
+        // Helpers.getHa().addEventListener('kobold-editor-save', this._editorSave);
+        // Helpers.getEditor().addEventListener('click', this._clickEvent);
+        // add listener to second button (save button)
+        // Helpers.getEditorButtons().querySelectorAll('mwc-button')[1].addEventListener('click', this._savePreprocessing(this._nextAlarmChange));
+        (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getEditorButtons().querySelectorAll('mwc-button')[1].addEventListener('click', (event)=>this._saveNextAlarm(event, this._nextAlarmConfig));
     // this._selectedTab = 0;
     // this._napDurationData = { nap_duration: { hours: 0, minutes: 0, seconds: 0 } };
     }
@@ -5171,7 +4606,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         }
         if (snooze) {
             console.log('*** snooze fired');
-            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, $b2cd7c9abb677932$export$4dc2b60021baefca).convertToMinutes(this._config['snooze_duration_default'].time))); // this won't work: snooze_duration_default is a duration
+            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, $b2cd7c9abb677932$export$4dc2b60021baefca).convertToMinutes(this._config.snooze_duration_default.time))); // this won't work: snooze_duration_default is a duration
             this._config.next_alarm = {
                 ...this._config.next_alarm,
                 enabled: true,
@@ -5227,11 +4662,6 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         const configChanges = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
         // console.log('*** configChanges: ', configChanges);
         if (!configChanges) return;
-        this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, event.detail.value);
-        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
-        // const configChanges = Helpers.deepCompareObj(this._oldConfig, this._config);
-        // this._allConfigChanges = { ...this._allConfigChanges, ...configChanges };
-        // let params = [];
         // nap tab
         // if (this._allConfigChanges.nap_duration) {
         if (configChanges.nap_duration || configChanges.next_alarm && configChanges.next_alarm.overridden) {
@@ -5240,12 +4670,14 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             // console.log('*** next_alarm.overridden: ', configChanges.next_alarm.overridden);
             // console.log('*** next_alarm: ', configChanges.next_alarm);
             // console.log('*** nap_duration: ', this._config.nap_duration);
-            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.nap_duration));
+            // const nextAlarmTime = dayjs().add(dayjs.duration(this._config.nap_duration));
+            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(event.detail.value.nap_duration));
             // console.log('*** nextAlarmTime: ', nextAlarmTime.format('HH:mm:ss'));
             // params = [nextAlarmTime.format('HH:mm:ss'), false, true];
             // this._setNextAlarm(nextAlarmTime, false, true);
-            this._config.next_alarm = {
-                ...this._config.next_alarm,
+            // this._config.next_alarm = {
+            const nextAlarm = {
+                ...event.detail.value.next_alarm,
                 enabled: true,
                 nap: true,
                 time: nextAlarmTime.format('HH:mm:ss'),
@@ -5253,13 +4685,19 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 date: nextAlarmTime.format('YYYY-MM-DD'),
                 overridden: true
             };
+            this._nextAlarmConfig = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, event.detail.value);
+            this._nextAlarmConfig.next_alarm = nextAlarm;
+            this._nextAlarmConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
             // console.log('*** config: ', this._config);
-            (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
-                config: this._config
-            }, this);
+            // Helpers.fireEvent('config-changed', { config: this._config }, this);
             return;
         // console.log('*** alarmTime: ', alarmTime.format('HH:mm:ss'));
         }
+        this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, event.detail.value);
+        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        // const configChanges = Helpers.deepCompareObj(this._oldConfig, this._config);
+        // this._allConfigChanges = { ...this._allConfigChanges, ...configChanges };
+        // let params = [];
         // if (this._allConfigChanges.next_alarm && !this._allConfigChanges.next_alarm.overridden) {
         // if (configChanges.next_alarm && !configChanges.next_alarm.overridden) {
         //   // console.log('*** reset alarm; nextAlarm: ', configChanges.next_alarm);
@@ -5352,6 +4790,30 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     //   // Helpers.fireEvent('dialog-closed', { dialog: 'hui-card-options' }, this);
     //   // console.log('*** this.localName: ', Helpers.getEditor().localName);
     // }
+    // _editorSave() {
+    //   // console.log('*** save config: ', this._config);
+    //   // console.log('*** this: ', this);
+    //   console.log('*** kobold Editor: ', this._koboldEditor);
+    // }
+    _saveNextAlarm(event, nextAlarmConfig) {
+        event.stopPropagation();
+        // not working; this fires AFTER config already saved
+        // this._config = {
+        //   ...this._config,
+        //   chump: true,
+        // }
+        // console.log('*** savePreprocessing: ', event);
+        console.log('*** nextAlarm: ', nextAlarmConfig);
+    // console.log('*** lovelace config: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0]);
+    // console.log('*** lovelace config nextAlarm: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0].next_alarm);
+    // console.log('*** lovelace config nap duration: ', Helpers.getLovelace().lovelace.config.views[0].cards[0].cards[0].nap_duration);
+    // console.log('*** this: ', this); // this = 'mwc-button' on hui-dialog-edit-card; _config is on kobold-card-editor
+    // Helpers.fireEvent('config-changed', { config: Helpers.getLovelace().lovelace.config }, this);
+    // console.log('*** lovelace.config: ', Helpers.getLovelace().lovelace.config);
+    // Helpers.fireEvent('config-changed', { Helpers.getLovelace().lovelace.config }, this);
+    // Helpers.getLovelace().lovelace.saveConfig(Helpers.getLovelace().lovelace.config);
+    // Helpers.fireEvent('kobold-editor-save', null, Helpers.getHa());
+    }
     _handleSwitchTab(event) {
         // console.log('*** handleSwitchTab');
         // this._selectedTab = ev.detail.name === "settings" ? 0 : 1;
@@ -5413,15 +4875,22 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         </div>`;
     }
     _renderNapEditor() {
-        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`<div class="box">
-            <ha-form
-                .hass=${this._hass}
-                .data=${this._config}
-                .schema=${this._configSchemaNap}
-                .computeLabel=${(s)=>s.label ?? s.name}
-                @value-changed=${this._valueChanged}
-            ></ha-form>
-        </div>`;
+        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
+      <div class="box">
+        <ha-form
+            .hass=${this._hass}
+            .data=${this._config}
+            .schema=${this._configSchemaNap}
+            .computeLabel=${(s)=>s.label ?? s.name}
+            @value-changed=${this._valueChanged}
+        ></ha-form>
+
+        <ha-duration-input
+          .data=${null}
+          @value-changed=${null}
+        ></ha-duration-input>
+
+      </div>`;
     }
     // <br>
     // <mwc-button
@@ -5487,6 +4956,9 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $e978bded0760ae3c$export$ca000e230c0caa3e)()
 ], $2109a11e0895c6b1$var$KoboldCardEditor.prototype, "_alarmsEnabled", void 0);
+(0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
+    (0, $e978bded0760ae3c$export$ca000e230c0caa3e)()
+], $2109a11e0895c6b1$var$KoboldCardEditor.prototype, "_nextAlarmConfig", void 0);
 $2109a11e0895c6b1$var$KoboldCardEditor = (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $fcbcbba309c0f62b$export$da64fc29f17f9d0e)('kobold-card-editor')
 ], $2109a11e0895c6b1$var$KoboldCardEditor);
@@ -5520,7 +4992,7 @@ class $2109a11e0895c6b1$var$HeightUpdater {
         return false;
     }
     static _updateHeightOnMediaControlCards(element) {
-        if (!element.getAttribute('type-media-control')) return;
+        if (!element.getAttribute('type-media-control')) return; // TODO: could not find this attribute anywhere in github for HA frontend; eliminate, modify?
         if (element.children[0] && element.children[0].shadowRoot) {
             element.children[0].style.height = '100%';
             let bannerTag = element.children[0].shadowRoot.querySelector('div.banner');
