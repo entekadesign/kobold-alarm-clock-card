@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
-import type { CardConfig, NextAlarmObject, TimeObject } from './types';
+import type { CardConfig, NextAlarmObject, TimeObject, Duration } from './types';
 
 // HA types
 import { getLovelace, type HomeAssistant } from "custom-card-helpers";
@@ -98,6 +98,7 @@ export class AlarmController {
     }
 
     dismiss() {
+        console.log('*** dismiss fired');
         this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
         if (this._config.alarm_actions) {
             this._config.alarm_actions
@@ -108,41 +109,50 @@ export class AlarmController {
         this._alarmRinging(false);
     }
 
-    snoozeConfig(snoozeTime: string) {
-        const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
-        this.nextAlarm = {
-            ...this.nextAlarm,
-            enabled: true,
+    snoozeConfig(snoozeDuration: Duration) {
+        const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(snoozeDuration));
+        const keyValue = {
+            // ...this.nextAlarm, // TODO: to capture overridden? is this necessary?
+            overridden: true,
             snooze: true,
-            time: nextAlarmTime.format('HH:mm'),
-            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm')
+            enabled: true,
+            time: nextAlarmTime.format('HH:mm:ss'),
+            date: nextAlarmTime.format('YYYY-MM-DD'),
+            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
         }
+        this._saveConfig('next_alarm', keyValue);
     }
 
     //TODO: Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
     dismissConfig() {
+        console.log('*** dismissConfig() fired');
         const momentTomorrow = dayjs().add(1, 'day');
         // const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
         const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
-        this.nextAlarm = AlarmController.createNextAlarmNew(alarmTomorrow);
+        // this.nextAlarm = AlarmController.createNextAlarmNew(alarmTomorrow);
+        // this.nextAlarm = alarmTomorrow;
+        //this.nextAlarm is a getter on this controller--it accepts a TimeObject, not a NextAlarmObject
+        const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
+        this._saveConfig('next_alarm', keyValue);
     }
 
+    // snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
     nextAlarmReset(snooze = false) {
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         if (snooze) {
             // controllersAlarmConfig.snooze(controllersAlarmConfig['snoozeDurationDefault'].time);
-            this.snoozeConfig(this._config.snooze_duration_default.time);
+            this.snoozeConfig(this._config.snooze_duration_default);
         } else {
             // controllersAlarmConfig.dismiss();
             this.dismissConfig();
         }
         // this._saveConfiguration(controllersAlarmConfig);
-        Helpers.fireEvent('config-changed', { config: this._config });
+        // Helpers.fireEvent('config-changed', { config: this._config }); //this is prolly not necessary; _saveConfig is enough
     }
 
     static createNextAlarmNew(alarm: TimeObject, forToday = false): NextAlarmObject {
+        console.log('*** createNextAlarmNew(); creating new next_alarm object');
         let alarmDate = dayjs();
-        // TODO: is forToday named correctly? should it be notToday?
         if (!((alarm.time >= alarmDate.format('HH:mm:ss')) && forToday)) {
             alarmDate = alarmDate.add(1, 'day');
         }
@@ -157,17 +167,20 @@ export class AlarmController {
     get nextAlarm(): NextAlarmObject {
         // console.log('*** get nextAlarm on contoller');
         // const nextAlarm = this.controllersAlarmConfig.nextAlarm;
-        const nextAlarm = Object.assign({}, this._config.next_alarm);
+        const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         // const nextAlarm = this._config.nextAlarm;
 
         if (!nextAlarm) {
+            console.log('*** get nextAlarm; nextAlarm undefined: returning default config');
             // return { enabled: false, time: '07:00', date: '', date_time: '' };
             return Helpers.defaultConfig.next_alarm;
+            // return Object.assign({}, Helpers.defaultConfig.next_alarm);
         }
         return nextAlarm;
     }
 
-    set nextAlarm(nextAlarm) {
+    // set nextAlarm(nextAlarm: NextAlarmObject) {
+    set nextAlarm(alarm: TimeObject) {
         console.log('*** set nextAlarm on contoller');
         // const controllersAlarmConfig = this.controllersAlarmConfig;
         const forToday = true;
@@ -209,9 +222,10 @@ export class AlarmController {
         //     overridden: true
         // };
 
+        // createNextAlarm() accepts a TimeObject parameter, not a NextAlarmObject
         const keyValue = {
-            ...AlarmController.createNextAlarmNew(nextAlarm, forToday),
-            overridden: true
+            ...AlarmController.createNextAlarmNew(alarm, forToday),
+            overridden: true //is this necessary?
         };
 
         // console.log('*** cardConfig: ', cardConfig);
@@ -222,7 +236,16 @@ export class AlarmController {
         this._saveConfig('next_alarm', keyValue);
     }
 
+    // set nextAlarmOverridden(state: boolean) {
+    //     console.log('*** nextAlarmOverridden: ', state);
+    //     const keyValue = Object.assign({}, this._config.next_alarm);
+    //     keyValue.overridden = state;
+    //     console.log('*** nextAlarmOverridden; keyValue: ', keyValue);
+    //     this._saveConfig('next_alarm', keyValue);
+    // }
+
     get isAlarmEnabled() {
+        // console.log('*** isAlarmEnabled()');
         const nextAlarm = this.nextAlarm;
 
         //TODO: can nextalarm ever be disabled (except when first defined)? why just just keep it enabled always? or, better, since picker not used anywhere else, eliminate enabled from nextalarm?)
@@ -243,8 +266,10 @@ export class AlarmController {
             // console.log('*** newData: ', newData);
             if (cardConfig && cardConfig[key]) {
                 cardConfig[key] = value;
+                cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
-                // console.log('*** newConfig: ', newConfig);
+                console.log('*** _saveConfig(); newConfig: ', newConfig);
+                // Helpers.fireEvent('config-changed', { config: cardConfig });
                 await lovelace.saveConfig(newConfig);
             } else throw { message: 'Unable to find kobold card in lovelace configuration' };
 
@@ -259,12 +284,13 @@ export class AlarmController {
             //         : await expandLovelaceConfigStrategies(lovelace.config, this.hass)
             // );
             // Helpers.getLovelace().lovelace.setEditMode(true);
-            this._saving = false;
+            // this._saving = false;
             //   this.closeDialog();
         } catch (err: any) {
             alert(`Saving failed: ${err.message}`);
-            this._saving = false;
+            // this._saving = false;
         }
+        this._saving = false;
     }
 
     isAlarmRinging() {
@@ -276,6 +302,7 @@ export class AlarmController {
     }
 
     _evaluate() {
+        // console.log('*** _evaluate(); getting nextAlarm');
         const nextAlarm = this.nextAlarm;
         const dateToday = dayjs().format('YYYY-MM-DD');
 
@@ -288,27 +315,27 @@ export class AlarmController {
         }
 
         // if (!this.controllersAlarmConfig.alarmsEnabled && !nextAlarm.nap) {
-        if (!this._config.alarmsEnabled && !nextAlarm.nap) {
+        if (!this._config.alarms_enabled && !nextAlarm.nap) {
             return;
         }
 
         if (!nextAlarm.enabled) {
             return;
         }
-        console.log('*** current time>nextalarm: ' + dayjs().format('HH:mm') + '; ' + nextAlarm.time);
-        if (!this.isAlarmRinging() && dayjs().format('HH:mm') >= nextAlarm.time && nextAlarm.date === dateToday) {
+        // console.log('*** current time>nextalarm: ' + dayjs().format('HH:mm:ss') + '; ' + nextAlarm.time);
+        if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
             console.log('*** alarm ringing');
             this._alarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm automatically after alarmdurationdefault time elapses
-            if (dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(this._config.alarmDurationDefault)).format('HH:mm') <= dayjs().format('HH:mm')) {
+            if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
         } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) {
             this._config.alarm_actions
                 .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScripts[`${action.entity}-${action.when}`])
-                .filter(action => dayjs(nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm') === dayjs().format('HH:mm'))
+                .filter(action => dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
                 .forEach(action => this._runAction(action));
         }
     }

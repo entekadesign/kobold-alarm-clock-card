@@ -25,6 +25,13 @@ export interface NextAlarmObject extends TimeObject {
     overridden?: boolean;
 }
 
+export interface Duration { hours: number; minutes: number; seconds: number; }
+
+export interface NextAlarmConfig {
+    next_alarm: NextAlarmObject;
+    nap_duration: Duration;
+}
+
 export interface RingerEntity {
     enabled: boolean;
     entity_id: string;
