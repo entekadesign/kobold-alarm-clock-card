@@ -5,7 +5,7 @@ dayjs.extend(duration);
 import type { CardConfig, NextAlarmObject, TimeObject, Duration } from './types';
 
 // HA types
-import { getLovelace, type HomeAssistant } from "custom-card-helpers";
+import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
 
 export class AlarmController {
 
@@ -45,19 +45,19 @@ export class AlarmController {
         return this._hass.states[`input_boolean.${this._config.name}`];
     }
 
-    get alarmSoundLocalEntity() {
-        return this._hass.states[this._config.alarm_entity_local];
-    }
+    // get alarmSoundLocalEntity() {
+    //     return this._hass.states[this._config.alarm_entity_local];
+    // }
 
-    get alarmClockVariableEntity() {
-        return this._hass.states[`sensor.${this._config.name}`];
-    }
+    // get alarmClockVariableEntity() {
+    //     return this._hass.states[`sensor.${this._config.name}`];
+    // }
 
-    get alarmClockPingEntity() {
-        if (this._config.ping_entity) {
-            return this._hass.states[this._config.ping_entity];
-        }
-    }
+    // get alarmClockPingEntity() {
+    //     if (this._config.ping_entity) {
+    //         return this._hass.states[this._config.ping_entity];
+    //     }
+    // }
 
     // get controllersAlarmConfig() {
     //     if (!this._controllersAlarmConfig) {
@@ -77,15 +77,15 @@ export class AlarmController {
     //     this._saveConfiguration(configuration);
     // }
 
-    isConfigCorrect() {
-        return this.alarmClockVariableEntity
-            && this.alarmRingingEntity;
-    }
+    // isConfigCorrect() {
+    //     return this.alarmClockVariableEntity
+    //         && this.alarmRingingEntity;
+    // }
 
-    isSafetyConfigSet() {
-        return this.alarmClockPingEntity
-            && this.alarmSoundLocalEntity;
-    }
+    // isSafetyConfigSet() {
+    //     return this.alarmClockPingEntity
+    //         && this.alarmSoundLocalEntity;
+    // }
 
     snooze() {
         this.nextAlarmReset(true);
@@ -287,7 +287,7 @@ export class AlarmController {
             // this._saving = false;
             //   this.closeDialog();
         } catch (err: any) {
-            alert(`Saving failed: ${err.message}`);
+            alert(`Saving failed: ${err.message}.`);
             // this._saving = false;
         }
         this._saving = false;
@@ -327,7 +327,7 @@ export class AlarmController {
             console.log('*** alarm ringing');
             this._alarmRinging(true);
         } else if (this.isAlarmRinging()) {
-            // dismiss alarm automatically after alarmdurationdefault time elapses
+            // dismiss alarm after alarm_duration_default time elapses
             if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
                 this.dismiss();
             }
@@ -355,18 +355,18 @@ export class AlarmController {
             this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; editor ID: ' + this._cardId, 'level': 'info' });
         }
         try {
-            if (this.alarmSoundLocalEntity) {
-                if (this.alarmClockPingEntity.state === 'off' || action === 'turn_off' || !this._config.alarm_entities) {
-                    if ((action === 'turn_on' && this.alarmSoundLocalEntity.state !== 'on') || (action === 'turn_off' && this.alarmSoundLocalEntity.state !== 'off')) {
-                        this._hass.callService('homeassistant', action, { 'entity_id': this._config.alarm_entity_local });
-                    }
-                }
-            } else {
-                if (this._config.debug) {
-                    this._hass.callService('system_log', 'write', { 'message': '*** alarmSoundLocalEntity is undefined', 'level': 'info' });
-                }
-                console.warn('*** _callAlarmRingingService(); alarmSoundLocalEntity is undefined');
-            }
+            // if (this.alarmSoundLocalEntity) {
+            //     if (this.alarmClockPingEntity.state === 'off' || action === 'turn_off' || !this._config.alarm_entities) {
+            //         if ((action === 'turn_on' && this.alarmSoundLocalEntity.state !== 'on') || (action === 'turn_off' && this.alarmSoundLocalEntity.state !== 'off')) {
+            //             this._hass.callService('homeassistant', action, { 'entity_id': this._config.alarm_entity_local });
+            //         }
+            //     }
+            // } else {
+            //     if (this._config.debug) {
+            //         this._hass.callService('system_log', 'write', { 'message': '*** alarmSoundLocalEntity is undefined', 'level': 'info' });
+            //     }
+            //     console.warn('*** _callAlarmRingingService(); alarmSoundLocalEntity is undefined');
+            // }
             // if (this._config.alarm_entities) {
             //     const entitiesArray = [];
             //     const ringerEntities = this.controllersAlarmConfig['ringerEntities'] ? JSON.parse(this.controllersAlarmConfig['ringerEntities']) : '';
@@ -750,6 +750,18 @@ export class Helpers {
         return root;
     };
 
+    static getDrawer = () => {
+        let root: any = this.getHa();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('home-assistant-main');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('ha-drawer');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('aside');
+        // console.log('*** getDrawer(); root: ', root);
+        return root;
+    };
+
     static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
         let timerFlag = null;
         return (...args: T) => {
@@ -770,8 +782,52 @@ export class Helpers {
         return { 'minutes': minutes };
     };
 
-    static defaultConfig = {
-        name: "alarm_clock",
+    static updateHeight(element: LovelaceCard): boolean {
+        if (this._updateHeightOnNormalCard(element)) return true;
+        if (this._updateHeightOnNestedCards(element)) return true;
+        if (this._updateHeightOnMediaControlCards(element)) return true;
+        return false;
+    }
+    static _updateHeightOnNormalCard(element: LovelaceCard) {
+        if (element.shadowRoot) {
+            let cardTag: LovelaceCard = element.shadowRoot.querySelector('ha-card');
+            if (cardTag) {
+                cardTag.style.height = "100%";
+                cardTag.style.boxSizing = "border-box";
+                return true;
+            }
+        }
+        return false;
+    }
+    static _updateHeightOnNestedCards(element: LovelaceCard) {
+        if (element.firstChild && element.children[0].shadowRoot) {
+            let cardTag: LovelaceCard = element.children[0].shadowRoot.querySelector('ha-card');
+            if (cardTag) {
+                cardTag.style.height = "100%";
+                cardTag.style.boxSizing = "border-box";
+                return true;
+            }
+        }
+        return false;
+    }
+    static _updateHeightOnMediaControlCards(element: LovelaceCard) {
+        if (!element.getAttribute('type-media-control')) return; // TODO: could not find this attribute anywhere in github for HA frontend; eliminate, modify?
+        if (element.children[0] && element.children[0].shadowRoot) {
+            (element.children[0] as LovelaceCard).style.height = '100%';
+            let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
+            if (bannerTag) {
+                bannerTag.style.boxSizing = "border-box";
+                bannerTag.style.height = "calc(100% - 72px)";
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static defaultConfig: CardConfig = {
+        name: "kobold_clock",
+        type: "custom:kobold-alarm-clock-card",
+        // alarm_entities: ["input_boolean.kobold_clock"],
         alarms_enabled: false,
         next_alarm: { enabled: false, time: "07:00", date: "", date_time: "", overridden: false },
         mo: { enabled: false, time: "07:00:00" },
