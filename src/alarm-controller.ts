@@ -278,7 +278,7 @@ export class AlarmController {
             replace_attributes: true
         };
 
-        if (this.alarmClockPingEntity.state === 'on') {
+        if (this.alarmClockPingEntity?.state === 'on' || !this.alarmClockPingEntity) {
             this._hass.callService('variable', 'update_sensor', param);
             this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
         } else {

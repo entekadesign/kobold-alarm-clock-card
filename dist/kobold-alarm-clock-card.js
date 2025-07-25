@@ -1263,7 +1263,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             attributes: configurationWithLastUpdated,
             replace_attributes: true
         };
-        if (this.alarmClockPingEntity.state === 'on') {
+        if (this.alarmClockPingEntity?.state === 'on' || !this.alarmClockPingEntity) {
             this._hass.callService('variable', 'update_sensor', param);
             this._controllersAlarmConfig = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, configurationWithLastUpdated);
         } else {
@@ -3882,7 +3882,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     _updateTime(force = false) {
         this._alarmController.evaluateAlarms();
-        const fontNum = !this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace'] ? '0' : this._alarmConfiguration['clockFontFace'];
+        const fontNum = this._alarmController.alarmClockPingEntity && this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace'] ? '0' : this._alarmConfiguration['clockFontFace'];
         const fontFaceClass = 'fontFace' + fontNum;
         this._clockClasses = fontNum === '0' ? {
             clock: true

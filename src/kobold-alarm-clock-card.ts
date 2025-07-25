@@ -1133,7 +1133,7 @@ class KoboldAlarmClockCard extends LitElement {
   _updateTime(force = false) {
 
     this._alarmController.evaluateAlarms();
-    const fontNum = (!this._alarmController.alarmClockPingEntity || this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
+    const fontNum = (this._alarmController.alarmClockPingEntity && this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
     const fontFaceClass = 'fontFace' + fontNum;
     this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
     const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
