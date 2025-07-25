@@ -181,6 +181,29 @@ class KoboldAlarmClockCard extends LitElement {
     // this._footClasses = this._footClasses || {};
     // this._clockClasses = this._clockClasses || { clock: true };
 
+    // const isAlarmRinging = this._alarmController.isAlarmRinging();
+    // if (isAlarmRinging && !this._ringingBegun) {
+    //   this._ringingBegun = true;
+    //   this._alarmClockClasses = { fullscreen: false };
+    //   this._alarmButtonsClasses = { showButtons: true };
+    //   this._footClasses = { hideFoot: false };
+    // } else if (!isAlarmRinging && this._ringingBegun) {
+    //   this._ringingBegun = false;
+    //   this._alarmButtonsClasses = { showButtons: false };
+    // }
+    // const isAlarmRinging = this._alarmController.isAlarmRinging();
+    // console.log('*** isAlarmRinging: ', isAlarmRinging);
+
+    // if (isAlarmRinging && !this._ringingBegun) {
+    //   this._ringingBegun = true;
+    //   this._alarmButtonsQ.classList.add('showButtons');
+    //   this._koboltClockQ.classList.remove('fullscreen');
+    //   this._footQ.classList.remove('hideFoot');
+    // } else if (!isAlarmRinging && this._ringingBegun) {
+    //   this._ringingBegun = false;
+    //   this._alarmButtonsQ.classList.remove('showButtons');
+    // }
+
     return html`
         <ha-card>
           <div>

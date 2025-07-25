@@ -51,7 +51,7 @@ export class AlarmController {
     dismiss() {
         this._setAlarmRinging(false);
         // console.log('*** dismiss fired');
-        // this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+        this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
         if (this._config.alarm_actions) {
             this._config.alarm_actions
                 .filter((action) => action.when === 'on_dismiss')

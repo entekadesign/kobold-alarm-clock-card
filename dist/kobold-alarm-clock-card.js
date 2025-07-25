@@ -1094,7 +1094,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     dismiss() {
         this._setAlarmRinging(false);
         // console.log('*** dismiss fired');
-        // this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+        this.nextAlarmReset(); // TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
         if (this._config.alarm_actions) {
             this._config.alarm_actions.filter((action)=>action.when === 'on_dismiss').forEach((action)=>this._runAction(action));
             this._alarmActionsScripts = [];
@@ -2969,6 +2969,27 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // this._alarmButtonsClasses = this._alarmButtonsClasses || {};
         // this._footClasses = this._footClasses || {};
         // this._clockClasses = this._clockClasses || { clock: true };
+        // const isAlarmRinging = this._alarmController.isAlarmRinging();
+        // if (isAlarmRinging && !this._ringingBegun) {
+        //   this._ringingBegun = true;
+        //   this._alarmClockClasses = { fullscreen: false };
+        //   this._alarmButtonsClasses = { showButtons: true };
+        //   this._footClasses = { hideFoot: false };
+        // } else if (!isAlarmRinging && this._ringingBegun) {
+        //   this._ringingBegun = false;
+        //   this._alarmButtonsClasses = { showButtons: false };
+        // }
+        // const isAlarmRinging = this._alarmController.isAlarmRinging();
+        // console.log('*** isAlarmRinging: ', isAlarmRinging);
+        // if (isAlarmRinging && !this._ringingBegun) {
+        //   this._ringingBegun = true;
+        //   this._alarmButtonsQ.classList.add('showButtons');
+        //   this._koboltClockQ.classList.remove('fullscreen');
+        //   this._footQ.classList.remove('hideFoot');
+        // } else if (!isAlarmRinging && this._ringingBegun) {
+        //   this._ringingBegun = false;
+        //   this._alarmButtonsQ.classList.remove('showButtons');
+        // }
         return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
         <ha-card>
           <div>
