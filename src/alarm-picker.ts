@@ -164,11 +164,12 @@ class AlarmPicker extends LitElement {
             let pickerStyle = '';
             let pickerOrOptionsDialogStyle = '';
             let myStyle: HTMLElement;
-            if (this.id == 'tab-2') {
+            if (this.id === 'tab-2') {
                 pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
                 myStyle = document.createElement('style');
                 let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                 myStyle.innerHTML = switchStyle;
+                // console.log('*** alarmPickerSwitch: ', this._alarmPickerSwitchQ);
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
                 myStyle = document.createElement('style');
                 let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
