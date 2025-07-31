@@ -2,8 +2,8 @@ import { AlarmController, Helpers } from './alarm-controller';
 import './alarm-picker';
 
 import { LitElement, html, css, PropertyValues } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
-import { state, customElement, query, queryAll } from "lit/decorators.js";
+// import { classMap } from 'lit/directives/class-map.js';
+import { property, state, customElement, query, queryAll } from "lit/decorators.js";
 
 function loadCSS(url: string) {
   const link = document.createElement('link');
@@ -48,7 +48,7 @@ window.customCards.push({
   type: "kobold-alarm-clock-card",
   name: "Kobold",
   description: "A multi-alarm clock for Home Assistant",
-  // preview: true,
+  preview: true,
   documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme",
 });
 
@@ -63,27 +63,30 @@ class KoboldAlarmClockCard extends LitElement {
   private _elements: Array<LovelaceCard>;
   private _injectStylesDone: boolean;
   private _cardHelpers: any;
-  private _time: string;
+  // private _time: string;
   private _ringing: boolean;
   private _controllersAlarmConfigLastUpdate: string;
 
   @state() _nextAlarm: NextAlarmObject;
   @state() _hass: HomeAssistant;
+  @state() _time: string;
   // @state() _alarmClockClasses: { [key: string]: boolean };
   // @state() _alarmButtonsClasses: { [key: string]: boolean };
   // @state() _footClasses: { [key: string]: boolean };
   // @state() _clockClasses: { [key: string]: boolean };
   @state() _koboldEditor: any; //TODO: better type
 
+  @property({ type: Boolean, reflect: true }) public preview = false;
+
   @query('#clock', true) _clockQ: HTMLElement;
-  @query('#koboltClock', true) _koboltClockQ: HTMLElement;
+  @query('#koboldClock', true) _koboldClockQ: HTMLElement;
   @query('#foot', true) _footQ: HTMLElement;
   @query('#alarmButtons', true) _alarmButtonsQ: HTMLElement;
   @query('#date', true) _dateQ: HTMLElement;
   @query('ha-card', true) _haCardQ: HTMLElement;
   @queryAll('div.optionButtons ha-icon') _optionButtonsHostsQ: NodeListOf<HTMLElement>;
   @query('#extraInfo', true) _rootQ: HTMLElement;
-  @query('#alarm-top div#koboltLogo', true) _koboltLogoQ: HTMLElement;
+  @query('#alarmTop div#koboldLogo', true) _koboldLogoQ: HTMLElement;
 
   connectedCallback() {
     super.connectedCallback();
@@ -172,9 +175,11 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   render() {
-    this._nextAlarm = this._alarmController.nextAlarm;
+    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
+
+    // console.log('*** preview: ', this.preview);
     // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
-    // console.log('*** render(); alarmClock class: ', this._koboltClockQ?.classList.value);
+    // console.log('*** render(); alarmClock class: ', this._koboldClockQ?.classList.value);
 
     // this._alarmClockClasses = this._alarmClockClasses || {};
     // this._alarmButtonsClasses = this._alarmButtonsClasses || {};
@@ -197,31 +202,54 @@ class KoboldAlarmClockCard extends LitElement {
     // if (isAlarmRinging && !this._ringingBegun) {
     //   this._ringingBegun = true;
     //   this._alarmButtonsQ.classList.add('showButtons');
-    //   this._koboltClockQ.classList.remove('fullscreen');
+    //   this._koboldClockQ.classList.remove('fullscreen');
     //   this._footQ.classList.remove('hideFoot');
     // } else if (!isAlarmRinging && this._ringingBegun) {
     //   this._ringingBegun = false;
     //   this._alarmButtonsQ.classList.remove('showButtons');
     // }
 
+    const isAlarmRinging = this._alarmController.isAlarmRinging();
+
+    // console.log('*** isAlarmRinging: ' + isAlarmRinging + '; ringingBegun: ' + this._ringingBegun);
+    if (isAlarmRinging && !this._ringingBegun) {
+      // console.log('*** adding "showButtons" class');
+      this._ringingBegun = true;
+      this._alarmButtonsQ.classList.add('showButtons');
+      this._koboldClockQ.classList.remove('fullscreen');
+      this._footQ.classList.remove('hideFoot');
+    } else if (!isAlarmRinging && this._ringingBegun) {
+      // console.log('*** removing "showButtons" class');
+      this._ringingBegun = false;
+      // allow animations to complete before saving
+      window.setTimeout(() => {
+        this._alarmButtonsQ.classList.remove('showButtons');
+      }, 250);
+      this._koboldClockQ.classList.add('fullscreen');
+      this._footQ.classList.add('hideFoot');
+    }
+
     return html`
         <ha-card>
           <div>
 
-            <div id="koboltClock">
-              <div id="alarm-top" class="meta">
-                <div id="koboltLogo"></div>
+            <div id="koboldClock">
+              <div id="alarmTop" class="meta">
+                <div id="koboldLogo"></div>
                 <div id="date"></div>
                 <div class="optionButtons">
                   <ha-icon id="tab-0" class="settingsButton button" icon="mdi:cog" @click=${this._showEditor}></ha-icon>
                   <ha-icon id="tab-1" class="napButton button" icon="mdi:sleep" @click=${this._showEditor}></ha-icon>
                 </div>
                 ${this._areAlarmsEnabled() ? html`
-                    <alarm-picker id="tab-2" show-icon="true" .alarm=${this._nextAlarm}
+                    <alarm-picker
+                        id="tab-2"
+                        show-icon="true"
+                        .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
                         @alarm-button-clicked=${this._showEditor}
-                        @alarm-changed=${this._onAlarmChanged}
+                        @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
                         ></alarm-picker>
                   ` : html`
@@ -229,7 +257,7 @@ class KoboldAlarmClockCard extends LitElement {
                                 @click=${this._showEditor}></ha-icon>
                   ` }
               </div>
-              <div id="clock" @click=${this._toggleClockFullscreen}>TIME</div>
+              <div id="clock" @click=${!this.preview ? this._toggleHideCards : null}>TIME</div>
             </div>
           </div>
         </ha-card>
@@ -245,7 +273,7 @@ class KoboldAlarmClockCard extends LitElement {
           </div>
 
           <div id="extraInfo">
-              <div style="text-align: center;">Loading cards...</div>
+              <div class="loading" style="text-align: center;">Loading cards...</div>
           </div>
         </div>
       `;
@@ -257,31 +285,32 @@ class KoboldAlarmClockCard extends LitElement {
     /* ************ */
 
     /* mobile screen sizes */
-    @media (max-width: 900px) {
-      #alarm-top div#koboltLogo {
+    @media (max-width: 870px) {
+      #alarmTop div#koboldLogo {
         display: none;
       }
     }
 
-    #koboltClock {
+    #koboldClock {
       padding: 1.5rem;
       height: 65vh;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: height 240ms;
+      opacity: 1;
+      transition: height 240ms, opacity 240ms;
     }
 
-    #koboltClock.fullscreen {
+    #koboldClock.fullscreen {
       height: 100vh;
     }
 
-    #koboltClock.fullscreen #clock {
+    #koboldClock.fullscreen #clock {
       padding-top: 0;
     }
 
-    #alarm-top {
+    #alarmTop {
       font-size: calc(1rem + 1vh);
       display: flex;
       justify-content: space-between;
@@ -291,7 +320,7 @@ class KoboldAlarmClockCard extends LitElement {
       color: var(--secondary-text-color);
     }
 
-    #alarm-top div#koboltLogo {
+    #alarmTop div#koboldLogo {
       background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27175%27%20viewBox%3D%270%200%20198.437%2046.302%27%3E%3Cdefs%3E%3Cpath%20id%3D%27a%27%20d%3D%27M134.532%20279.996h1013.197v243.84H134.532z%27%2F%3E%3C%2Fdefs%3E%3Cg%20aria-label%3D%27KOBOLD%27%20style%3D%27font-size%3A192px%3Bline-height%3A1.25%3Bwhite-space%3Apre%3Bshape-inside%3Aurl%28%23a%29%27%20transform%3D%27translate%28-39.822%2011.568%29%20scale%28.26458%29%27%3E%3Cpath%20d%3D%27M297.007%20381.147v7.723l-36.756%2043.764q9.01%2010.87%2018.307%2022.025%209.439%2011.013%2018.45%2021.739v7.723h-23.17l-33.753-40.331H219.92v40.331h-22.311V381.147h22.31v40.331h20.166q3.29-3.718%206.436-7.58%203.147-3.861%206.436-7.723l20.881-25.028zm232.264%2040.474q0%204.005-1%206.58%202.144%202.717%203.575%206.292%201.43%203.433%201.43%207.151v21.31q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147h77.802q4.291%200%208.153%201.716%203.861%201.573%206.721%204.434%203.004%202.86%204.577%206.722%201.716%203.861%201.716%208.295zM452.47%20461.81h58.352v-18.879H452.47Zm0-41.19h54.347v-17.162H452.47Zm222.958-39.616h22.168v80.806h80.807v22.311H675.428Zm193.22.143q4.434%200%208.295%201.716%203.862%201.573%206.722%204.434%202.86%202.86%204.577%206.722%201.716%203.861%201.716%208.295v60.64q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147Zm-59.496%2080.663h58.352v-58.352h-58.352z%27%20style%3D%27font-family%3AOrbitron%3B-inkscape-font-specification%3AOrbitron%3Bstroke-width%3A.744895%27%20transform%3D%27translate%28-33.794%20-401.053%29%20scale%281.02854%29%27%2F%3E%3Cpath%20d%3D%27M419.64%20675.367A117.536%20117.536%200%200%200%20302.101%20792.9%20117.536%20117.536%200%200%200%20419.64%20910.437%20117.536%20117.536%200%200%200%20537.172%20792.9%20117.536%20117.536%200%200%200%20419.64%20675.367Zm-.71%2012.63%203.237%2036.913%203.195%2036.426h.043l-.032.141.032.346h-.106l-3.132%2014.648-3.237%2015.135-3.237-15.135-3.135-14.648h-.102l.028-.346-.028-.14h.042l3.195-36.427zm-1.728%20106.955-5.173%208.6-5.007%208.322.078.138-.194.06-.05.081-.031-.056-20.703%206.41-20.977%206.496%2016.118-14.916%2015.9-14.722-.032-.057h.095l.148-.14.082.137%209.71-.173z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%2895.652%20-407.931%29%20scale%28.56969%29%27%2F%3E%3Cpath%20d%3D%27M705.391%20675.367A117.536%20117.536%200%200%200%20587.855%20792.9%20117.536%20117.536%200%200%200%20705.39%20910.437%20117.536%20117.536%200%200%200%20822.925%20792.9%20117.536%20117.536%200%200%200%20705.39%20675.367Zm.54%2012.63%203.237%2036.913%203.195%2036.426h.042l-.032.141.032.346h-.106l-3.131%2014.648-3.237%2015.135-3.24-15.135-3.132-14.648h-.102l.028-.346-.028-.14h.042l3.191-36.427zm1.57%20106.856%2010.035.18%209.715.173.077-.138.152.141h.091l-.031.057%2015.9%2014.722%2016.118%2014.916-20.978-6.495-20.699-6.411-.031.056-.05-.08-.197-.06.077-.138-5.007-8.322z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%28185.991%20-407.931%29%20scale%28.56969%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
 
       height: calc(0.55em + 1vh);
@@ -327,14 +356,14 @@ class KoboldAlarmClockCard extends LitElement {
       text-orientation: upright;
       letter-spacing: -0.15em;
     }
-    #clock .periodKern {
-      margin-left: -0.3em !important;
+    #clock .periodName.periodKern {
+      margin-left: -0.3em;
     }
     #clock .colonKernL {
-      margin-left: -0.1em !important;
+      margin-left: -0.1em;
     }
     #clock .colonKernR {
-      margin-right: -0.1em !important;
+      margin-right: -0.05em;
     }
     #clock .colon {
       position: relative;
@@ -353,8 +382,8 @@ class KoboldAlarmClockCard extends LitElement {
       bottom: 5.2vh;
       letter-spacing: -0.4em;
     }
-    #clock.fontFace1 .periodKern {
-      margin-left: -0.3em !important;
+    #clock.fontFace1 .periodName.periodKern {
+      margin-left: -0.3em;
     }
 
     #clock.fontFace2 {
@@ -365,10 +394,10 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: 0;
     }
     #clock.fontFace2 .colonKernL {
-      margin-left: -0.05em !important;
+      margin-left: -0.05em;
     }
     #clock.fontFace2 .colonKernR {
-      margin-right: 0 !important;
+      margin-right: 0;
     }
     #clock.fontFace2 .periodName {
       bottom: 5.4vh;
@@ -385,10 +414,10 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: -0.2em;
     }
     #clock.fontFace3 .colonKernL {
-      margin-left: 0 !important;
+      margin-left: 0;
     }
     #clock.fontFace3 .colonKernR {
-      margin-right: 0 !important;
+      margin-right: 0;
     }
 
     .optionButtons {
@@ -470,18 +499,74 @@ class KoboldAlarmClockCard extends LitElement {
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
     }
+
+
+    /* *************** */
+    /* *** preview *** */
+    /* *************** */
+
+    :host([preview]) #koboldClock {
+      height: 65vh;
+    }
+
+    :host([preview]) #clock {
+      text-shadow: none;
+      font-size: 10em;
+    }
+
+    :host([preview]) #clock.seconds {
+      font-size: 7em;
+    }
+
+    :host([preview]) #clock .periodName {
+      margin-left: 0.3em;
+      bottom: 0.4em;
+    }
+
+    :host([preview]) #clock .periodName.periodKern {
+      margin-left: 0.01em;
+    }
+
+    :host([preview]) #clock .colon {
+      bottom: 0.07em;
+    }
+
+    :host([preview]) #alarmTop #koboldLogo {
+      filter: invert(1) brightness(0);
+    }
+
+    :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .optionButtons, :host([preview]) #alarmTop alarm-picker {
+      display: none;
+    }
+
+
   `;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
-    // this._toggleClockFullscreen(this._config.hide_cards_default);
   }
 
+  // protected update(_changedProperties: PropertyValues): void {
+  //   super.update(_changedProperties);
+  //   console.log('*** update(); changed properties: ', _changedProperties);
+  // }
+
   protected firstUpdated(_changedProperties: PropertyValues): void {
-    super.firstUpdated(_changedProperties);
-    this._toggleClockFullscreen(this._config.hide_cards_default);
+    if (!this._alarmController.isAlarmRinging()) {
+      // when card starts up, hide cards (prevents flicker during save)
+      this._enforceHideCards(true);
+      window.setTimeout(() => {
+        if (!this._config.hide_cards_default) this._enforceHideCards(false);
+      }, 250);
+    }
     this._updateTime();
 
     if (this._haCardQ) {
+      // console.log('*** _buildCard(); rootQ kobold-card: ', this._rootQ.querySelectorAll('*')); //'[kobold-card="true"]'));
+      // console.log('*** _buildCard(); rootQ.childElementCount: ', this._rootQ.childElementCount);
+      // console.log('*** _buildCard(); rootQ: ', this._rootQ);
+      // console.log('*** _buildCard(); rootQ.children: ', this._rootQ.children);
+      // console.log('*** _buildCard(); rootQ.childNodes: ', this._rootQ.childNodes);
+      // if (!this.preview) this._buildCard();
       this._buildCard();
     } else {
       console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot')
@@ -507,9 +592,9 @@ class KoboldAlarmClockCard extends LitElement {
       // inject style into mdc form fields
       let myStyle: HTMLElement;
 
-      //  alarm-top styles
+      //  alarmTop styles
       if (this._optionButtonsHostsQ) {
-        let optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+        const optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
         this._optionButtonsHostsQ.forEach((optionButtonsHost) => {
           myStyle = document.createElement('style');
           myStyle.innerHTML = optionButtonsStyle;
@@ -530,7 +615,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
-    Helpers.fireEvent('config-changed', { config: this._config }, this);
+    Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing?
 
     // NOTE: Some cards call setConfig() multiple times during life of card
     if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
@@ -555,7 +640,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _buildCard() {
-    if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id extraInfo) not available');
+    if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id "extraInfo") not available');
 
     while (this._rootQ.lastChild) {
       this._rootQ.removeChild(this._rootQ.lastChild);
@@ -573,6 +658,7 @@ class KoboldAlarmClockCard extends LitElement {
       const elements = this._elements = [];
       Promise.all(config.cards.map(async (card: LovelaceCardConfig) => {
         const element = await this._createCardElement(card);
+        // element.setAttribute('kobold-card', 'true');
         if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
         elements.push(element);
         this._rootQ.appendChild(element);
@@ -619,26 +705,29 @@ class KoboldAlarmClockCard extends LitElement {
 
     this._alarmController.evaluateAlarms();
     const fontNum = (!this._config.clock_display_font) ? '0' : this._config.clock_display_font;
-    const fontFaceClass = 'fontFace' + fontNum;
+    let clockClass = 'fontFace' + fontNum;
+    const showSeconds = false;
+    if (showSeconds) clockClass += ' seconds';
     // this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
-    this._clockQ.classList.value = fontFaceClass;
+    this._clockQ.classList.value = clockClass;
 
     const time = dayjs().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
-    if (isAlarmRinging && !this._ringingBegun) {
-      this._ringingBegun = true;
-      // this._alarmClockClasses = { fullscreen: false };
-      // this._alarmButtonsClasses = { showButtons: true };
-      this._alarmButtonsQ.classList.add('showButtons');
-      // this._footClasses = { hideFoot: false };
-      this._koboltClockQ.classList.remove('fullscreen');
-      this._footQ.classList.remove('hideFoot');
-    } else if (!isAlarmRinging && this._ringingBegun) {
-      this._ringingBegun = false;
-      // this._alarmButtonsClasses = { showButtons: false };
-      this._alarmButtonsQ.classList.remove('showButtons');
-    }
+    // // console.log('*** isAlarmRinging: ' + isAlarmRinging + '; ringingBegun: ' + this._ringingBegun);
+    // if (isAlarmRinging && !this._ringingBegun) {
+    //   console.log('*** adding "showButtons" class');
+    //   this._ringingBegun = true;
+    //   this._alarmButtonsQ.classList.add('showButtons');
+    //   this._koboldClockQ.classList.remove('fullscreen');
+    //   this._footQ.classList.remove('hideFoot');
+    // } else if (!isAlarmRinging && this._ringingBegun) {
+    //   console.log('*** removing "showButtons" class');
+    //   this._ringingBegun = false;
+    //   this._alarmButtonsQ.classList.remove('showButtons');
+    //   this._koboldClockQ.classList.add('fullscreen');
+    //   this._footQ.classList.add('hideFoot');
+    // }
 
     if (this._clockQ &&
       (force
@@ -651,36 +740,37 @@ class KoboldAlarmClockCard extends LitElement {
       this._controllersAlarmConfigLastUpdate = this._config.last_updated;
 
       let timeDisplay: string;
-      const showSeconds = false;
+      // time variable includes seconds, even when showSeconds is false
       const [timeHr, timeMn, timeSd] = time.split(':');
       let colon1Kern = '';
       let colon2Kern = '';
       if (timeHr.slice(-1) === '1') colon1Kern = ' colonKernL';
       if (timeMn.slice(0, 1) === '1') colon1Kern = colon1Kern + ' colonKernR';
+      if (showSeconds) {
+        if (timeMn.slice(-1) === '1') colon2Kern = ' colonKernL';
+        if (timeSd.slice(0, 1) === '1') colon2Kern = colon2Kern + ' colonKernR';
+      }
 
       if (this._config.time_format === '24hr') {
         if (showSeconds) {
-          if (timeMn.slice(-1) === '1') colon2Kern = ' colonKernL';
-          if (timeSd.slice(0, 1) === '1') colon2Kern = colon2Kern + ' colonKernR';
           timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSd;
         } else {
           timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn;
         }
       } else {
-        const [timeNum, timeTxt] = timeSd.split(' ');
         let periodKern = '';
-        if (timeMn.slice(-1) === '1' || timeMn.slice(-1) === '7') periodKern = ' periodKern';
+        const [timeSdNum, timeTxt] = timeSd.split(' ');
         if (showSeconds) {
-          if (timeMn.slice(-1) === '1') colon2Kern = ' colonKernL';
-          if (timeSd.slice(0, 1) === '1') colon2Kern = colon2Kern + ' colonKernR';
-          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeNum + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+          if (timeSdNum.slice(-1) === '1' || timeSdNum.slice(-1) === '7') periodKern = ' periodKern';
+          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSdNum + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
         } else {
+          if (timeMn.slice(-1) === '1' || timeMn.slice(-1) === '7') periodKern = ' periodKern';
           timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
         }
       }
 
       this._clockQ.innerHTML = `
-        <div class="clock-display">
+        <div class>
           ${timeDisplay}
         </div>
       `;
@@ -695,11 +785,23 @@ class KoboldAlarmClockCard extends LitElement {
 
   _onAlarmChanged(event: CustomEvent) {
     // this only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
-    if (!event.detail.alarm.enabled) {
-      this._alarmController.nextAlarm = { enabled: false, time: event.detail.alarm.time };
+
+    // if (!event.detail.nextAlarm.enabled) {
+    //   this._alarmController.nextAlarm = { enabled: false, time: event.detail.nextAlarm.time };
+    // } else {
+    //   this._alarmController.nextAlarm = event.detail.nextAlarm;
+    // }
+    let data;
+    if (!event.detail.nextAlarm.enabled) {
+      data = { enabled: false, time: event.detail.nextAlarm.time };
     } else {
-      this._alarmController.nextAlarm = event.detail.alarm;
+      data = event.detail.nextAlarm;
     }
+    if (!this._config.hide_cards_default) this._enforceHideCards(true);
+    // allow animations to complete before saving
+    window.setTimeout(() => {
+      this._alarmController.nextAlarm = data;
+    }, 250);
   }
 
   _handleAlarmButtonsClick(event: Event) {
@@ -722,31 +824,76 @@ class KoboldAlarmClockCard extends LitElement {
   //   }
   // }
 
-  _toggleClockFullscreen(forceHide: boolean | PointerEvent) {
-    // console.log('*** alarmClockClasses: ', this._alarmClockClasses);
+  // _toggleClockFullscreen(forceHide: boolean | PointerEvent) {
+  //   console.log('*** _toggleClockFullscreen fired');
+  //   // console.log('*** alarmClockClasses: ', this._alarmClockClasses);
+  //   let state = forceHide;
+  //   if (!this._alarmController.isAlarmRinging()) {
+  //     // if ((!this._alarmClockClasses.fullscreen && forceHide instanceof PointerEvent) || forceHide === true) {
+  //     if ((!this._koboldClockQ.classList.contains('fullscreen') && forceHide instanceof PointerEvent) || forceHide === true) {
+  //       // this._alarmClockClasses = { fullscreen: true };
+  //       this._koboldClockQ.classList.add('fullscreen');
+  //       // this._footClasses = { hideFoot: true };
+  //       this._footQ.classList.add('hideFoot');
+  //       state = true;
+  //     } else if ((this._koboldClockQ.classList.contains('fullscreen') && forceHide instanceof PointerEvent) || forceHide === false) {
+  //       // } else if ((this._alarmClockClasses.fullscreen && forceHide instanceof PointerEvent) || forceHide === false) {
+  //       // this._alarmClockClasses = { fullscreen: false };
+  //       // this._footClasses = { hideFoot: false };
+  //       this._koboldClockQ.classList.remove('fullscreen');
+  //       this._footQ.classList.remove('hideFoot');
+  //       state = false;
+  //     }
+  //   }
+  //   if (this._config.hide_cards_default !== state) this._alarmController.hideCardsDefault = state;
+  // }
+
+  _toggleHideCards(event) {
+    // console.log('*** _toggleHideCards fired');
     if (!this._alarmController.isAlarmRinging()) {
-      // if ((!this._alarmClockClasses.fullscreen && forceHide instanceof PointerEvent) || forceHide === true) {
-      if ((!this._koboltClockQ.classList.contains('fullscreen') && forceHide instanceof PointerEvent) || forceHide === true) {
-        // this._alarmClockClasses = { fullscreen: true };
-        this._koboltClockQ.classList.add('fullscreen');
-        // this._footClasses = { hideFoot: true };
-        this._footQ.classList.add('hideFoot');
-      } else if ((this._koboltClockQ.classList.contains('fullscreen') && forceHide instanceof PointerEvent) || forceHide === false) {
-        // } else if ((this._alarmClockClasses.fullscreen && forceHide instanceof PointerEvent) || forceHide === false) {
-        // this._alarmClockClasses = { fullscreen: false };
-        // this._footClasses = { hideFoot: false };
-        this._koboltClockQ.classList.remove('fullscreen');
-        this._footQ.classList.remove('hideFoot');
+      // if (!this._config.hide_cards_default) {
+      //   // this._koboldClockQ.classList.add('fullscreen');
+      //   // this._footQ.classList.add('hideFoot');
+      //   state = true;
+      // } else {
+      //   // this._koboldClockQ.classList.remove('fullscreen');
+      //   // this._footQ.classList.remove('hideFoot');
+      //   state = false;
+      // }
+      // const state = !this._config.hide_cards_default ? true : false;
+      if (!this._config.hide_cards_default) {
+        // hiding cards
+        this._enforceHideCards(true);
+        // allow animation to complete before saving
+        window.setTimeout(() => {
+          this._alarmController.hideCardsDefault = true;
+        }, 250);
+      } else {
+        // showing cards
+        this._alarmController.hideCardsDefault = false;
       }
     }
   }
 
+  _enforceHideCards(hideCards: boolean) {
+    // hide cards requested, not already hiding cards
+    if (hideCards && !this._koboldClockQ.classList.contains('fullscreen')) {
+      this._koboldClockQ.classList.add('fullscreen');
+      this._footQ.classList.add('hideFoot');
+    }
+    // show cards requested, not already showing cards
+    if (!hideCards && this._koboldClockQ.classList.contains('fullscreen')) {
+      this._koboldClockQ.classList.remove('fullscreen');
+      this._footQ.classList.remove('hideFoot');
+    }
+  }
+
   _toggleLogoVisibility() {
-    if (this._koboltLogoQ) {
-      if (this._koboltLogoQ.style.display !== 'none') {
-        this._koboltLogoQ.style.display = 'none';
+    if (this._koboldLogoQ) {
+      if (this._koboldLogoQ.style.display !== 'none') {
+        this._koboldLogoQ.style.display = 'none';
       } else {
-        this._koboltLogoQ.style.display = 'block';
+        this._koboldLogoQ.style.display = 'block';
       }
     }
   }
@@ -755,6 +902,17 @@ class KoboldAlarmClockCard extends LitElement {
     event.stopPropagation();
     let tabNo = parseInt(event.target.id.slice(4));
     window.setMyEditMode();
+
+    // Helpers.getLovelace().style.display = 'none';
+    // Helpers.getLovelace().style.filter = 'blur(10px)';
+    //  dialogBackground styles
+    if (Helpers.getLovelace()) {
+      const dialogBackgroundStyle = 'hui-root { display: none; }';
+      const myStyle = document.createElement('style');
+      myStyle.innerHTML = dialogBackgroundStyle;
+      Helpers.getLovelace().appendChild(myStyle);
+      // console.log('*** lovelace style: ', Helpers.getLovelace());
+    }
 
     let rounds = 0;
     // wait for availability of card-options; kobold card might be nested
@@ -777,6 +935,7 @@ class KoboldAlarmClockCard extends LitElement {
       }
     }
   }
+  // end of kobold-alarm-clock-card
 }
 
 @customElement('kobold-card-editor')
@@ -798,11 +957,11 @@ class KoboldCardEditor extends LitElement {
       label: "Clock Display Font",
       selector: { select: { options: [{ label: "System", value: 0 }, { label: "1", value: 1 }, { label: "2", value: 2 }, { label: "3", value: 3 }] } },
     },
-    {
-      name: "hide_cards_default",
-      label: "Hide Cards by Default",
-      selector: { boolean: {} },
-    },
+    // {
+    //   name: "hide_cards_default",
+    //   label: "Hide Cards by Default",
+    //   selector: { boolean: {} },
+    // },
     {
       name: "snooze_duration_default",
       label: "Snooze Duration Default",
@@ -966,6 +1125,8 @@ class KoboldCardEditor extends LitElement {
   @state() _selectedTab = 0;
   @state() _nextAlarmConfig: NextAlarmConfig;
 
+  // @query('hui-dialog-edit-card', true) _editorQ: HTMLElement;
+
   constructor() {
     super();
     Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHa());
@@ -982,19 +1143,67 @@ class KoboldCardEditor extends LitElement {
   }
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
-    const saveButton = Helpers.getEditorButtons().querySelectorAll('mwc-button')[1];
-    if (saveButton) {
-      saveButton.addEventListener('click', () => {
-        if (this._nextAlarmConfig) {
-          const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-          if (nextAlarmDiff) {
-            this._saveNextAlarm(this._nextAlarmConfig);
-          }
+    // const saveButton = Helpers.getEditorButtons().querySelectorAll('mwc-button')[1];
+    // if (saveButton) {
+    //   saveButton.addEventListener('click', () => {
+    //     if (this._nextAlarmConfig) {
+    //       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+    //       if (nextAlarmDiff) {
+    //         this._saveNextAlarm(this._nextAlarmConfig);
+    //       }
+    //     }
+    //   });
+    // } else {
+    //   console.error(`*** Save button not found`);
+    // }
+
+    const editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
+    if (editButtons) {
+      editButtons.forEach(
+        (button, index) => {
+          button.addEventListener('click', (event) => {
+            // Helpers.getLovelace().style.display = 'inline';
+            // Helpers.getLovelace().style.filter = 'none';
+            if (Helpers.getLovelace()) {
+              const dialogBackgroundStyle = 'hui-root { display: block; }';
+              Helpers.getLovelace().querySelector('style').remove();
+            }
+
+            if (index === 1) {
+              if (this._nextAlarmConfig) {
+                const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+                if (nextAlarmDiff) {
+                  this._saveNextAlarm(this._nextAlarmConfig);
+                }
+              }
+            }
+          })
         }
-      });
+      );
     } else {
-      console.error(`*** Save button not found`);
+      console.error(`*** Edit buttons not found`);
+      Helpers.getLovelace().style.display = 'inline';
     }
+
+    //   if (Helpers.getPreview()) {
+    //     let myStyle;
+    //     console.log('*** firstUpdated; preview: ', Helpers.getPreview());
+    //     const clockStyle = '#clock { background-color: green !important}; }';
+    //     myStyle = document.createElement('style');
+    //     myStyle.innerHTML = clockStyle;
+    //     let card = Helpers.getPreview().querySelector('kobold-alarm-clock-card');
+    //     if (!card) {
+    //       card = Helpers.getPreview().shadowRoot?.querySelector('kobold-alarm-clock-card');
+    //       if (!card) {
+    //         console.warn('*** firstUpdated(); No card found for preview');
+    //         Helpers.getPreview().style.visibility = 'hidden';
+    //       }
+    //     }
+    //     if (card) card.appendChild(myStyle);
+    //   }
+  }
+
+  protected updated(_changedProperties: PropertyValues): void {
   }
 
   _getDayOfWeek(days: number) {
@@ -1002,8 +1211,7 @@ class KoboldCardEditor extends LitElement {
     return dayjs('2018-08-27').add(days, 'days').format('dddd');
   }
 
-  // _valueChanged(event: CustomEvent) {
-  _valueChanged(event) {
+  _valueChanged(event: CustomEvent) {
     event.stopPropagation();
     if (!this._config) return;
     const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
@@ -1014,9 +1222,15 @@ class KoboldCardEditor extends LitElement {
     const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
     Object.keys(configChanges).forEach(
       (item) => {
+        // update nextAlarm
         if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
+          // console.log('*** changed item: ', item);
           const alarmTomorrow = this._config[dayTomorrow];
-          this._config.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
+          // this._config.next_alarm = AlarmController.createNextAlarm(alarmTomorrow); // sometimes undesired: resets overridden, etc
+          this._config.next_alarm = {
+            ...this._config.next_alarm,
+            ...AlarmController.createNextAlarm(alarmTomorrow),
+          }
         }
       });
 
@@ -1048,6 +1262,7 @@ class KoboldCardEditor extends LitElement {
     this.requestUpdate();
   }
 
+  // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm
   async _saveNextAlarm(nextAlarmConfig) {
     try {
       const lovelace = Helpers.getLovelace().lovelace;
@@ -1156,13 +1371,21 @@ class KoboldCardEditor extends LitElement {
     }
     return html`
       <div class="box">
-        <div>
-          Nap Duration
-          <ha-switch ?checked=${this._nextAlarmConfig.next_alarm.overridden} @change=${() => { this._nextAlarmConfig.next_alarm.overridden = !this._nextAlarmConfig.next_alarm.overridden }}></ha-switch>
-          <ha-duration-input
-            .data=${this._nextAlarmConfig.nap_duration}
-            @value-changed=${this._valueChangedNap}
-          ></ha-duration-input>
+        <div class="kobold-nap-form">
+          <div class="ha-form-grid">
+            <div class="ha-form">
+              <div class="ha-formfield">
+                <span><p>Nap Duration</p></span>
+                <ha-switch ?checked=${this._nextAlarmConfig.next_alarm.overridden} @change=${() => { this._nextAlarmConfig.next_alarm.overridden = !this._nextAlarmConfig.next_alarm.overridden }}></ha-switch>
+              </div>
+            </div>
+            <div class="ha-form">
+              <ha-duration-input
+                .data=${this._nextAlarmConfig.nap_duration}
+                @value-changed=${this._valueChangedNap}
+              ></ha-duration-input>
+            </div>
+          </div>
         </div>
 
       </div>`;
@@ -1208,6 +1431,32 @@ class KoboldCardEditor extends LitElement {
           }
           .gui-mode-button {
             margin-right: auto;
+          }
+
+          .kobold-nap-form .ha-form-grid {
+            display: grid !important;
+            grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));
+            grid-column-gap: 8px;
+            grid-row-gap: 24px;
+          }
+
+          .kobold-nap-form .ha-form {
+            display: block;
+          }
+
+          .kobold-nap-form .ha-formfield {
+            justify-content: space-between;
+            align-items: var(--ha-formfield-align-items, center);
+            gap: 4px;
+            width: 100%;
+            display: flex;
+            min-height: 56px;
+            align-items: center;
+            --mdc-typography-body2-font-size: 1em;
+          }
+
+          .kobold-nap-form p {
+            margin: 0;
           }
         `;
   }

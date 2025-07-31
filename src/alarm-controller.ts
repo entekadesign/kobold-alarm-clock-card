@@ -30,7 +30,7 @@ export class AlarmController {
                 this._isAlarmRinging = false;
                 this._callAlarmRingingService('turn_off');
             }
-        }, 500);
+        }, 1000);
     }
 
     set hass(hass: HomeAssistant) {
@@ -39,19 +39,26 @@ export class AlarmController {
     }
 
     snooze() {
-        this.nextAlarmReset(true);
+        this._setAlarmRinging(false);
+        // allow animations to complete before saving
+        window.setTimeout(() => {
+            this.nextAlarmReset(true);// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+        }, 250);
         if (this._config.alarm_actions) {
             this._config.alarm_actions
                 .filter((action) => action.when === 'on_snooze')
                 .forEach(action => this._runAction(action));
         }
-        this._setAlarmRinging(false);
     }
 
     dismiss() {
         this._setAlarmRinging(false);
         // console.log('*** dismiss fired');
-        this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+        // allow animations to complete before saving
+        window.setTimeout(() => {
+            this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+        }, 250);
+
         if (this._config.alarm_actions) {
             this._config.alarm_actions
                 .filter((action) => action.when === 'on_dismiss')
@@ -145,12 +152,17 @@ export class AlarmController {
         return this._config.alarms_enabled && nextAlarm.enabled;
     }
 
+    set hideCardsDefault(keyValue) {
+        // console.log('*** saving hide_cards_default: ', keyValue);
+        this._saveConfig('hide_cards_default', keyValue);
+    }
+
     async _saveConfig(key, value) {
         try {
             const lovelace = Helpers.getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
             const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
-            if (cardConfig && cardConfig[key]) {
+            if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
@@ -178,7 +190,8 @@ export class AlarmController {
         // if day is ending and nextAlarm is not set for tomorrow, then reset nextAlarm
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
-        if (dayjs().subtract(1, 'second').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) {
+        if (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) {
+            // console.log('*** alarm resetting automatically');
             this.nextAlarmReset();
             // if (this._config.debug) {
             //     console.warn('*** _evaluate(); No nextAlarm for tomorrow; resetting nextAlarm');
@@ -335,6 +348,16 @@ export class Helpers {
         root = root && root.shadowRoot;
         root = root && root.querySelector('hui-dialog-edit-card');
         // console.log('*** getEditor(); root: ', root);
+        return root;
+    };
+
+    static getPreview = () => {
+        let root: any = this.getHa();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('hui-dialog-edit-card');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('div.element-preview');
+        // console.log('*** getPreview(); root: ', root);
         return root;
     };
 
