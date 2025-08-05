@@ -84,7 +84,7 @@ If you installed Kobold manually, register Kobold on the [resources page of your
 Regardless of how you installed, add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
 ```
@@ -92,7 +92,7 @@ Regardless of how you installed, add the following to your dashboard's [lovelace
 Kobold expects the entity ID of your input_boolean helper to be in the `alarm_entities` list. These entity IDs represent HA integrations that will activate when the alarm is activated (called "alarm ringers" in the **settings dialog**). Note that the name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock," you must add a `name` entry to the lovelace configuration to set a new name:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   name: living_room_clock
   alarm_entities:
     - input_boolean.living_room_clock
@@ -110,7 +110,7 @@ Set an alarm for each day of the week in the **alarm schedule dialog**. The next
 You can instruct Kobold to activate an HA integration at other times than when an alarm activates. For example, to configure an input_boolean helper to activate one minute before the alarm, add an `alarm_actions` entry to your lovelace configuration:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
   alarm_actions:
@@ -127,7 +127,7 @@ Enhance reliability by configuring both of the following.
 1. The [*Ping* integration](https://www.home-assistant.io/integrations/ping/) provides a binary_sensor that can be used to query an IP address to confirm the availability of an Internet connection. If there is no connection, Kobold will display a warning when attempting a settings change, and it will try to use a LAN-accessible alarm (if one is configured). After installing the integration and configuring a binary_sensor to ping 8.8.8.8, for example, add the `ping_entity` entry to your lovelace configuration, including the binary_sensor entity ID as the value:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
   ping_entity: binary_sensor.8_8_8_8
@@ -136,7 +136,7 @@ Enhance reliability by configuring both of the following.
 2. To configure a LAN-accessible alarm, add an `alarm_entity_local` entry to your lovelace configuration, including as the value the entity ID of an alarm integration that does not require the Internet:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
   ping_entity: binary_sensor.8_8_8_8
@@ -148,7 +148,7 @@ Enhance reliability by configuring both of the following.
 Display HA cards in an area along lower edge of main view by adding a `cards` entry to your lovelace configuration:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
   cards:
@@ -180,7 +180,7 @@ Another feature of *Browser_Mod* is its ability to allow a browser to serve as a
 Now, configure Kobold by adding the switch's entity ID to your lovelace configuration:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
     - switch.stream_wnyc
@@ -220,7 +220,7 @@ description: ""
 Some debugging information can be logged in the HA system log by adding a `debug` entry to your lovelace configuration:
 
 ```yaml
-- type: custom:kobold-alarm-clock
+- type: custom:kobold-alarm-clock-card
   alarm_entities:
     - input_boolean.alarm_clock
   debug: true
