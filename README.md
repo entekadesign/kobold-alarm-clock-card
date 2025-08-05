@@ -49,7 +49,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - [Home Assistant](https://www.home-assistant.io/installation/)
 - [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
 - [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
-- [*Variables+History* integration](https://github.com/enkama/hass-variables)
+- [*Variables+History* integration](https://github.com/enkama/hass-variables) ("Sensor" variable type, default settings)
 
 ## Installation
 
