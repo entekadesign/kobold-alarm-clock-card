@@ -2958,7 +2958,7 @@ window.customCards.push({
     type: "kobold-alarm-clock-card",
     name: "Kobold",
     description: "A multi-alarm clock for Home Assistant",
-    preview: true,
+    // preview: true, // will need styling to accommodate narrow spaces
     documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme"
 });
 class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$export$3f2f9f5909897157) {
@@ -3647,15 +3647,16 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         event.stopPropagation();
         let tabNo = parseInt(event.target.id.slice(4));
         window.setMyEditMode();
+        this._clockQ.style.display = 'none';
         // Helpers.getLovelace().style.display = 'none';
         // Helpers.getLovelace().style.filter = 'blur(10px)';
         //  dialogBackground styles
-        if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace()) {
-            const dialogBackgroundStyle = 'hui-root { display: none; }';
+        if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot) {
+            const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 250ms; }';
             const myStyle = document.createElement('style');
             myStyle.innerHTML = dialogBackgroundStyle;
-            (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().appendChild(myStyle);
-        // console.log('*** lovelace style: ', Helpers.getLovelace());
+            // console.log('*** lovelace style: ', Helpers.getLovelace().shadowRoot.querySelector('div'));
+            (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
         }
         let rounds = 0;
         // wait for availability of card-options; kobold card might be nested
@@ -3676,6 +3677,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 this._koboldEditor = undefined;
             }
         }
+        this._clockQ.style.display = 'flex';
     }
     constructor(...args){
         super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON(), this.preview = false, this._connectionStatusEvent = (event)=>{
@@ -3851,7 +3853,43 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 name: "alarm_actions",
                 label: "Alarm Actions",
                 selector: {
-                    object: {}
+                    object: {
+                        // label_field: "name",
+                        // description_field: "percentage",
+                        // multiple: true,
+                        // fields: [
+                        //   {
+                        //     name: {
+                        //       label: "Name",
+                        //       selector: { text: {} },
+                        //     }
+                        //   },
+                        //   {
+                        //     percentage: {
+                        //       label: "Percentage",
+                        //       selector: { number: { unit_of_measurement: "%" } },
+                        //     },
+                        //   },
+                        // ],
+                        label_field: "name",
+                        description_field: "percentage",
+                        multiple: true,
+                        fields: {
+                            name: {
+                                label: "Name",
+                                selector: {
+                                    text: {}
+                                }
+                            },
+                            percentage: {
+                                label: "Percentage",
+                                // selector: { number: { unit_of_measurement: "%" } }
+                                selector: {
+                                    text: {}
+                                }
+                            }
+                        }
+                    }
                 }
             },
             {
@@ -4057,10 +4095,12 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             button.addEventListener('click', (event)=>{
                 // Helpers.getLovelace().style.display = 'inline';
                 // Helpers.getLovelace().style.filter = 'none';
-                if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace()) {
-                    const dialogBackgroundStyle = 'hui-root { display: block; }';
-                    (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().querySelector('style').remove();
-                }
+                if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot) // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
+                // console.log('*** myStyle: ', myStyle);
+                // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
+                // myStyle.innerHTML = dialogBackgroundStyle;
+                // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
+                (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div > style').remove();
                 if (index === 1) {
                     if (this._nextAlarmConfig) {
                         const nextAlarmDiff = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
@@ -4100,11 +4140,17 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         if (!this._config) return;
         const configChanges = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
         if (!configChanges) return;
+        // console.log('*** valueChanged(); configChanges: ', configChanges);
+        // console.log('*** valueChanged(); oldConfig: ', this._oldConfig);
+        // console.log('*** valueChanged(); event value: ', event.detail.value);
         this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, event.detail.value);
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        // console.log('*** valueChanged(); new config: ', this._config);
         const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
         const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
+            // console.log('*** item: ', item);
+            if (!event.detail.value[item]) event.detail.value[item] = this._config[item]; //this._oldConfig[item];
             // update nextAlarm
             if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
                 // console.log('*** changed item: ', item);
@@ -4264,7 +4310,6 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             </div>
           </div>
         </div>
-
       </div>`;
     }
     _renderScheduleEditor() {

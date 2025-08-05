@@ -48,7 +48,7 @@ window.customCards.push({
   type: "kobold-alarm-clock-card",
   name: "Kobold",
   description: "A multi-alarm clock for Home Assistant",
-  preview: true,
+  // preview: true, // will need styling to accommodate narrow spaces
   documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme",
 });
 
@@ -903,15 +903,16 @@ class KoboldAlarmClockCard extends LitElement {
     let tabNo = parseInt(event.target.id.slice(4));
     window.setMyEditMode();
 
+    this._clockQ.style.display = 'none';
     // Helpers.getLovelace().style.display = 'none';
     // Helpers.getLovelace().style.filter = 'blur(10px)';
     //  dialogBackground styles
-    if (Helpers.getLovelace()) {
-      const dialogBackgroundStyle = 'hui-root { display: none; }';
+    if (Helpers.getLovelace().shadowRoot) {
+      const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 250ms; }';
       const myStyle = document.createElement('style');
       myStyle.innerHTML = dialogBackgroundStyle;
-      Helpers.getLovelace().appendChild(myStyle);
-      // console.log('*** lovelace style: ', Helpers.getLovelace());
+      // console.log('*** lovelace style: ', Helpers.getLovelace().shadowRoot.querySelector('div'));
+      Helpers.getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
     }
 
     let rounds = 0;
@@ -934,6 +935,7 @@ class KoboldAlarmClockCard extends LitElement {
         this._koboldEditor = undefined;
       }
     }
+    this._clockQ.style.display = 'flex';
   }
   // end of kobold-alarm-clock-card
 }
@@ -975,7 +977,41 @@ class KoboldCardEditor extends LitElement {
     {
       name: "alarm_actions",
       label: "Alarm Actions",
-      selector: { object: {} },
+      selector: {
+        object: {
+          // label_field: "name",
+          // description_field: "percentage",
+          // multiple: true,
+          // fields: [
+          //   {
+          //     name: {
+          //       label: "Name",
+          //       selector: { text: {} },
+          //     }
+          //   },
+          //   {
+          //     percentage: {
+          //       label: "Percentage",
+          //       selector: { number: { unit_of_measurement: "%" } },
+          //     },
+          //   },
+          // ],
+          label_field: "name",
+          description_field: "percentage",
+          multiple: true,
+          fields: {
+            name: {
+              label: "Name",
+              selector: { text: {} }
+            },
+            percentage: {
+              label: "Percentage",
+              // selector: { number: { unit_of_measurement: "%" } }
+              selector: { text: {} }
+            }
+          }
+        }
+      }
     },
     {
       name: "debug",
@@ -1164,9 +1200,13 @@ class KoboldCardEditor extends LitElement {
           button.addEventListener('click', (event) => {
             // Helpers.getLovelace().style.display = 'inline';
             // Helpers.getLovelace().style.filter = 'none';
-            if (Helpers.getLovelace()) {
-              const dialogBackgroundStyle = 'hui-root { display: block; }';
-              Helpers.getLovelace().querySelector('style').remove();
+            if (Helpers.getLovelace().shadowRoot) {
+              // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
+              // console.log('*** myStyle: ', myStyle);
+              // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
+              // myStyle.innerHTML = dialogBackgroundStyle;
+              // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
+              Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
             }
 
             if (index === 1) {
@@ -1216,12 +1256,22 @@ class KoboldCardEditor extends LitElement {
     if (!this._config) return;
     const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
     if (!configChanges) return;
+    // console.log('*** valueChanged(); configChanges: ', configChanges);
+    // console.log('*** valueChanged(); oldConfig: ', this._oldConfig);
+    // console.log('*** valueChanged(); event value: ', event.detail.value);
     this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
     this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    // console.log('*** valueChanged(); new config: ', this._config);
     const momentTomorrow = dayjs().add(1, 'day');
     const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+
     Object.keys(configChanges).forEach(
       (item) => {
+        // console.log('*** item: ', item);
+        if (!event.detail.value[item]) {
+          event.detail.value[item] = this._config[item];//this._oldConfig[item];
+          // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._oldConfig[item]));
+        }
         // update nextAlarm
         if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
           // console.log('*** changed item: ', item);
@@ -1387,7 +1437,6 @@ class KoboldCardEditor extends LitElement {
             </div>
           </div>
         </div>
-
       </div>`;
   }
 
