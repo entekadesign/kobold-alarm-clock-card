@@ -278,16 +278,14 @@ export class AlarmController {
             replace_attributes: true
         };
 
-        if (this.alarmClockPingEntity) {
-            if (this.alarmClockPingEntity?.state === 'on' || !this.alarmClockPingEntity) {
-                this._hass.callService('variable', 'update_sensor', param);
-                this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
-            } else {
-                if (this._config.debug) {
-                    this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
-                }
-                alert('Save failed. No connection to Home Assistant.');
+        if ((this.alarmClockPingEntity && this.alarmClockPingEntity.state === 'on') || !this.alarmClockPingEntity) {
+            this._hass.callService('variable', 'update_sensor', param);
+            this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
+        } else {
+            if (this._config.debug) {
+                this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
             }
+            alert('Save failed. No connection to Home Assistant.');
         }
     }
 }

@@ -1262,17 +1262,15 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             attributes: configurationWithLastUpdated,
             replace_attributes: true
         };
-        if (this.alarmClockPingEntity) {
-            if (this.alarmClockPingEntity?.state === 'on' || !this.alarmClockPingEntity) {
-                this._hass.callService('variable', 'update_sensor', param);
-                this._controllersAlarmConfig = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, configurationWithLastUpdated);
-            } else {
-                if (this._config.debug) this._hass.callService('system_log', 'write', {
-                    'message': '*** Save attempted while clock disconnected from Home Assistant',
-                    'level': 'info'
-                });
-                alert('Save failed. No connection to Home Assistant.');
-            }
+        if (this.alarmClockPingEntity && this.alarmClockPingEntity.state === 'on' || !this.alarmClockPingEntity) {
+            this._hass.callService('variable', 'update_sensor', param);
+            this._controllersAlarmConfig = Object.assign(new $b2cd7c9abb677932$export$5df46671f5b4cca6, configurationWithLastUpdated);
+        } else {
+            if (this._config.debug) this._hass.callService('system_log', 'write', {
+                'message': '*** Save attempted while clock disconnected from Home Assistant',
+                'level': 'info'
+            });
+            alert('Save failed. No connection to Home Assistant.');
         }
     }
 }
