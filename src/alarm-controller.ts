@@ -199,13 +199,16 @@ export class AlarmController {
             // }
         }
 
-        if (!this._config.alarms_enabled && !nextAlarm.nap) {
-            return;
-        }
+        // if (!this._config.alarms_enabled && !nextAlarm.nap) {
+        //     return;
+        // }
 
-        if (!nextAlarm.enabled) {
-            return;
-        }
+        // if (!nextAlarm.enabled) {
+        //     return;
+        // }
+
+        if (!this.isAlarmEnabled) return;
+
         if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
             this._setAlarmRinging(true);
         } else if (this.isAlarmRinging()) {

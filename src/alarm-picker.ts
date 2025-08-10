@@ -116,7 +116,7 @@ class AlarmPicker extends LitElement {
         }
 
         #alarmTimeInput[overridden] {
-            border: 1px dotted black;
+            border: 1px dotted #969696;
             padding: 1px;
         }
 
@@ -167,7 +167,7 @@ class AlarmPicker extends LitElement {
             let myStyle: HTMLElement;
             if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
                 myStyle.innerHTML = switchStyle;
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
@@ -187,8 +187,8 @@ class AlarmPicker extends LitElement {
             //     pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             // }
             if (this._alarmTimeInputQ.shadowRoot) {
-                const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
-                const pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 2em !important; background-color: white !important; }';
+                const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
+                const pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
                 myStyle = document.createElement('style');
                 myStyle.innerHTML = allStyle + pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
