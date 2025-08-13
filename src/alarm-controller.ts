@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
-import type { CardConfig, NextAlarmObject, TimeObject, Duration } from './types';
+import type { CardConfig, NextAlarmObject, TimeObject, AlarmActionsObject, Duration } from './types';
 
 // HA types
 import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
@@ -15,7 +15,7 @@ export class AlarmController {
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _setAlarmRinging: (state: boolean) => void;
     private _cardId?: string;
-    private _alarmActionsScripts?: Array<Record<string, boolean>> = [];
+    private _alarmActionsScript?: Array<Record<string, boolean>> = [];
 
     constructor(config: CardConfig, cardId?: string) {
 
@@ -63,7 +63,7 @@ export class AlarmController {
             this._config.alarm_actions
                 .filter((action) => action.when === 'on_dismiss')
                 .forEach(action => this._runAction(action));
-            this._alarmActionsScripts = [];
+            this._alarmActionsScript = [];
         }
     }
 
@@ -190,6 +190,9 @@ export class AlarmController {
         // if day is ending and nextAlarm is not set for tomorrow, then reset nextAlarm
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
+        // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time;
+        // const myB = nextAlarm.date <= dateToday;
+        // console.log('*** nextAlarm is past: ' + myA + '; date less or same as today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
         if (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) {
             // console.log('*** alarm resetting automatically');
             this.nextAlarmReset();
@@ -207,32 +210,55 @@ export class AlarmController {
         //     return;
         // }
 
+        // console.log('*** evaluate(); alarmActionsScript: ', this._alarmActionsScript);
+
         if (!this.isAlarmEnabled) return;
+
+        // console.log('*** _evaluate(); alarm enabled');
+
+        // console.log('*** _evaluate(); snooze: ' + nextAlarm.snooze + '; nap: ' + nextAlarm.nap + '; actions: ' + this._config.alarm_actions);
 
         if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
             this._setAlarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm after alarm_duration_default time elapses
             if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
+                // console.log('*** _evaluate(); dismissing ringing automatically');
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
         } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) {
+            // console.log('*** _evaluate(); not ringing, no nap, no snooze alarm actions present');
+            // this._config.alarm_actions
+            //     .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+            //     .filter(action => dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
+            //     .forEach(action => this._runAction(action));
             this._config.alarm_actions
-                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScripts[`${action.entity}-${action.when}`])
-                .filter(action => dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
-                .forEach(action => this._runAction(action));
+                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+                .forEach(action => {
+                    let myDuration: Duration = structuredClone(action.offset);
+                    if (action.negative && action.offset) {
+                        myDuration = { hours: myDuration.hours *= -1, minutes: myDuration.minutes *= -1, seconds: myDuration.seconds *= -1 };
+                    }
+                    console.log('*** _evaluate(); alarm action time: ', dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss'));
+                    if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
+                        // this._runAction(action);
+                        console.log('*** _evaluate(); alarm action triggered for: ', action);
+                    }
+                    // dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
+                    // .forEach(action => this._runAction(action));
+                });
         }
     }
 
-    _runAction(action: Record<'entity' | 'when', string>) {
+    _runAction(action: AlarmActionsObject) {
         const tempAction = {
             service: 'homeassistant.turn_on',
             ...action
         }
         const actionServiceCommand = tempAction.service.split('.');
         this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], { "entity_id": tempAction.entity });
-        this._alarmActionsScripts[`${tempAction.entity}-${tempAction.when}`] = true;
+        this._alarmActionsScript[`${tempAction.entity}-${tempAction.when}`] = true;
     }
 
     _callAlarmRingingService(action: string) {
@@ -470,6 +496,7 @@ export class Helpers {
         fr: { enabled: false, time: "07:00:00" },
         sa: { enabled: false, time: "09:00:00" },
         su: { enabled: false, time: "09:00:00" },
+        // alarm_actions: {},
         snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
         alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
         nap_duration: { hours: 0, minutes: 30, seconds: 0 },

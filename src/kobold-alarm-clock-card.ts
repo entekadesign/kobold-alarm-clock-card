@@ -416,7 +416,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
     #clock.fontFace2 .periodName {
       bottom: 1.8vh;
-      /*letter-spacing: -0.4em;*
+      /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
     }
 
@@ -429,7 +429,8 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
-      letter-spacing: -0.2em;
+      letter-spacing: -0.4em;
+      bottom: 4.5vh;
     }
     #clock.fontFace3 .colonKernL {
       margin-left: 0;
@@ -997,39 +998,36 @@ class KoboldCardEditor extends LitElement {
       label: "Alarm Actions",
       selector: {
         object: {
-          // label_field: "name",
-          // description_field: "percentage",
-          // multiple: true,
-          // fields: [
-          //   {
-          //     name: {
-          //       label: "Name",
-          //       selector: { text: {} },
-          //     }
-          //   },
-          //   {
-          //     percentage: {
-          //       label: "Percentage",
-          //       selector: { number: { unit_of_measurement: "%" } },
-          //     },
-          //   },
-          // ],
-          label_field: "name",
-          description_field: "percentage",
+          label_field: "entity",
+          // description_field: "enabled",
           multiple: true,
           fields: {
-            name: {
-              label: "Name",
-              selector: { text: {} }
+            enabled: {
+              label: "Alarm Action Enabled",
+              selector: { boolean: {} },
+              required: true,
             },
-            percentage: {
-              label: "Percentage",
-              // selector: { number: { unit_of_measurement: "%" } }
-              selector: { text: {} }
-            }
+            entity: {
+              label: "Alarm Action Entity",
+              selector: { entity: {} },
+              required: true,
+            },
+            when: {
+              label: "Activate Action When",
+              selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "Offset from Alarm Ring Time", value: "offset" }] } },
+              required: true,
+            },
+            offset: {
+              label: "Offset Duration",
+              selector: { duration: {} },
+            },
+            negative: {
+              label: "Offset Negative",
+              selector: { boolean: {} },
+            },
           }
         }
-      }
+      },
     },
     {
       name: "debug",
@@ -1217,27 +1215,47 @@ class KoboldCardEditor extends LitElement {
     if (editButtons.length > 0) {
       editButtons.forEach(
         (button, index) => {
-          button.addEventListener('click', (event) => {
-            // Helpers.getLovelace().style.display = 'inline';
-            // Helpers.getLovelace().style.filter = 'none';
-            if (Helpers.getLovelace().shadowRoot) {
-              // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
-              // console.log('*** myStyle: ', myStyle);
-              // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
-              // myStyle.innerHTML = dialogBackgroundStyle;
-              // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
-              Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
-            }
 
-            if (index === 1) {
-              if (this._nextAlarmConfig) {
-                const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-                if (nextAlarmDiff) {
-                  this._saveNextAlarm(this._nextAlarmConfig);
+          ['click', 'keypress'].forEach(event => {
+            button.addEventListener(event, function (e) {
+              if (event === 'click' || e.keyCode === 13) {
+                if (Helpers.getLovelace().shadowRoot) {
+                  Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
+                }
+
+                if (index === 1) {
+                  if (this._nextAlarmConfig) {
+                    const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+                    if (nextAlarmDiff) {
+                      this._saveNextAlarm(this._nextAlarmConfig);
+                    }
+                  }
                 }
               }
-            }
-          })
+            });
+          });
+
+          // button.addEventListener('click', (event) => {
+          //   // Helpers.getLovelace().style.display = 'inline';
+          //   // Helpers.getLovelace().style.filter = 'none';
+          //   if (Helpers.getLovelace().shadowRoot) {
+          //     // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
+          //     // console.log('*** myStyle: ', myStyle);
+          //     // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
+          //     // myStyle.innerHTML = dialogBackgroundStyle;
+          //     // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
+          //     Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
+          //   }
+
+          //   if (index === 1) {
+          //     if (this._nextAlarmConfig) {
+          //       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+          //       if (nextAlarmDiff) {
+          //         this._saveNextAlarm(this._nextAlarmConfig);
+          //       }
+          //     }
+          //   }
+          // })
         }
       );
     } else {
@@ -1284,8 +1302,10 @@ class KoboldCardEditor extends LitElement {
     // this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
     // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
     // console.log('*** valueChanged(); new config: ', this._config);
-    const momentTomorrow = dayjs().add(1, 'day');
-    const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+    // const momentTomorrow = dayjs().add(1, 'day');
+    // const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+    const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
+    const dayToday = dayjs().format('dd').toLowerCase();
 
     Object.keys(configChanges).forEach(
       (item) => {
@@ -1301,15 +1321,21 @@ class KoboldCardEditor extends LitElement {
           // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._config[item]));
         }
         // update nextAlarm
-        if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
+        if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
           // console.log('*** changed item: ', item);
           // const alarmTomorrow = this._config[dayTomorrow];
-          const alarmTomorrow = event.detail.value[dayTomorrow];
+          // const alarmTomorrow = event.detail.value[dayTomorrow];
+
+          const forToday = item === dayToday && dayjs().format('HH:mm:ss') < event.detail.value[item].time;
+          // console.log('*** now: ' + dayjs().add(1, 'minute').format('HH:mm:ss') + ' < ' + event.detail.value[item].time);
+          // console.log('*** forToday: ', forToday);
+          const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
           // this._config.next_alarm = AlarmController.createNextAlarm(alarmTomorrow); // sometimes undesired: resets overridden, etc
           // this._config.next_alarm = {
           event.detail.value.next_alarm = {
             ...this._config.next_alarm,
-            ...AlarmController.createNextAlarm(alarmTomorrow),
+            // ...AlarmController.createNextAlarm(alarmTomorrow),
+            ...AlarmController.createNextAlarm(newAlarm, forToday),
           }
           // console.log('*** new next_alarm.enabled: ', event.detail.value.next_alarm);
         }
@@ -1451,6 +1477,7 @@ class KoboldCardEditor extends LitElement {
   }
 
   _renderSettingsEditor() {
+    // console.log('*** when: ', this._config.alarm_actions);
     return html`<div class="box">
       <ha-form
           .hass=${this._hass}

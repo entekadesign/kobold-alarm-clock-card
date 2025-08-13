@@ -20,7 +20,8 @@ export interface CardConfig extends LovelaceCardConfig {
     type: string;
     name: string;
     alarm_entities?: Array<string>;
-    alarm_actions?: Array<Record<'entity' | 'when', string>>;
+    // alarm_actions?: Array<Record<'entity' | 'when', string>>;
+    alarm_actions?: Array<AlarmActionsObject>;
     alarms_enabled: boolean;
     next_alarm: NextAlarmObject;
     mo: TimeObject;
@@ -43,6 +44,13 @@ export interface CardConfig extends LovelaceCardConfig {
 export interface NextAlarmConfig {
     next_alarm: NextAlarmObject;
     nap_duration: Duration;
+}
+
+export interface AlarmActionsObject {
+    entity: string;
+    when: string;
+    offset: Duration;
+    negative: boolean;
 }
 
 // export interface RingerEntity {

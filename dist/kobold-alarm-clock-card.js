@@ -1069,7 +1069,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             'turn_on': 'media_play',
             'turn_off': 'media_pause'
         };
-        this._alarmActionsScripts = [];
+        this._alarmActionsScript = [];
         this._cardId = cardId;
         this._config = config;
         this._setAlarmRinging = $b2cd7c9abb677932$export$4dc2b60021baefca.throttle((state)=>{
@@ -1103,7 +1103,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         }, 250);
         if (this._config.alarm_actions) {
             this._config.alarm_actions.filter((action)=>action.when === 'on_dismiss').forEach((action)=>this._runAction(action));
-            this._alarmActionsScripts = [];
+            this._alarmActionsScript = [];
         }
     }
     // snoozeConfig(snoozeDuration: Duration) {
@@ -1211,6 +1211,9 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // if day is ending and nextAlarm is not set for tomorrow, then reset nextAlarm
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
+        // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time;
+        // const myB = nextAlarm.date <= dateToday;
+        // console.log('*** nextAlarm is past: ' + myA + '; date less or same as today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
         if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) // console.log('*** alarm resetting automatically');
         this.nextAlarmReset();
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
@@ -1219,12 +1222,33 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // if (!nextAlarm.enabled) {
         //     return;
         // }
+        // console.log('*** evaluate(); alarmActionsScript: ', this._alarmActionsScript);
         if (!this.isAlarmEnabled) return;
+        // console.log('*** _evaluate(); alarm enabled');
+        // console.log('*** _evaluate(); snooze: ' + nextAlarm.snooze + '; nap: ' + nextAlarm.nap + '; actions: ' + this._config.alarm_actions);
         if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._setAlarmRinging(true);
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
         {
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) this.dismiss();
-        } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScripts[`${action.entity}-${action.when}`]).filter((action)=>(0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration($b2cd7c9abb677932$export$4dc2b60021baefca.convertToMinutes(action.when))).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')).forEach((action)=>this._runAction(action));
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) // console.log('*** _evaluate(); dismissing ringing automatically');
+            this.dismiss();
+        } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) // console.log('*** _evaluate(); not ringing, no nap, no snooze alarm actions present');
+        // this._config.alarm_actions
+        //     .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+        //     .filter(action => dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
+        //     .forEach(action => this._runAction(action));
+        this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
+            let myDuration = structuredClone(action.offset);
+            if (action.negative && action.offset) myDuration = {
+                hours: myDuration.hours *= -1,
+                minutes: myDuration.minutes *= -1,
+                seconds: myDuration.seconds *= -1
+            };
+            console.log('*** _evaluate(); alarm action time: ', (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(myDuration)).format('HH:mm:ss'));
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) // this._runAction(action);
+            console.log('*** _evaluate(); alarm action triggered for: ', action);
+        // dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
+        // .forEach(action => this._runAction(action));
+        });
     }
     _runAction(action) {
         const tempAction = {
@@ -1235,7 +1259,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], {
             "entity_id": tempAction.entity
         });
-        this._alarmActionsScripts[`${tempAction.entity}-${tempAction.when}`] = true;
+        this._alarmActionsScript[`${tempAction.entity}-${tempAction.when}`] = true;
     }
     _callAlarmRingingService(action) {
         if (this._config.debug) this._hass.callService('system_log', 'write', {
@@ -1467,6 +1491,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             enabled: false,
             time: "09:00:00"
         },
+        // alarm_actions: {},
         snooze_duration_default: {
             hours: 0,
             minutes: 15,
@@ -3240,7 +3265,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     #clock.fontFace2 .periodName {
       bottom: 1.8vh;
-      /*letter-spacing: -0.4em;*
+      /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
     }
 
@@ -3253,7 +3278,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
-      letter-spacing: -0.2em;
+      letter-spacing: -0.4em;
+      bottom: 4.5vh;
     }
     #clock.fontFace3 .colonKernL {
       margin-left: 0;
@@ -3876,38 +3902,56 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 label: "Alarm Actions",
                 selector: {
                     object: {
-                        // label_field: "name",
-                        // description_field: "percentage",
-                        // multiple: true,
-                        // fields: [
-                        //   {
-                        //     name: {
-                        //       label: "Name",
-                        //       selector: { text: {} },
-                        //     }
-                        //   },
-                        //   {
-                        //     percentage: {
-                        //       label: "Percentage",
-                        //       selector: { number: { unit_of_measurement: "%" } },
-                        //     },
-                        //   },
-                        // ],
-                        label_field: "name",
-                        description_field: "percentage",
+                        label_field: "entity",
+                        // description_field: "enabled",
                         multiple: true,
                         fields: {
-                            name: {
-                                label: "Name",
+                            enabled: {
+                                label: "Alarm Action Enabled",
                                 selector: {
-                                    text: {}
+                                    boolean: {}
+                                },
+                                required: true
+                            },
+                            entity: {
+                                label: "Alarm Action Entity",
+                                selector: {
+                                    entity: {}
+                                },
+                                required: true
+                            },
+                            when: {
+                                label: "Activate Action When",
+                                selector: {
+                                    select: {
+                                        options: [
+                                            {
+                                                label: "On Snooze",
+                                                value: "on_snooze"
+                                            },
+                                            {
+                                                label: "On Dismiss",
+                                                value: "on_dismiss"
+                                            },
+                                            {
+                                                label: "Offset from Alarm Ring Time",
+                                                value: "offset"
+                                            }
+                                        ]
+                                    }
+                                },
+                                required: true
+                            },
+                            offset: {
+                                label: "Offset Duration",
+                                selector: {
+                                    duration: {}
                                 }
                             },
-                            percentage: {
-                                label: "Percentage",
-                                // selector: { number: { unit_of_measurement: "%" } }
+                            negative: {
+                                label: "Offset Negative",
                                 selector: {
-                                    text: {}
+                                    boolean: {}
                                 }
                             }
                         }
@@ -4116,22 +4160,42 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         if (editButtons.length === 0) editButtons = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getEditorButtons().querySelectorAll('mwc-button');
         // console.log('*** editButtons: ', editButtons);
         if (editButtons.length > 0) editButtons.forEach((button, index)=>{
-            button.addEventListener('click', (event)=>{
-                // Helpers.getLovelace().style.display = 'inline';
-                // Helpers.getLovelace().style.filter = 'none';
-                if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot) // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
-                // console.log('*** myStyle: ', myStyle);
-                // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
-                // myStyle.innerHTML = dialogBackgroundStyle;
-                // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
-                (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div > style').remove();
-                if (index === 1) {
-                    if (this._nextAlarmConfig) {
-                        const nextAlarmDiff = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-                        if (nextAlarmDiff) this._saveNextAlarm(this._nextAlarmConfig);
+            [
+                'click',
+                'keypress'
+            ].forEach((event)=>{
+                button.addEventListener(event, function(e) {
+                    if (event === 'click' || e.keyCode === 13) {
+                        if ((0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot) (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div > style').remove();
+                        if (index === 1) {
+                            if (this._nextAlarmConfig) {
+                                const nextAlarmDiff = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+                                if (nextAlarmDiff) this._saveNextAlarm(this._nextAlarmConfig);
+                            }
+                        }
                     }
-                }
+                });
             });
+        // button.addEventListener('click', (event) => {
+        //   // Helpers.getLovelace().style.display = 'inline';
+        //   // Helpers.getLovelace().style.filter = 'none';
+        //   if (Helpers.getLovelace().shadowRoot) {
+        //     // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
+        //     // console.log('*** myStyle: ', myStyle);
+        //     // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
+        //     // myStyle.innerHTML = dialogBackgroundStyle;
+        //     // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
+        //     Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
+        //   }
+        //   if (index === 1) {
+        //     if (this._nextAlarmConfig) {
+        //       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+        //       if (nextAlarmDiff) {
+        //         this._saveNextAlarm(this._nextAlarmConfig);
+        //       }
+        //     }
+        //   }
+        // })
         });
         else {
             console.error(`*** Edit buttons not found`);
@@ -4172,8 +4236,10 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         // this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
         // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
         // console.log('*** valueChanged(); new config: ', this._config);
-        const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
-        const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+        // const momentTomorrow = dayjs().add(1, 'day');
+        // const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
+        const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('dd').toLowerCase();
+        const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
             // console.log('*** item: ', item);
             // console.log('*** item.time: ', event.detail.value[item]?.time);
@@ -4183,15 +4249,20 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(Helpers.defaultConfig[item]));
             event.detail.value[item] = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig[item];
             // update nextAlarm
-            if (item === dayTomorrow || item === 'alarms_enabled' || item === 'next_alarm') {
+            if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
                 // console.log('*** changed item: ', item);
                 // const alarmTomorrow = this._config[dayTomorrow];
-                const alarmTomorrow = event.detail.value[dayTomorrow];
+                // const alarmTomorrow = event.detail.value[dayTomorrow];
+                const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') < event.detail.value[item].time;
+                // console.log('*** now: ' + dayjs().add(1, 'minute').format('HH:mm:ss') + ' < ' + event.detail.value[item].time);
+                // console.log('*** forToday: ', forToday);
+                const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
                 // this._config.next_alarm = AlarmController.createNextAlarm(alarmTomorrow); // sometimes undesired: resets overridden, etc
                 // this._config.next_alarm = {
                 event.detail.value.next_alarm = {
                     ...this._config.next_alarm,
-                    ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm(alarmTomorrow)
+                    // ...AlarmController.createNextAlarm(alarmTomorrow),
+                    ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
                 };
             // console.log('*** new next_alarm.enabled: ', event.detail.value.next_alarm);
             }
@@ -4329,6 +4400,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     `;
     }
     _renderSettingsEditor() {
+        // console.log('*** when: ', this._config.alarm_actions);
         return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`<div class="box">
       <ha-form
           .hass=${this._hass}
