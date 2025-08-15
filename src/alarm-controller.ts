@@ -104,14 +104,20 @@ export class AlarmController {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             }
         } else {
-            const momentTomorrow = dayjs().add(1, 'day');
-            const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
-            keyValue = AlarmController.createNextAlarm(alarmTomorrow);
+            const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
+            const dayToday = dayjs().format('dd').toLowerCase();
+            const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
+            const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
+            keyValue = AlarmController.createNextAlarm(newAlarm, forToday);
+            // const momentTomorrow = dayjs().add(1, 'day');
+            // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+            // keyValue = AlarmController.createNextAlarm(alarmTomorrow);
         }
         this._saveConfig('next_alarm', keyValue);
     }
 
     static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
+        // console.log('*** createnextalarm fired');
         let alarmDate = dayjs();
         if (!((alarm.time >= alarmDate.format('HH:mm:ss')) && forToday)) {
             alarmDate = alarmDate.add(1, 'day');
@@ -240,10 +246,10 @@ export class AlarmController {
                     if (action.negative && action.offset) {
                         myDuration = { hours: myDuration.hours *= -1, minutes: myDuration.minutes *= -1, seconds: myDuration.seconds *= -1 };
                     }
-                    console.log('*** _evaluate(); alarm action time: ', dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss'));
+                    // console.log('*** _evaluate(); alarm action time: ', dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss'));
                     if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
-                        // this._runAction(action);
-                        console.log('*** _evaluate(); alarm action triggered for: ', action);
+                        this._runAction(action);
+                        // console.log('*** _evaluate(); alarm action triggered for: ', action);
                     }
                     // dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
                     // .forEach(action => this._runAction(action));
@@ -252,13 +258,13 @@ export class AlarmController {
     }
 
     _runAction(action: AlarmActionsObject) {
-        const tempAction = {
+        const myAction = {
             service: 'homeassistant.turn_on',
             ...action
         }
-        const actionServiceCommand = tempAction.service.split('.');
-        this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], { "entity_id": tempAction.entity });
-        this._alarmActionsScript[`${tempAction.entity}-${tempAction.when}`] = true;
+        const actionServiceCommand = myAction.service.split('.');
+        this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], { "entity_id": myAction.entity });
+        this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
     }
 
     _callAlarmRingingService(action: string) {
@@ -433,6 +439,37 @@ export class Helpers {
             }
         };
     }
+
+
+    // from source: frontend/src/common/config/version.ts
+    // @param version (this._hass.config.version)
+    // @param major (major version number)
+    // @param minor (minor version number)
+    // @returns boolean
+    static atLeastVersion = (
+        version: string,
+        major: number,
+        minor: number,
+        patch?: number
+    ): boolean => {
+        // if (__DEMO__) {
+        //     return true;
+        // }
+
+        const [haMajor, haMinor, haPatch] = version.split(".", 3);
+
+        return (
+            Number(haMajor) > major ||
+            (Number(haMajor) === major &&
+                (patch === undefined
+                    ? Number(haMinor) >= minor
+                    : Number(haMinor) > minor)) ||
+            (patch !== undefined &&
+                Number(haMajor) === major &&
+                Number(haMinor) === minor &&
+                Number(haPatch) >= patch)
+        );
+    };
 
     static convertToMinutes(HHMM: string): { 'minutes': number } {
         // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")

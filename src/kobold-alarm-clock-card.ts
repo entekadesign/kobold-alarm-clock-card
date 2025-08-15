@@ -570,6 +570,9 @@ class KoboldAlarmClockCard extends LitElement {
   // }
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
+
+
+    // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
     if (!this._alarmController.isAlarmRinging()) {
       // when card starts up, hide cards (prevents flicker during save)
       this._enforceHideCards(true);
@@ -971,17 +974,22 @@ class KoboldCardEditor extends LitElement {
     {
       name: "time_format",
       label: "Time Format",
-      selector: { select: { options: ["12hr", "24hr"] } },
+      selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
     },
     {
       name: "clock_display_font",
       label: "Clock Display Font",
-      selector: { select: { options: [{ label: "System", value: 0 }, { label: "1", value: 1 }, { label: "2", value: 2 }, { label: "3", value: 3 }] } },
+      selector: { select: { options: [{ label: "System", value: 0 }, { label: "Noto Sans", value: 1 }, { label: "Oswald", value: 2 }, { label: "IBM Plex Sans", value: 3 }] } },
     },
     // {
     //   name: "hide_cards_default",
     //   label: "Hide Cards by Default",
     //   selector: { boolean: {} },
+    // },
+    // {
+    //   type: "grid", schema: [
+    //     {}, { name: "stuff", label: "", selector: { duration: {} } }
+    //   ]
     // },
     {
       name: "snooze_duration_default",
@@ -999,14 +1007,9 @@ class KoboldCardEditor extends LitElement {
       selector: {
         object: {
           label_field: "entity",
-          // description_field: "enabled",
+          description_field: "when",
           multiple: true,
           fields: {
-            enabled: {
-              label: "Alarm Action Enabled",
-              selector: { boolean: {} },
-              required: true,
-            },
             entity: {
               label: "Alarm Action Entity",
               selector: { entity: {} },
@@ -1195,6 +1198,7 @@ class KoboldCardEditor extends LitElement {
   }
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
+    // console.log('*** this._nextAlarmConfig: ', this._nextAlarmConfig);
     // const saveButton = Helpers.getEditorButtons().querySelectorAll('mwc-button')[1];
     // if (saveButton) {
     //   saveButton.addEventListener('click', () => {
@@ -1209,58 +1213,75 @@ class KoboldCardEditor extends LitElement {
     //   console.error(`*** Save button not found`);
     // }
 
+    const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
+
+    const myDialog = Helpers.getEditor().shadowRoot.querySelector('ha-dialog');
+    if (myDialog) {
+      myDialog.addEventListener('keydown', (event) => {
+        //https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event#keydown_events_with_ime
+        if (event.isComposing || event.keyCode === 229) {
+          // console.log('*** ignorable key event fired; returning');
+          return;
+        }
+        // console.log('*** key hit: ', event.key);
+        if (event.key === 'Enter') {
+          // console.log('*** saving after key event.');
+          if (editorStyleTag) editorStyleTag.remove();
+          this._handleSaveButton();
+        }
+
+      });
+    } else {
+      console.error(`*** firstUpdated(); Editor dialog not found`);
+      if (editorStyleTag) editorStyleTag.remove();
+    }
+
     let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
     if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
     // console.log('*** editButtons: ', editButtons);
     if (editButtons.length > 0) {
       editButtons.forEach(
         (button, index) => {
+          // ['click', 'keypress'].forEach(event => {
+          //   button.addEventListener(event, function (e, myNextAlarmConfig) {
+          //     if (event === 'click' || e.keyCode === 13) {
+          //       if (Helpers.getLovelace().shadowRoot) {
+          //         Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
+          //       }
 
-          ['click', 'keypress'].forEach(event => {
-            button.addEventListener(event, function (e) {
-              if (event === 'click' || e.keyCode === 13) {
-                if (Helpers.getLovelace().shadowRoot) {
-                  Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
-                }
-
-                if (index === 1) {
-                  if (this._nextAlarmConfig) {
-                    const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-                    if (nextAlarmDiff) {
-                      this._saveNextAlarm(this._nextAlarmConfig);
-                    }
-                  }
-                }
-              }
-            });
-          });
-
-          // button.addEventListener('click', (event) => {
-          //   // Helpers.getLovelace().style.display = 'inline';
-          //   // Helpers.getLovelace().style.filter = 'none';
-          //   if (Helpers.getLovelace().shadowRoot) {
-          //     // const myStyle = Helpers.getLovelace().shadowRoot.querySelector('div.edit-mode style');
-          //     // console.log('*** myStyle: ', myStyle);
-          //     // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 1; }';
-          //     // myStyle.innerHTML = dialogBackgroundStyle;
-          //     // console.log('*** div: ', Helpers.getLovelace().shadowRoot.querySelector('div > style'));
-          //     Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
-          //   }
-
-          //   if (index === 1) {
-          //     if (this._nextAlarmConfig) {
-          //       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-          //       if (nextAlarmDiff) {
-          //         this._saveNextAlarm(this._nextAlarmConfig);
+          //       if (index === 1) {
+          //         // console.log('*** this._nextAlarmConfig: ', this._nextAlarmConfig);
+          //         // console.log('*** this._nextAlarmConfig: ', myNextAlarmConfig);
+          //         if (this._nextAlarmConfig) {
+          //           const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+          //           if (nextAlarmDiff) {
+          //             this._saveNextAlarm(this._nextAlarmConfig);
+          //           }
+          //         }
           //       }
           //     }
-          //   }
-          // })
+          //   });
+          // });
+
+          button.addEventListener('click', () => {
+            if (editorStyleTag) editorStyleTag.remove();
+
+            if (index === 1) {
+              // console.log('*** saving after click event');
+              this._handleSaveButton();
+              // if (this._nextAlarmConfig) {
+              //   const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+              //   if (nextAlarmDiff) {
+              //     this._saveNextAlarm(this._nextAlarmConfig);
+              //   }
+              // }
+            }
+          })
         }
       );
     } else {
-      console.error(`*** Edit buttons not found`);
-      Helpers.getLovelace().style.display = 'inline';
+      console.error(`*** firstUpdated(); Editor buttons not found`);
+      if (editorStyleTag) editorStyleTag.remove();
     }
 
     //   if (Helpers.getPreview()) {
@@ -1281,7 +1302,20 @@ class KoboldCardEditor extends LitElement {
     //   }
   }
 
-  protected updated(_changedProperties: PropertyValues): void {
+  // protected updated(_changedProperties: PropertyValues): void {
+  //   // console.log('*** updated; changed properties: ', _changedProperties);
+  // }
+
+  _handleSaveButton() {
+    // console.log('*** saveSettings called.');
+    // nextAlarmConfig undefined unless nap settings tab was visited
+    if (this._nextAlarmConfig) {
+      const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+      if (nextAlarmDiff) {
+        // console.log('*** saving nextAlarm.');
+        this._saveNextAlarm(this._nextAlarmConfig);
+      }
+    }
   }
 
   _getDayOfWeek(days: number) {
@@ -1359,6 +1393,7 @@ class KoboldCardEditor extends LitElement {
   }
 
   _valueChangedNap(event) {
+    // console.log('*** value: ', event.detail.value);
     if (event.detail.value === undefined) {
       // event.detail.value = this._config.nap_duration;
       event.detail.value = Helpers.defaultConfig.nap_duration;
@@ -1388,16 +1423,19 @@ class KoboldCardEditor extends LitElement {
     this.requestUpdate();
   }
 
-  // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm
+  // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
   async _saveNextAlarm(nextAlarmConfig) {
+    // console.log('*** saveNextAlarm; overridden: ', nextAlarmConfig.next_alarm.overridden);
+    // console.log('*** saveNextAlarm called');
     try {
       const lovelace = Helpers.getLovelace().lovelace;
       const newConfig = structuredClone(lovelace.config);
       const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
       if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
-        //TODO: echeck to ensure save only happens if a change?
+        //TODO: check to ensure save only happens if a change?
         if (nextAlarmConfig.next_alarm.overridden) {
           // same as is valueChangedNap except overridden?; TODO: have both goto new _setNextAlarm() method?
+          // console.log('*** saveNextAlarm; overridden is true');
           const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
           const nextAlarm = {
             ...this._nextAlarmConfig.next_alarm,
@@ -1409,11 +1447,12 @@ class KoboldCardEditor extends LitElement {
             // overridden: true
           }
           cardConfig.next_alarm = nextAlarm;
-        } else {
-          // reset alarm
-          const momentTomorrow = dayjs().add(1, 'day');
-          const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-          cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
+          // } else {
+          // console.log('*** skipping reset nextalarm');
+          // reset alarm should not be necessary
+          // const momentTomorrow = dayjs().add(1, 'day');
+          // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
+          // cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
         }
         cardConfig.nap_duration = nextAlarmConfig.nap_duration;
         await lovelace.saveConfig(newConfig);
@@ -1496,7 +1535,7 @@ class KoboldCardEditor extends LitElement {
         nap_duration: structuredClone(this._config.nap_duration),
       }
     }
-    // console.log('*** renderNapEditor; overridden: ', this._nextAlarmConfig.next_alarm.overridden);
+    // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
     return html`
       <div class="box">
         <div class="kobold-nap-form">
