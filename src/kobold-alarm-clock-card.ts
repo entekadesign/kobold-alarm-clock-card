@@ -48,12 +48,18 @@ declare global {
   }
 }
 
+const DOMAINS_ALARM_ENTITIES = [
+  "input_boolean",
+  "switch",
+  "media_player"
+];
+
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "kobold-alarm-clock-card",
   name: "Kobold",
   description: "A multi-alarm clock for Home Assistant",
-  // preview: true, // will need styling to accommodate narrow spaces
+  preview: true,
   documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme",
 });
 
@@ -113,6 +119,10 @@ class KoboldAlarmClockCard extends LitElement {
         ll.lovelace.setEditMode(mode);
       }
     };
+    // this.addEventListener('ll-rebuild', (ev) => {
+    //   ev.stopPropagation();
+    //   console.log('*** rebuilding card');
+    // });
   }
 
   disconnectedCallback() {
@@ -174,9 +184,29 @@ class KoboldAlarmClockCard extends LitElement {
     return document.createElement("kobold-card-editor");
   }
 
-  static getStubConfig() {
+  static getStubConfig(hass, entities, entitiesFill) {
+    // console.log('*** getStubConfig; entitiesFill: ', entitiesFill);
+    const ents = entitiesFill.filter((e) => {
+      const domain = e.split(".")[0];
+      // console.log('*** getStubConfig; domain: ', domain);
+      return (
+        DOMAINS_ALARM_ENTITIES.includes(domain)
+      );
+    });
+    // console.log('*** getStubConfig; ents: ', ents[Math.floor(Math.random() * ents.length)] || "");
+    // console.log('*** getStubConfig; ents: ', ents);
+    const alarmEntities = [ents.includes('input_boolean.kobold_clock') ? 'input_boolean.kobold_clock' : ents[0]];
+    // console.log('*** getStubConfig; alarm_entities: ', alarm_entities);
+
+    // console.log('*** getStubConfig; customCards: ', window.customCards);
+    // console.log('*** getStubConfig; preview: ', this.preview);
     // Return a minimal configuration that will result in a working card configuration
-    return Helpers.defaultConfig;
+
+    return {
+      alarm_entities: alarmEntities,
+      ...Helpers.defaultConfig,
+    }
+    // return Helpers.defaultConfig;
   }
 
   render() {
@@ -639,6 +669,12 @@ class KoboldAlarmClockCard extends LitElement {
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
     Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing?
 
+    // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
+
+    // this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
+
+    // console.log('*** setConfig(); parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
+
     // NOTE: Some cards call setConfig() multiple times during life of card
     if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
   }
@@ -969,7 +1005,7 @@ class KoboldCardEditor extends LitElement {
     {
       name: "alarm_entities",
       label: "Alarm Ringer Entities",
-      selector: { entity: { multiple: true, filter: { domain: ["input_boolean", "switch", "media_player"] } } },
+      selector: { entity: { multiple: true, filter: { domain: DOMAINS_ALARM_ENTITIES } } },
     },
     {
       name: "time_format",
@@ -1461,7 +1497,7 @@ class KoboldCardEditor extends LitElement {
           Helpers.fireEvent('hass-notification', { message: 'Successfully saved' }, Helpers.getHa());
         }, 50);
       } else {
-        throw { message: 'Unable to find kobold card in lovelace configuration or kobold card config is corrupt' };
+        throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
       };
     } catch (err: any) {
       alert(`Saving failed: ${err.message}.`);

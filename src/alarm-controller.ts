@@ -104,6 +104,7 @@ export class AlarmController {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             }
         } else {
+            // new nextAlarm will set nap, snooze, and overridden to default settings
             const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
             const dayToday = dayjs().format('dd').toLowerCase();
             const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
@@ -166,6 +167,8 @@ export class AlarmController {
     async _saveConfig(key, value) {
         try {
             const lovelace = Helpers.getLovelace().lovelace;
+            // console.log('*** saveConfig(); lovelace: ', lovelace);
+            // console.log('*** saveConfig(); this: ', this);
             const newConfig = structuredClone(lovelace.config);
             const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
             if (cardConfig && cardConfig[key] !== undefined) {
@@ -173,7 +176,7 @@ export class AlarmController {
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
                 await lovelace.saveConfig(newConfig);
-            } else throw { message: 'Unable to find kobold card in lovelace configuration' };
+            } else throw { message: 'Unable to find Kobold card in lovelace configuration' };
         } catch (err: any) {
             alert(`Saving failed: ${err.message}.`);
         }
@@ -193,18 +196,19 @@ export class AlarmController {
         const nextAlarm = this.nextAlarm;
         const dateToday = dayjs().format('YYYY-MM-DD');
 
-        // if day is ending and nextAlarm is not set for tomorrow, then reset nextAlarm
+        // console.log('*** evaluate(); config: ', this._config);
+
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
         // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time;
         // const myB = nextAlarm.date <= dateToday;
         // console.log('*** nextAlarm is past: ' + myA + '; date less or same as today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
-        if (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) {
-            // console.log('*** alarm resetting automatically');
+        // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
+        if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             this.nextAlarmReset();
             // if (this._config.debug) {
-            //     console.warn('*** _evaluate(); No nextAlarm for tomorrow; resetting nextAlarm');
-            //     this._hass.callService('system_log', 'write', { 'message': '*** No nextAlarm for tomorrow; resetting nextAlarm', 'level': 'info' });
+            console.warn('*** _evaluate(); Resetting nextAlarm');
+            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
             // }
         }
 
@@ -525,7 +529,7 @@ export class Helpers {
         name: "kobold_clock",
         type: "custom:kobold-alarm-clock-card",
         alarms_enabled: false,
-        next_alarm: { enabled: false, time: "07:00", date: "", date_time: "", overridden: false },
+        next_alarm: { enabled: false, time: "07:00", date: dayjs().add(1, 'day').format('YYYY-MM-DD'), date_time: dayjs().add(1, 'day').format('YYYY-MM-DD') + " 07:00", overridden: false },
         mo: { enabled: false, time: "07:00:00" },
         tu: { enabled: false, time: "07:00:00" },
         we: { enabled: false, time: "07:00:00" },
@@ -533,7 +537,6 @@ export class Helpers {
         fr: { enabled: false, time: "07:00:00" },
         sa: { enabled: false, time: "09:00:00" },
         su: { enabled: false, time: "09:00:00" },
-        // alarm_actions: {},
         snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
         alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
         nap_duration: { hours: 0, minutes: 30, seconds: 0 },

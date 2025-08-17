@@ -1141,6 +1141,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             };
         } else {
+            // new nextAlarm will set nap, snooze, and overridden to default settings
             const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('dd').toLowerCase();
             const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('dd').toLowerCase();
             const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') < this._config[dayToday].time;
@@ -1191,6 +1192,8 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     async _saveConfig(key, value) {
         try {
             const lovelace = $b2cd7c9abb677932$export$4dc2b60021baefca.getLovelace().lovelace;
+            // console.log('*** saveConfig(); lovelace: ', lovelace);
+            // console.log('*** saveConfig(); this: ', this);
             const newConfig = structuredClone(lovelace.config);
             const cardConfig = $b2cd7c9abb677932$export$4dc2b60021baefca.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
             if (cardConfig && cardConfig[key] !== undefined) {
@@ -1198,7 +1201,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
                 await lovelace.saveConfig(newConfig);
             } else throw {
-                message: 'Unable to find kobold card in lovelace configuration'
+                message: 'Unable to find Kobold card in lovelace configuration'
             };
         } catch (err) {
             alert(`Saving failed: ${err.message}.`);
@@ -1214,14 +1217,23 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // console.log('*** isAlarmRinging: ', this.isAlarmRinging());
         const nextAlarm = this.nextAlarm;
         const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD');
-        // if day is ending and nextAlarm is not set for tomorrow, then reset nextAlarm
+        // console.log('*** evaluate(); config: ', this._config);
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
         // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time;
         // const myB = nextAlarm.date <= dateToday;
         // console.log('*** nextAlarm is past: ' + myA + '; date less or same as today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
-        if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date <= dateToday && !this.isAlarmRinging()) // console.log('*** alarm resetting automatically');
-        this.nextAlarmReset();
+        // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
+        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday) && !this.isAlarmRinging()) {
+            this.nextAlarmReset();
+            // if (this._config.debug) {
+            console.warn('*** _evaluate(); Resetting nextAlarm');
+            this._hass.callService('system_log', 'write', {
+                'message': '*** Resetting nextAlarm',
+                'level': 'info'
+            });
+        // }
+        }
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
         //     return;
         // }
@@ -1476,8 +1488,8 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         next_alarm: {
             enabled: false,
             time: "07:00",
-            date: "",
-            date_time: "",
+            date: (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('YYYY-MM-DD'),
+            date_time: (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('YYYY-MM-DD') + " 07:00",
             overridden: false
         },
         mo: {
@@ -1508,7 +1520,6 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             enabled: false,
             time: "09:00:00"
         },
-        // alarm_actions: {},
         snooze_duration_default: {
             hours: 0,
             minutes: 15,
@@ -3005,12 +3016,17 @@ $2109a11e0895c6b1$var$myStyle.innerHTML = $2109a11e0895c6b1$var$fontStyles;
 document.head.appendChild($2109a11e0895c6b1$var$myStyle);
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($e60b0d000ec57fbf$exports))));
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($5e2bd162b336a82b$exports))));
+const $2109a11e0895c6b1$var$DOMAINS_ALARM_ENTITIES = [
+    "input_boolean",
+    "switch",
+    "media_player"
+];
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "kobold-alarm-clock-card",
     name: "Kobold",
     description: "A multi-alarm clock for Home Assistant",
-    // preview: true, // will need styling to accommodate narrow spaces
+    preview: true,
     documentationURL: "https://codeberg.org/entekadesign/kobold-alarm-clock-card#readme"
 });
 class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$export$3f2f9f5909897157) {
@@ -3032,6 +3048,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             const ll = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace();
             if (ll && ll.lovelace.editMode !== mode) ll.lovelace.setEditMode(mode);
         };
+    // this.addEventListener('ll-rebuild', (ev) => {
+    //   ev.stopPropagation();
+    //   console.log('*** rebuilding card');
+    // });
     }
     disconnectedCallback() {
         super.disconnectedCallback();
@@ -3050,9 +3070,27 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     static getConfigElement() {
         return document.createElement("kobold-card-editor");
     }
-    static getStubConfig() {
+    static getStubConfig(hass, entities, entitiesFill) {
+        // console.log('*** getStubConfig; entitiesFill: ', entitiesFill);
+        const ents = entitiesFill.filter((e)=>{
+            const domain = e.split(".")[0];
+            // console.log('*** getStubConfig; domain: ', domain);
+            return $2109a11e0895c6b1$var$DOMAINS_ALARM_ENTITIES.includes(domain);
+        });
+        // console.log('*** getStubConfig; ents: ', ents[Math.floor(Math.random() * ents.length)] || "");
+        // console.log('*** getStubConfig; ents: ', ents);
+        const alarmEntities = [
+            ents.includes('input_boolean.kobold_clock') ? 'input_boolean.kobold_clock' : ents[0]
+        ];
+        // console.log('*** getStubConfig; alarm_entities: ', alarm_entities);
+        // console.log('*** getStubConfig; customCards: ', window.customCards);
+        // console.log('*** getStubConfig; preview: ', this.preview);
         // Return a minimal configuration that will result in a working card configuration
-        return (0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig;
+        return {
+            alarm_entities: alarmEntities,
+            ...(0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig
+        };
+    // return Helpers.defaultConfig;
     }
     render() {
         this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
@@ -3482,6 +3520,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //TODO: is this modifying saved config, or doing nothing?
+        // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
+        // this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
+        // console.log('*** setConfig(); parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
         // NOTE: Some cards call setConfig() multiple times during life of card
         if (!this._alarmController) this._alarmController = new (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d)(this._config, this._cardId);
     }
@@ -3849,11 +3890,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     entity: {
                         multiple: true,
                         filter: {
-                            domain: [
-                                "input_boolean",
-                                "switch",
-                                "media_player"
-                            ]
+                            domain: $2109a11e0895c6b1$var$DOMAINS_ALARM_ENTITIES
                         }
                     }
                 }
@@ -4389,7 +4426,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     }, (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getHa());
                 }, 50);
             } else throw {
-                message: 'Unable to find kobold card in lovelace configuration or kobold card config is corrupt'
+                message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
             };
         } catch (err) {
             alert(`Saving failed: ${err.message}.`);
