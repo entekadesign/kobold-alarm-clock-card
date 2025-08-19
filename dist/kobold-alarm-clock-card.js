@@ -2651,6 +2651,11 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
                 height: 2rem;
             }
         }
+        @container (width < 750px) {
+            div#alarmPicker.alarm.open {
+                height: 4rem;
+            }
+        }
 
         .alarm {
             display:inline-flex;
@@ -2741,7 +2746,8 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             // if (this.id === 'tab-2') {
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                // let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                let iconStyle = 'ha-svg-icon { height: calc(1.25rem + 0.5cqw); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
@@ -3082,7 +3088,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         const alarmEntities = [
             ents.includes('input_boolean.kobold_clock') ? 'input_boolean.kobold_clock' : ents[0]
         ];
-        // console.log('*** getStubConfig; alarm_entities: ', alarm_entities);
+        // console.log('*** getStubConfig; alarm_entities: ', alarmEntities);
         // console.log('*** getStubConfig; customCards: ', window.customCards);
         // console.log('*** getStubConfig; preview: ', this.preview);
         // Return a minimal configuration that will result in a working card configuration
@@ -3200,13 +3206,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     /* ************ */
 
     /* mobile screen sizes */
-    @media (max-width: 870px) {
-      #alarmTop div#koboldLogo {
+    /*@media (max-width: 870px) {*/
+    @container (width < 750px) {
+      div#alarmTop > div#koboldLogo {
         display: none;
       }
     }
 
     #koboldClock {
+      container-type: inline-size;
       padding: 1.5rem;
       height: 65vh;
       box-sizing: border-box;
@@ -3226,7 +3234,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
 
     #alarmTop {
-      font-size: calc(1rem + 1vh);
+      /*font-size: calc(1rem + 1vh);*/
+      font-size: calc(0.5cqw + 1em);
       display: flex;
       justify-content: space-between;
       height: 4vh;
@@ -3238,23 +3247,30 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     #alarmTop div#koboldLogo {
       background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27175%27%20viewBox%3D%270%200%20198.437%2046.302%27%3E%3Cdefs%3E%3Cpath%20id%3D%27a%27%20d%3D%27M134.532%20279.996h1013.197v243.84H134.532z%27%2F%3E%3C%2Fdefs%3E%3Cg%20aria-label%3D%27KOBOLD%27%20style%3D%27font-size%3A192px%3Bline-height%3A1.25%3Bwhite-space%3Apre%3Bshape-inside%3Aurl%28%23a%29%27%20transform%3D%27translate%28-39.822%2011.568%29%20scale%28.26458%29%27%3E%3Cpath%20d%3D%27M297.007%20381.147v7.723l-36.756%2043.764q9.01%2010.87%2018.307%2022.025%209.439%2011.013%2018.45%2021.739v7.723h-23.17l-33.753-40.331H219.92v40.331h-22.311V381.147h22.31v40.331h20.166q3.29-3.718%206.436-7.58%203.147-3.861%206.436-7.723l20.881-25.028zm232.264%2040.474q0%204.005-1%206.58%202.144%202.717%203.575%206.292%201.43%203.433%201.43%207.151v21.31q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147h77.802q4.291%200%208.153%201.716%203.861%201.573%206.721%204.434%203.004%202.86%204.577%206.722%201.716%203.861%201.716%208.295zM452.47%20461.81h58.352v-18.879H452.47Zm0-41.19h54.347v-17.162H452.47Zm222.958-39.616h22.168v80.806h80.807v22.311H675.428Zm193.22.143q4.434%200%208.295%201.716%203.862%201.573%206.722%204.434%202.86%202.86%204.577%206.722%201.716%203.861%201.716%208.295v60.64q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147Zm-59.496%2080.663h58.352v-58.352h-58.352z%27%20style%3D%27font-family%3AOrbitron%3B-inkscape-font-specification%3AOrbitron%3Bstroke-width%3A.744895%27%20transform%3D%27translate%28-33.794%20-401.053%29%20scale%281.02854%29%27%2F%3E%3Cpath%20d%3D%27M419.64%20675.367A117.536%20117.536%200%200%200%20302.101%20792.9%20117.536%20117.536%200%200%200%20419.64%20910.437%20117.536%20117.536%200%200%200%20537.172%20792.9%20117.536%20117.536%200%200%200%20419.64%20675.367Zm-.71%2012.63%203.237%2036.913%203.195%2036.426h.043l-.032.141.032.346h-.106l-3.132%2014.648-3.237%2015.135-3.237-15.135-3.135-14.648h-.102l.028-.346-.028-.14h.042l3.195-36.427zm-1.728%20106.955-5.173%208.6-5.007%208.322.078.138-.194.06-.05.081-.031-.056-20.703%206.41-20.977%206.496%2016.118-14.916%2015.9-14.722-.032-.057h.095l.148-.14.082.137%209.71-.173z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%2895.652%20-407.931%29%20scale%28.56969%29%27%2F%3E%3Cpath%20d%3D%27M705.391%20675.367A117.536%20117.536%200%200%200%20587.855%20792.9%20117.536%20117.536%200%200%200%20705.39%20910.437%20117.536%20117.536%200%200%200%20822.925%20792.9%20117.536%20117.536%200%200%200%20705.39%20675.367Zm.54%2012.63%203.237%2036.913%203.195%2036.426h.042l-.032.141.032.346h-.106l-3.131%2014.648-3.237%2015.135-3.24-15.135-3.132-14.648h-.102l.028-.346-.028-.14h.042l3.191-36.427zm1.57%20106.856%2010.035.18%209.715.173.077-.138.152.141h.091l-.031.057%2015.9%2014.722%2016.118%2014.916-20.978-6.495-20.699-6.411-.031.056-.05-.08-.197-.06.077-.138-5.007-8.322z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%28185.991%20-407.931%29%20scale%28.56969%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
 
-      height: calc(0.55em + 1vh);
+      /*height: calc(0.55em + 1vh);*/
+      height: calc(0.5cqw + 1em);
       width: 92%;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center center;
       filter: invert(1) brightness(0.41); /* match --secondary-text-color */
       position: absolute;
+      display: block;
+    }
+    #alarmTop div#koboldLogo.hidden {
+      display: none;
     }
 
     #clock {
+      overflow: hidden;
       transition: padding-top 240ms;
       padding-top: 0.15em;
       padding-right: 0.05em;
       display: flex;
       justify-content: center;
       height: 100%;
-      font-size: 40vh;
+      /*font-size: 40vh;*/
+      font-size: calc(14cqw + 5em);
       letter-spacing: -0.02em;
       /*font-weight: 500;*/
       align-items: center;
@@ -3263,9 +3279,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     #clock .periodName {
       position: relative;
-      bottom: 2.2vh;
+      /*bottom: 2.2vh;*/
+      bottom: 0.2em;
       margin-left: -0.2em;
       font-size: 31%;
+      font-size: 0.3em;
       font-weight: 900 !important;
       writing-mode: vertical-lr;
       text-orientation: upright;
@@ -3282,7 +3300,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     #clock .colon {
       position: relative;
-      bottom: 3.3vh;
+      /*bottom: 3.3vh;*/
+      bottom: 0.09em;
     }
 
     #clock.fontFace1 {
@@ -3296,11 +3315,12 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       letter-spacing: 0;
     }
     #clock.fontFace1 .periodName {
-      bottom: 4vh;
+      /*bottom: 4vh;*/
+      bottom: 0.43em;
       letter-spacing: -0.5em;
     }
     #clock.fontFace1 .periodName.periodKern {
-      margin-left: -0.3em;
+      margin-left: -0.5em;
     }
 
     #clock.fontFace2 {
@@ -3319,7 +3339,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       margin-right: 0;
     }
     #clock.fontFace2 .periodName {
-      bottom: 1.8vh;
+      /*bottom: 1.8vh;*/
       /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
     }
@@ -3334,7 +3354,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     #clock.fontFace3 .periodName {
       letter-spacing: -0.4em;
-      bottom: 4.5vh;
+      /*bottom: 4.5vh;*/
+      bottom: 0.43em;
     }
     #clock.fontFace3 .colonKernL {
       margin-left: 0;
@@ -3434,16 +3455,16 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
 
     :host([preview]) #clock {
       text-shadow: none;
-      font-size: 10em;
+      /*font-size: 10em;*/
     }
 
     :host([preview]) #clock.seconds {
-      font-size: 7em;
+      /*font-size: 7em;*/
     }
 
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
-      bottom: 0.3em;
+      /*bottom: 0.3em;*/
     }
 
     :host([preview]) #clock .periodName.periodKern {
@@ -3451,11 +3472,16 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
 
     :host([preview]) #clock .colon {
-      bottom: 0.07em;
+      /*bottom: 0.07em;*/
     }
 
-    :host([preview]) #alarmTop #koboldLogo {
+    /*:host([preview]) #alarmTop #koboldLogo {
       filter: invert(1) brightness(0);
+      display: block !important;
+    }*/
+    :host([preview]) div#alarmTop > div#koboldLogo {
+      filter: invert(1) brightness(0);
+      display: block;
     }
 
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .optionButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
@@ -3470,6 +3496,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     //   console.log('*** update(); changed properties: ', _changedProperties);
     // }
     firstUpdated(_changedProperties) {
+        // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
+        this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
+        // console.log('*** firstUpdated; parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
         // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
         if (!this._alarmController.isAlarmRinging()) {
             // when card starts up, hide cards (prevents flicker during save)
@@ -3504,7 +3533,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             let myStyle;
             //  alarmTop styles
             if (this._optionButtonsHostsQ) {
-                const optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                // const optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                const optionButtonsStyle = 'ha-svg-icon { height: calc(1.25rem + 0.5cqw); width: calc(1.25rem + 0.5cqw); }';
                 this._optionButtonsHostsQ.forEach((optionButtonsHost)=>{
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = optionButtonsStyle;
@@ -3515,14 +3545,19 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     setConfig(config) {
         if (!config) alert('Card config incorrectly formatted or missing.');
-        if (!config.cards || !Array.isArray(config.cards)) console.warn('*** setConfig(); No HA cards available to configure');
+        if (!config.cards || !Array.isArray(config.cards)) {
+            if (config.debug) {
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** setConfig(); No HA cards available to configure',
+                    'level': 'info'
+                });
+                console.warn('*** setConfig(); No HA cards available to configure');
+            }
+        }
         this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, config);
         (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //TODO: is this modifying saved config, or doing nothing?
-        // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
-        // this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
-        // console.log('*** setConfig(); parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
         // NOTE: Some cards call setConfig() multiple times during life of card
         if (!this._alarmController) this._alarmController = new (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d)(this._config, this._cardId);
     }
@@ -3746,8 +3781,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     _toggleLogoVisibility() {
         if (this._koboldLogoQ) {
-            if (this._koboldLogoQ.style.display !== 'none') this._koboldLogoQ.style.display = 'none';
-            else this._koboldLogoQ.style.display = 'block';
+            if (!this._koboldLogoQ.classList.contains('hidden')) // if (this._koboldLogoQ.style.display !== 'none') {
+            // this._koboldLogoQ.style.display = 'none';
+            this._koboldLogoQ.classList.add('hidden');
+            else // this._koboldLogoQ.style.display = 'block';
+            this._koboldLogoQ.classList.remove('hidden');
         }
     }
     async _showEditor(event) {
@@ -4229,10 +4267,13 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 this._handleSaveButton();
             }
         });
-        else {
-            console.error(`*** firstUpdated(); Editor dialog not found`);
+        else console.error('*** firstUpdated(); Editor dialog not found. Refresh browser');
+        const cancelButton = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getHa().shadowRoot.querySelector('hui-dialog-edit-card').shadowRoot.querySelector('ha-icon-button[dialogaction=cancel]');
+        if (cancelButton) cancelButton.addEventListener('click', (event)=>{
+            // console.log('*** event: ', event);
             if (editorStyleTag) editorStyleTag.remove();
-        }
+        });
+        else console.error('*** firstUpdated(); Cancel button not found. Refresh browser');
         let editButtons = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getEditorButtons().querySelectorAll('ha-button');
         if (editButtons.length === 0) editButtons = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getEditorButtons().querySelectorAll('mwc-button');
         // console.log('*** editButtons: ', editButtons);
@@ -4262,10 +4303,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 this._handleSaveButton();
             });
         });
-        else {
-            console.error(`*** firstUpdated(); Editor buttons not found`);
-            if (editorStyleTag) editorStyleTag.remove();
-        }
+        else console.error('*** firstUpdated(); Editor buttons not found. Refresh browser');
     //   if (Helpers.getPreview()) {
     //     let myStyle;
     //     console.log('*** firstUpdated; preview: ', Helpers.getPreview());
@@ -4410,12 +4448,11 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                         date: nextAlarmTime.format('YYYY-MM-DD')
                     };
                     cardConfig.next_alarm = nextAlarm;
-                // } else {
-                // console.log('*** skipping reset nextalarm');
-                // reset alarm should not be necessary
-                // const momentTomorrow = dayjs().add(1, 'day');
-                // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-                // cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
+                } else {
+                    //reset alarm when overridden is switched to false
+                    const momentTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day');
+                    const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
+                    cardConfig.next_alarm = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm(alarmTomorrow);
                 }
                 cardConfig.nap_duration = nextAlarmConfig.nap_duration;
                 await lovelace.saveConfig(newConfig);

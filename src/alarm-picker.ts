@@ -83,6 +83,11 @@ class AlarmPicker extends LitElement {
                 height: 2rem;
             }
         }
+        @container (width < 750px) {
+            div#alarmPicker.alarm.open {
+                height: 4rem;
+            }
+        }
 
         .alarm {
             display:inline-flex;
@@ -175,7 +180,8 @@ class AlarmPicker extends LitElement {
 
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                // let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+                let iconStyle = 'ha-svg-icon { height: calc(1.25rem + 0.5cqw); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
