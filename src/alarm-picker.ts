@@ -87,6 +87,11 @@ class AlarmPicker extends LitElement {
             div#alarmPicker.alarm.open {
                 height: 4rem;
             }
+            div#alarmPicker.alarm.open > .sliders {
+                margin-left: 0;
+                width: 0;
+                overflow: hidden;
+            }
         }
 
         .alarm {
@@ -96,19 +101,18 @@ class AlarmPicker extends LitElement {
             height: 4rem;
         }
 
-        div#alarmPicker.alarm.open {
+        #alarmPicker.alarm.open {
             height: 10rem;
         }
 
-        div#alarmPicker .row-options.settings-picker {
+        /*div#alarmPicker .row-options.settings-picker {
             width: 22em;
             text-align: left;
             transition: width 120ms;
         }
-
-        div#alarmPicker.alarm.open .row-options.settings-picker {
+        #alarmPicker.alarm.open .row-options.settings-picker {
             width: 7rem;
-        }
+        }*/
 
         #alarmTimeInput {
             width: 5.1em;
@@ -139,8 +143,6 @@ class AlarmPicker extends LitElement {
             overflow: hidden;
             transition: width 120ms;
             width: 0;
-        }
-        .alarm > .sliders {
             padding-top: 6rem; backdrop-filter: blur(10px);
         }
 

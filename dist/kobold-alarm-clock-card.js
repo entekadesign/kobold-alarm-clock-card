@@ -2655,6 +2655,11 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             div#alarmPicker.alarm.open {
                 height: 4rem;
             }
+            div#alarmPicker.alarm.open > .sliders {
+                margin-left: 0;
+                width: 0;
+                overflow: hidden;
+            }
         }
 
         .alarm {
@@ -2664,19 +2669,18 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             height: 4rem;
         }
 
-        div#alarmPicker.alarm.open {
+        #alarmPicker.alarm.open {
             height: 10rem;
         }
 
-        div#alarmPicker .row-options.settings-picker {
+        /*div#alarmPicker .row-options.settings-picker {
             width: 22em;
             text-align: left;
             transition: width 120ms;
         }
-
-        div#alarmPicker.alarm.open .row-options.settings-picker {
+        #alarmPicker.alarm.open .row-options.settings-picker {
             width: 7rem;
-        }
+        }*/
 
         #alarmTimeInput {
             width: 5.1em;
@@ -2707,8 +2711,6 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             overflow: hidden;
             transition: width 120ms;
             width: 0;
-        }
-        .alarm > .sliders {
             padding-top: 6rem; backdrop-filter: blur(10px);
         }
 
@@ -3234,6 +3236,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
 
     #alarmTop {
+      position: relative;
       /*font-size: calc(1rem + 1vh);*/
       font-size: calc(0.5cqw + 1em);
       display: flex;
@@ -3249,7 +3252,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
 
       /*height: calc(0.55em + 1vh);*/
       height: calc(0.5cqw + 1em);
-      width: 92%;
+      width: 100%;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center center;
@@ -3452,25 +3455,23 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host([preview]) #koboldClock {
       height: 65vh;
     }
-
     :host([preview]) #clock {
       text-shadow: none;
       /*font-size: 10em;*/
     }
-
     :host([preview]) #clock.seconds {
       /*font-size: 7em;*/
     }
-
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
       /*bottom: 0.3em;*/
     }
-
     :host([preview]) #clock .periodName.periodKern {
       margin-left: 0.01em;
     }
-
+    :host([preview]) #clock.fontFace3 .periodName.periodKern {
+      margin-left: 0.1em;
+    }
     :host([preview]) #clock .colon {
       /*bottom: 0.07em;*/
     }
@@ -3745,7 +3746,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     // }
     _toggleHideCards(event) {
         // console.log('*** _toggleHideCards fired');
-        if (!this._alarmController.isAlarmRinging()) {
+        if (!this._alarmController.isAlarmRinging() && this._config.cards) {
             // if (!this._config.hide_cards_default) {
             //   // this._koboldClockQ.classList.add('fullscreen');
             //   // this._footQ.classList.add('hideFoot');
@@ -4049,6 +4050,31 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                                 label: "Offset Negative",
                                 selector: {
                                     boolean: {}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                name: "cards",
+                label: "Cards to Display",
+                selector: {
+                    object: {
+                        label_field: "entity",
+                        multiple: true,
+                        fields: {
+                            entity: {
+                                label: "Card Entity",
+                                selector: {
+                                    entity: {}
+                                },
+                                required: true
+                            },
+                            "": {
+                                label: "Card Configuration",
+                                selector: {
+                                    object: {}
                                 }
                             }
                         }

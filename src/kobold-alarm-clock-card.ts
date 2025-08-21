@@ -352,6 +352,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     #alarmTop {
+      position: relative;
       /*font-size: calc(1rem + 1vh);*/
       font-size: calc(0.5cqw + 1em);
       display: flex;
@@ -367,7 +368,7 @@ class KoboldAlarmClockCard extends LitElement {
 
       /*height: calc(0.55em + 1vh);*/
       height: calc(0.5cqw + 1em);
-      width: 92%;
+      width: 100%;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center center;
@@ -570,25 +571,23 @@ class KoboldAlarmClockCard extends LitElement {
     :host([preview]) #koboldClock {
       height: 65vh;
     }
-
     :host([preview]) #clock {
       text-shadow: none;
       /*font-size: 10em;*/
     }
-
     :host([preview]) #clock.seconds {
       /*font-size: 7em;*/
     }
-
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
       /*bottom: 0.3em;*/
     }
-
     :host([preview]) #clock .periodName.periodKern {
       margin-left: 0.01em;
     }
-
+    :host([preview]) #clock.fontFace3 .periodName.periodKern {
+      margin-left: 0.1em;
+    }
     :host([preview]) #clock .colon {
       /*bottom: 0.07em;*/
     }
@@ -928,7 +927,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   _toggleHideCards(event) {
     // console.log('*** _toggleHideCards fired');
-    if (!this._alarmController.isAlarmRinging()) {
+    if (!this._alarmController.isAlarmRinging() && this._config.cards) {
       // if (!this._config.hide_cards_default) {
       //   // this._koboldClockQ.classList.add('fullscreen');
       //   // this._footQ.classList.add('hideFoot');
@@ -1091,6 +1090,27 @@ class KoboldCardEditor extends LitElement {
           }
         }
       },
+    },
+    {
+      name: "cards",
+      label: "Cards to Display",
+      selector: {
+        object: {
+          label_field: "entity",
+          multiple: true,
+          fields: {
+            entity: {
+              label: "Card Entity",
+              selector: { entity: {} },
+              required: true,
+            },
+            "": {
+              label: "Card Configuration",
+              selector: { object: {} },
+            }
+          }
+        },
+      }
     },
     {
       name: "debug",
