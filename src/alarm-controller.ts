@@ -176,7 +176,7 @@ export class AlarmController {
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
                 await lovelace.saveConfig(newConfig);
-            } else throw { message: 'Unable to find Kobold card in lovelace configuration' };
+            } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
         } catch (err: any) {
             alert(`Saving failed: ${err.message}.`);
         }
@@ -206,10 +206,10 @@ export class AlarmController {
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             this.nextAlarmReset();
-            // if (this._config.debug) {
-            console.warn('*** _evaluate(); Resetting nextAlarm');
-            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
-            // }
+            if (this._config.debug) {
+                console.warn('*** _evaluate(); Resetting nextAlarm');
+                this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
+            }
         }
 
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {

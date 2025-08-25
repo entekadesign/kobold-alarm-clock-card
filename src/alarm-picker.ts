@@ -83,7 +83,7 @@ class AlarmPicker extends LitElement {
                 height: 2rem;
             }
         }
-        @container (width < 750px) {
+        /*@container (width < 750px) {
             div#alarmPicker.alarm.open {
                 height: 4rem;
             }
@@ -92,6 +92,16 @@ class AlarmPicker extends LitElement {
                 width: 0;
                 overflow: hidden;
             }
+        }*/
+
+        :host(.narrow) div#alarmPicker.alarm.open {
+            height: 4rem;
+        }
+
+        :host(.narrow) div#alarmPicker.alarm.open > .sliders {
+            margin-left: 0;
+            width: 0;
+            overflow: hidden;
         }
 
         .alarm {
