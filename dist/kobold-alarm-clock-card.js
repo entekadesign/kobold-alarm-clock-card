@@ -1199,6 +1199,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
                 cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+                // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
                 await lovelace.saveConfig(newConfig);
             } else throw {
                 message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
@@ -3088,9 +3089,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     static getConfigElement() {
         return document.createElement("kobold-card-editor");
     }
-    static getStubConfig(hass, entities, entitiesFill) {
-        // console.log('*** getStubConfig; entitiesFill: ', entitiesFill);
-        const ents = entitiesFill.filter((e)=>{
+    static getStubConfig(hass, entities) {
+        // console.log('*** getStubConfig; entities: ', entities);
+        const ents = entities.filter((e)=>{
             const domain = e.split(".")[0];
             // console.log('*** getStubConfig; domain: ', domain);
             return $2109a11e0895c6b1$var$DOMAINS_ALARM_ENTITIES.includes(domain);
@@ -3593,12 +3594,14 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     updated(_changedProperties) {
         const cardWidth = this.getBoundingClientRect().width;
         // console.log('*** card width: ', cardWidth);
-        if (cardWidth < 750) {
-            this._koboldClockQ.classList.add('narrow');
-            this._alarmPickerQ.classList.add('narrow');
-        } else {
-            this._koboldClockQ.classList.remove('narrow');
-            this._alarmPickerQ.classList.remove('narrow');
+        if (this._koboldClockQ && this._alarmPickerQ) {
+            if (cardWidth < 750) {
+                this._koboldClockQ.classList.add('narrow');
+                this._alarmPickerQ.classList.add('narrow');
+            } else {
+                this._koboldClockQ.classList.remove('narrow');
+                this._alarmPickerQ.classList.remove('narrow');
+            }
         }
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
@@ -3643,10 +3646,19 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 console.warn('*** setConfig(); No HA cards available to configure');
             }
         }
-        this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, config);
-        (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
-            config: this._config
-        }, this); //TODO: is this modifying saved config, or doing nothing?
+        if (!config.alarm_entities || !Array.isArray(config.alarm_entities)) {
+            if (config.debug) {
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** setConfig(); No array of alarm_entities found in card configuration',
+                    'level': 'info'
+                });
+                console.warn('*** setConfig(); No array of alarm_entities found in card configuration');
+            }
+        }
+        this._config = config;
+        // this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
+        // console.log('*** setConfig: config: ', this._config);
+        // Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing?
         // NOTE: Some cards call setConfig() multiple times during life of card
         if (!this._alarmController) this._alarmController = new (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d)(this._config, this._cardId);
     }
@@ -3665,10 +3677,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id "extraInfo") not available');
         while(this._rootQ.lastChild)this._rootQ.removeChild(this._rootQ.lastChild);
         const config = this._config;
-        if (config.alarm_entities) config.alarm_entities.forEach((item)=>{
+        if (config.alarm_entities && Array.isArray(config.alarm_entities)) config.alarm_entities.forEach((item)=>{
             if (!this._hass.states[item]) console.warn(`*** _buildCard(); Entity ${item} does not exist in HA`);
         });
-        else alert('No alarm_entities in card configuration. One is required for alarm.');
+        else alert('No array of alarm_entities found in card configuration. One is required for alarm.');
         if (config.cards) {
             const elements = this._elements = [];
             Promise.all(config.cards.map(async (card)=>{
@@ -3731,10 +3743,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         //   this._koboldClockQ.classList.add('fullscreen');
         //   this._footQ.classList.add('hideFoot');
         // }
-        if (this._clockQ && (force || this._time !== time || this._ringing !== isAlarmRinging || this._controllersAlarmConfigLastUpdate !== this._config.last_updated)) {
+        if (this._clockQ && (force || this._time !== time)) {
             this._time = time;
-            this._ringing = isAlarmRinging; //TODO: do we need both these variables?
-            this._controllersAlarmConfigLastUpdate = this._config.last_updated;
+            // this._ringing = isAlarmRinging;  //TODO: do we need both these variables?
+            // this._controllersAlarmConfigLastUpdate = this._config.last_updated;
+            // console.log('*** updateTime(); last_updated: ', this._config.last_updated);
             let timeDisplay;
             // time variable includes seconds, even when showSeconds is false
             const [timeHr, timeMn, timeSd] = time.split(':');
@@ -4366,6 +4379,8 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     }
     setConfig(config) {
         this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, config);
+        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
         (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //updates lovelace.config
@@ -4544,6 +4559,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         // console.log('*** after value: ', event.detail.value);
         // console.log('*** after config.next_alarm: ', this._config.next_alarm);
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        // console.log('*** valueChanged(); last_updated: ', this._config.last_updated);
         this._oldConfig = this._config;
         // console.log('*** after: config.snooze_duration_default: ', this._config.snooze_duration_default);
         // console.log('*** config: ', this._config);
@@ -4608,6 +4624,7 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     cardConfig.next_alarm = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm(alarmTomorrow);
                 }
                 cardConfig.nap_duration = nextAlarmConfig.nap_duration;
+                // cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss'); //TODO: is this necessary?
                 await lovelace.saveConfig(newConfig);
                 // Override HA refresh dashboard notification
                 window.setTimeout(()=>{
@@ -4755,10 +4772,10 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
 
           .kobold-nap-form .ha-form-grid {
             display: grid !important;
-            grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));
+            /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
             /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-            grid-template-columns: auto auto;
-            /*grid-template-columns: auto 60%;*/
+            /*grid-template-columns: auto auto;*/
+            grid-template-columns: auto 50%;
             /*grid-template-columns: calc(35% - 4px) auto;*/
             grid-column-gap: 8px;
             grid-row-gap: 24px;

@@ -174,6 +174,7 @@ export class AlarmController {
             if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+                // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
 
                 await lovelace.saveConfig(newConfig);
             } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
