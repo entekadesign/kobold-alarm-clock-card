@@ -20,7 +20,7 @@ export class AlarmController {
     constructor(config: CardConfig, cardId?: string) {
 
         this._cardId = cardId;
-        this._config = config;
+        this._config = config; // TODO: make a copy here?
 
         this._setAlarmRinging = Helpers.throttle((state) => {
             if (state) {
@@ -142,7 +142,9 @@ export class AlarmController {
     }
 
     get nextAlarm(): NextAlarmObject {
+        // console.log('*** getting nextAlarm: ', this._config.next_alarm);// new Date().toJSON());
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
+        // const nextAlarm = this._config.next_alarm;
         if (!nextAlarm) {
             console.warn('*** get nextAlarm; NextAlarm undefined: returning default config');
             return Helpers.defaultConfig.next_alarm;
@@ -151,6 +153,7 @@ export class AlarmController {
     }
 
     get isAlarmEnabled() {
+        // console.log('*** checking whether alarm enabled');
         const nextAlarm = this.nextAlarm;
 
         if (nextAlarm.overridden && nextAlarm.enabled) {
@@ -201,9 +204,13 @@ export class AlarmController {
 
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
-        // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time;
-        // const myB = nextAlarm.date <= dateToday;
-        // console.log('*** nextAlarm is past: ' + myA + '; date less or same as today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
+        // const myA = dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time && nextAlarm.date === dateToday;
+        // const myB = nextAlarm.date < dateToday;
+        // console.log('*** nextAlarm date is today & time is past: ' + myA + '; nextAlarm date before today: ' + myB + '; alarm not ringing: ' + !this.isAlarmRinging());
+        // console.log('*** nextAlarm date is today: ', nextAlarm.date === dateToday);
+        // console.log('*** nextAlarm date: ', nextAlarm.date);
+        // console.log('*** date today: ', dateToday);
+        // console.log('*** nextAlarm time is past: ', dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time);
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             this.nextAlarmReset();
@@ -530,7 +537,7 @@ export class Helpers {
         name: "kobold_clock",
         type: "custom:kobold-alarm-clock-card",
         alarms_enabled: false,
-        next_alarm: { enabled: false, time: "07:00", date: dayjs().add(1, 'day').format('YYYY-MM-DD'), date_time: dayjs().add(1, 'day').format('YYYY-MM-DD') + " 07:00", overridden: false },
+        next_alarm: { enabled: false, time: "07:00:00", date: dayjs().add(1, 'day').format('YYYY-MM-DD'), date_time: dayjs().add(1, 'day').format('YYYY-MM-DD') + " 07:00:00", overridden: false },
         mo: { enabled: false, time: "07:00:00" },
         tu: { enabled: false, time: "07:00:00" },
         we: { enabled: false, time: "07:00:00" },

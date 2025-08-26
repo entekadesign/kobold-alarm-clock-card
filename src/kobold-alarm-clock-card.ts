@@ -85,7 +85,7 @@ class KoboldAlarmClockCard extends LitElement {
   // @state() _alarmButtonsClasses: { [key: string]: boolean };
   // @state() _footClasses: { [key: string]: boolean };
   // @state() _clockClasses: { [key: string]: boolean };
-  @state() _koboldEditor: any; //TODO: better type
+  @state() _koboldEditor: LitElement;
 
   @property({ type: Boolean, reflect: true }) public preview = false;
 
@@ -96,7 +96,7 @@ class KoboldAlarmClockCard extends LitElement {
   @query('#date', true) _dateQ: HTMLElement;
   @query('ha-card', true) _haCardQ: HTMLElement;
   @queryAll('div.optionButtons ha-icon') _optionButtonsHostsQ: NodeListOf<HTMLElement>;
-  @query('#extraInfo', true) _rootQ: HTMLElement;
+  @query('#extraInfo', true) _extraInfoQ: HTMLElement;
   @query('#alarmTop div#koboldLogo', true) _koboldLogoQ: HTMLElement;
   @query('alarm-picker', true) _alarmPickerQ: HTMLElement;
 
@@ -113,7 +113,7 @@ class KoboldAlarmClockCard extends LitElement {
     // recover from disconnect, e.g., HA restart
     window.addEventListener('connection-status', this._connectionStatusEvent);
     Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
-    Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent); //TODO: can this be triggered by editing a different card?
+    Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
     window.setMyEditMode = (mode = true) => {
       const ll = Helpers.getLovelace();
       if (ll && ll.lovelace.editMode !== mode) {
@@ -154,7 +154,6 @@ class KoboldAlarmClockCard extends LitElement {
       window.hassConnection.then(({ conn }) => {
         conn.subscribeEvents(() => {
           window.setTimeout(() => {
-            //TODO: test that logging works here; if not, see https://github.com/search?q=repo%3Ahome-assistant%2Ffrontend+system_log&type=code
             this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
             window.setTimeout(() => {
               location.reload();
@@ -166,6 +165,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _dialogClosedEvent = (event: CustomEvent) => {
+    // NOTE: this will fire when closing any edit dialog
     if (event.detail.dialog === 'hui-dialog-edit-card') {
       window.setMyEditMode(false);
       window.setTimeout(() => {
@@ -210,6 +210,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   render() {
     this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
+    // console.log('*** render(); nextAlarm: ', this._nextAlarm);
 
     // console.log('*** preview: ', this.preview);
     // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
@@ -633,10 +634,10 @@ class KoboldAlarmClockCard extends LitElement {
     }
     :host([preview]) #clock {
       text-shadow: none;
-      font-size: calc(7em + 100%);
+      font-size: calc(5em + 100%);
       /*font-size: 10em;*/
       /*font-size: 12em;*/
-      font-size: calc(10cqw + 5em);
+      font-size: calc(5cqw + 5em);
     }
     :host([preview]) #clock.seconds {
       /*font-size: 7em;*/
@@ -691,17 +692,17 @@ class KoboldAlarmClockCard extends LitElement {
       // when card starts up, hide cards (prevents flicker during save)
       this._enforceHideCards(true);
       window.setTimeout(() => {
-        if (!this._config.hide_cards_default) this._enforceHideCards(false);
+        if (!this._config.hide_cards_default && this._config.cards) this._enforceHideCards(false);
       }, 250);
     }
     this._updateTime();
 
     if (this._haCardQ) {
-      // console.log('*** _buildCard(); rootQ kobold-card: ', this._rootQ.querySelectorAll('*')); //'[kobold-card="true"]'));
-      // console.log('*** _buildCard(); rootQ.childElementCount: ', this._rootQ.childElementCount);
-      // console.log('*** _buildCard(); rootQ: ', this._rootQ);
-      // console.log('*** _buildCard(); rootQ.children: ', this._rootQ.children);
-      // console.log('*** _buildCard(); rootQ.childNodes: ', this._rootQ.childNodes);
+      // console.log('*** _buildCard(); extraInfoQ kobold-card: ', this._extraInfoQ.querySelectorAll('*')); //'[kobold-card="true"]'));
+      // console.log('*** _buildCard(); extraInfoQ.childElementCount: ', this._extraInfoQ.childElementCount);
+      // console.log('*** _buildCard(); extraInfoQ: ', this._extraInfoQ);
+      // console.log('*** _buildCard(); extraInfoQ.children: ', this._extraInfoQ.children);
+      // console.log('*** _buildCard(); extraInfoQ.childNodes: ', this._extraInfoQ.childNodes);
       // if (!this.preview) this._buildCard();
       this._buildCard();
     } else {
@@ -781,10 +782,10 @@ class KoboldAlarmClockCard extends LitElement {
       };
     }
 
-    this._config = config;
+    this._config = config;  //TODO: make a copy here?
     // this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
     // console.log('*** setConfig: config: ', this._config);
-    // Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing?
+    // Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing? seems unecessary; leave while testing
 
     // NOTE: Some cards call setConfig() multiple times during life of card
     if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
@@ -809,10 +810,10 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _buildCard() {
-    if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id "extraInfo") not available');
+    if (!this._extraInfoQ) console.warn('*** _buildCard(); Card root (element id "extraInfo") not available');
 
-    while (this._rootQ.lastChild) {
-      this._rootQ.removeChild(this._rootQ.lastChild);
+    while (this._extraInfoQ.lastChild) {
+      this._extraInfoQ.removeChild(this._extraInfoQ.lastChild);
     }
 
     const config = this._config;
@@ -830,7 +831,7 @@ class KoboldAlarmClockCard extends LitElement {
         // element.setAttribute('kobold-card', 'true');
         if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
         elements.push(element);
-        this._rootQ.appendChild(element);
+        this._extraInfoQ.appendChild(element);
       })).
         catch(error => {
           console.error('*** Error while creating card element: ', error.message);
@@ -846,6 +847,9 @@ class KoboldAlarmClockCard extends LitElement {
             }
           });
         });
+    } else {
+      // console.log('*** no cards; hiding foot');
+      // this._enforceHideCards(true);
     }
   }
 
@@ -906,7 +910,7 @@ class KoboldAlarmClockCard extends LitElement {
         // || this._controllersAlarmConfigLastUpdate !== this._config.last_updated
       )) {
       this._time = time;
-      // this._ringing = isAlarmRinging;  //TODO: do we need both these variables?
+      // this._ringing = isAlarmRinging;  //TODO: do we need both these variables? seems not; leave for testing
       // this._controllersAlarmConfigLastUpdate = this._config.last_updated;
       // console.log('*** updateTime(); last_updated: ', this._config.last_updated);
 
@@ -968,7 +972,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _areAlarmsEnabled() {
-    return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap; //TODO: shouldn't this be !!this._alarmConfiguration.nextAlarm.nap? (not according to dehuyss clock).
+    return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap;
   }
 
   _onAlarmChanged(event: CustomEvent) {
@@ -1007,7 +1011,7 @@ class KoboldAlarmClockCard extends LitElement {
   //       this._footClasses = { hideFoot: true };
   //     }
   //     if (force) {
-  //       // TODO: save hide_cards_default(force) and remove obsolete option to configure in settings
+  //       // save hide_cards_default(force) and remove obsolete option to configure in settings
   //     }
   //   }
   // }
@@ -1385,6 +1389,7 @@ class KoboldCardEditor extends LitElement {
   }
 
   setConfig(config) {
+    // TODO: add check to determine whether config same as after merge with defaultconfig? If same, no need to update last_updated
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
     this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
     // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
@@ -1634,7 +1639,7 @@ class KoboldCardEditor extends LitElement {
       return;
     }
 
-    // TODO: same as set nextAlarm() in controller? use _setNextalarm above?
+    // TODO: same as set nextAlarm() in controller (except overridden)? use _setNextalarm below?
     const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value));
     const nextAlarm = {
       ...this._nextAlarmConfig.next_alarm,
@@ -1661,7 +1666,7 @@ class KoboldCardEditor extends LitElement {
       const newConfig = structuredClone(lovelace.config);
       const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
       if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
-        //TODO: check to ensure save only happens if a change?
+        //TODO: add check to ensure save only happens if a change?
         if (nextAlarmConfig.next_alarm.overridden) {
           // same as is valueChangedNap except overridden?; TODO: have both goto new _setNextAlarm() method?
           // console.log('*** saveNextAlarm; overridden is true');
@@ -1678,6 +1683,7 @@ class KoboldCardEditor extends LitElement {
           cardConfig.next_alarm = nextAlarm;
         } else {
           //reset alarm when overridden is switched to false
+          // console.log('*** reset alarm');
           const momentTomorrow = dayjs().add(1, 'day');
           const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
           cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
@@ -1759,6 +1765,7 @@ class KoboldCardEditor extends LitElement {
 
   _renderNapEditor() {
     if (!this._nextAlarmConfig) {
+      // console.log('*** rederNapEditor()');
       this._nextAlarmConfig = {
         next_alarm: structuredClone(this._config.next_alarm),
         nap_duration: structuredClone(this._config.nap_duration),
