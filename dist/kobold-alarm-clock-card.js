@@ -3297,7 +3297,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       overflow: hidden;
       transition: padding-top 240ms;
       padding-top: 0.15em;
-      padding-right: 0.05em;
+      /*padding-right: 0.05em;*/
       display: flex;
       justify-content: center;
       height: 100%;
@@ -3310,8 +3310,19 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       letter-spacing: -0.02em;
       /*font-weight: 500;*/
       align-items: center;
+      white-space-collapse: collapse;
+      text-wrap-mode: nowrap;
       white-space: nowrap;
       text-shadow: 0 0 0.04em var(--primary-text-color);
+    }
+    /* Safari before v16 */
+    @supports not (trim-margin: block) {
+      @media not all and (min-resolution: 0.001dpcm) {
+        /* Early Safari: bounding box incorrect when child in vertical writing mode */
+        #clock {
+          padding-right: 0.2em;
+        }
+      }
     }
     /*#clock svg {
       fill: currentColor;
@@ -3782,7 +3793,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 }
             }
             this._clockQ.innerHTML = `
-        <div class>
+        <div>
           ${timeDisplay}
         </div>
       `;
