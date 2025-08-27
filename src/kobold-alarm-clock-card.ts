@@ -496,9 +496,9 @@ class KoboldAlarmClockCard extends LitElement {
         letter-spacing: -0.05em;
       }
     }
-    #clock.fontFace1 .periodName.periodKern {
+    /*#clock.fontFace1 .periodName.periodKern {
       margin-left: -0.5em;
-    }
+    }*/
 
     #clock.fontFace2 {
       font-family: 'oswald_regularregular';
@@ -679,8 +679,6 @@ class KoboldAlarmClockCard extends LitElement {
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .optionButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
       display: none;
     }
-
-
   `;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
@@ -722,6 +720,8 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   protected updated(_changedProperties: PropertyValues): void {
+    // console.log('*** updated; changeProperties: ', _changedProperties);
+
     const cardWidth = this.getBoundingClientRect().width;
     // console.log('*** card width: ', cardWidth);
     if (this._koboldClockQ && this._alarmPickerQ) {

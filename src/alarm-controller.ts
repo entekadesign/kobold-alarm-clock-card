@@ -180,6 +180,13 @@ export class AlarmController {
                 // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
 
                 await lovelace.saveConfig(newConfig);
+
+                Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
+                    .then(() => {
+                        if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
+                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+                        }
+                    }).catch(); //timed out
             } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
         } catch (err: any) {
             alert(`Saving failed: ${err.message}.`);
@@ -440,6 +447,16 @@ export class Helpers {
         return root;
     };
 
+    static getNotification = () => {
+        let root: any = this.getHa();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('notification-manager');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('ha-toast');
+        // console.log('*** getNotification(); root: ', root);
+        return root;
+    };
+
     static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
         let timerFlag = null;
         return (...args: T) => {
@@ -482,6 +499,21 @@ export class Helpers {
                 Number(haPatch) >= patch)
         );
     };
+
+    static testUntilTimeout = async (f, timeoutMs) => {
+        return new Promise((resolve, reject) => {
+            const timeWas = new Date();
+            const wait = setInterval(function () {
+                if (f()) {
+                    clearInterval(wait);
+                    resolve('resolved');
+                } else if (new Date().valueOf() - timeWas.valueOf() > timeoutMs) { // Timeout
+                    clearInterval(wait);
+                    reject('timed out');
+                }
+            }, 20);
+        });
+    }
 
     static convertToMinutes(HHMM: string): { 'minutes': number } {
         // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")

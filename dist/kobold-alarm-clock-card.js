@@ -1204,6 +1204,11 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
                 // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
                 await lovelace.saveConfig(newConfig);
+                $b2cd7c9abb677932$export$4dc2b60021baefca.testUntilTimeout(()=>$b2cd7c9abb677932$export$4dc2b60021baefca.getNotification(), 5000).then(()=>{
+                    if ($b2cd7c9abb677932$export$4dc2b60021baefca.getNotification().labelText.includes('dashboard was updated')) $b2cd7c9abb677932$export$4dc2b60021baefca.fireEvent('hass-notification', {
+                        message: 'Configuration updated'
+                    }, $b2cd7c9abb677932$export$4dc2b60021baefca.getHa());
+                }).catch(); //timed out
             } else throw {
                 message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
             };
@@ -1415,6 +1420,15 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         // console.log('*** getDrawer(); root: ', root);
         return root;
     };
+    static #_8 = this.getNotification = ()=>{
+        let root = this.getHa();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('notification-manager');
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('ha-toast');
+        // console.log('*** getNotification(); root: ', root);
+        return root;
+    };
     static throttle(fn, delay) {
         let timerFlag = null;
         return (...args)=>{
@@ -1426,7 +1440,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             }
         };
     }
-    static #_8 = // from source: frontend/src/common/config/version.ts
+    static #_9 = // from source: frontend/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)
@@ -1437,6 +1451,20 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         // }
         const [haMajor, haMinor, haPatch] = version.split(".", 3);
         return Number(haMajor) > major || Number(haMajor) === major && (patch === undefined ? Number(haMinor) >= minor : Number(haMinor) > minor) || patch !== undefined && Number(haMajor) === major && Number(haMinor) === minor && Number(haPatch) >= patch;
+    };
+    static #_10 = this.testUntilTimeout = async (f, timeoutMs)=>{
+        return new Promise((resolve, reject)=>{
+            const timeWas = new Date();
+            const wait = setInterval(function() {
+                if (f()) {
+                    clearInterval(wait);
+                    resolve('resolved');
+                } else if (new Date().valueOf() - timeWas.valueOf() > timeoutMs) {
+                    clearInterval(wait);
+                    reject('timed out');
+                }
+            }, 20);
+        });
     };
     static convertToMinutes(HHMM) {
         // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
@@ -1489,7 +1517,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
         }
         return false;
     }
-    static #_9 = this.defaultConfig = {
+    static #_11 = this.defaultConfig = {
         name: "kobold_clock",
         type: "custom:kobold-alarm-clock-card",
         alarms_enabled: false,
@@ -3397,9 +3425,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         letter-spacing: -0.05em;
       }
     }
-    #clock.fontFace1 .periodName.periodKern {
+    /*#clock.fontFace1 .periodName.periodKern {
       margin-left: -0.5em;
-    }
+    }*/
 
     #clock.fontFace2 {
       font-family: 'oswald_regularregular';
@@ -3580,8 +3608,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .optionButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
       display: none;
     }
-
-
   `;
     willUpdate(_changedProperties) {}
     // protected update(_changedProperties: PropertyValues): void {
@@ -3611,6 +3637,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         else console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot');
     }
     updated(_changedProperties) {
+        // console.log('*** updated; changeProperties: ', _changedProperties);
         const cardWidth = this.getBoundingClientRect().width;
         // console.log('*** card width: ', cardWidth);
         if (this._koboldClockQ && this._alarmPickerQ) {
