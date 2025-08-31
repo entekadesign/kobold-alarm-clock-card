@@ -209,8 +209,9 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   render() {
-    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
+    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
     // console.log('*** render(); nextAlarm: ', this._nextAlarm);
+    // console.log('*** render(); nextAlarm.overridden: ', this._nextAlarm.overridden);
 
     // console.log('*** preview: ', this.preview);
     // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
@@ -696,6 +697,8 @@ class KoboldAlarmClockCard extends LitElement {
 
     // console.log('*** firstUpdated; parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
 
+    // console.log('*** firstUpdated; this._config ', this._config);
+
     // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
     if (!this._alarmController.isAlarmRinging()) {
       // when card starts up, hide cards (prevents flicker during save)
@@ -721,6 +724,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   protected updated(_changedProperties: PropertyValues): void {
     // console.log('*** updated; changeProperties: ', _changedProperties);
+    // if (_changedProperties.has('_nextAlarm')) console.log('*** Card updated(); nextAlarm changed: ', this._nextAlarm);
 
     const cardWidth = this.getBoundingClientRect().width;
     // console.log('*** card width: ', cardWidth);
@@ -794,9 +798,10 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     this._config = config;  //TODO: make a copy here?
-    // this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
-    // console.log('*** setConfig: config: ', this._config);
-    // Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing? seems unecessary; leave while testing
+    // this._config = Helpers.deepMerge(Helpers.defaultConfig, config); //only helpful if inside editor
+    // console.log('*** Card setConfig: config: ', this._config);
+    // Helpers.fireEvent('config-changed', { config: this._config }, Helpers.getEditor()); //only works inside editor
+    // console.log('*** Card setConfig: config.nextAlarm: ', this._config.next_alarm);
 
     // NOTE: Some cards call setConfig() multiple times during life of card
     if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
@@ -1401,8 +1406,20 @@ class KoboldCardEditor extends LitElement {
 
   setConfig(config) {
     // TODO: add check to determine whether config same as after merge with defaultconfig? If same, no need to update last_updated
+    console.log('*** Editor setConfig(); config: ', config);
+    // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
-    this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const configChanges = Helpers.deepCompareObj(this._config, config);
+    // if (!configChanges) return;
+    if (configChanges) {
+      // console.log('*** Editor setConfig(); changes v default: ', Helpers.deepCompareObj(configChanges, Helpers.defaultConfig));
+      // console.log('*** Editor setConfig(); changes v config: ', Helpers.deepCompareObj(configChanges, config));
+      console.log('*** Editor setConfig(); configChanges: ', configChanges);
+      // console.log('*** Editor setConfig(); config: ', config);
+      console.log('*** Editor setConfig(); this._config: ', Helpers.defaultConfig);
+
+    }
+    // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
     // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
     Helpers.fireEvent('config-changed', { config: this._config }, this); //updates lovelace.config
     if (!this._oldConfig) this._oldConfig = this._config;
@@ -1675,7 +1692,11 @@ class KoboldCardEditor extends LitElement {
     try {
       const lovelace = Helpers.getLovelace().lovelace;
       const newConfig = structuredClone(lovelace.config);
-      const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
+      const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+      let viewIndex;
+      viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+      if (viewIndex === -1) viewIndex = 0;
+      const cardConfig = Helpers.findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
       if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
         //TODO: add check to ensure save only happens if a change?
         if (nextAlarmConfig.next_alarm.overridden) {

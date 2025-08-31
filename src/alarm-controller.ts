@@ -115,6 +115,7 @@ export class AlarmController {
             // keyValue = AlarmController.createNextAlarm(alarmTomorrow);
         }
         this._saveConfig('next_alarm', keyValue);
+        // console.log('*** nextAlarmReset; saving new nextAlarm: ', keyValue);
     }
 
     static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
@@ -142,13 +143,14 @@ export class AlarmController {
     }
 
     get nextAlarm(): NextAlarmObject {
-        // console.log('*** getting nextAlarm: ', this._config.next_alarm);// new Date().toJSON());
+        // console.log('*** getting nextAlarm before: ', this._config.next_alarm);// new Date().toJSON());
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         // const nextAlarm = this._config.next_alarm;
         if (!nextAlarm) {
-            console.warn('*** get nextAlarm; NextAlarm undefined: returning default config');
+            console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
             return Helpers.defaultConfig.next_alarm;
         }
+        // console.log('*** getting nextAlarm after: ', this._config.next_alarm);// new Date().toJSON());
         return nextAlarm;
     }
 
@@ -173,11 +175,26 @@ export class AlarmController {
             // console.log('*** saveConfig(); lovelace: ', lovelace);
             // console.log('*** saveConfig(); this: ', this);
             const newConfig = structuredClone(lovelace.config);
-            const cardConfig = Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
+            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+            // console.log('*** _saveConfig on controller(); tabGroup: ', tabGroup);
+            let viewIndex;
+            viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+            if (viewIndex === -1) viewIndex = 0;
+            // console.log('*** _saveConfig on controller(); viewIndex: ', viewIndex);
+            // console.log('*** _saveConfig on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+
+            const cardConfig = Helpers.findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
+            // console.log('*** _saveConfig(); cardConfig: ', cardConfig);
+            // console.log('*** _saveConfig(); newConfig: ', newConfig);
             if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
+                // console.log('*** saveConfig on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
                 // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
+                // console.log('*** saveConfig on controller(); saving newConfig: ', newConfig);
+                // console.log('*** saveConfig on controller(); saving cardConfig: ', cardConfig);
+                // console.log('*** saveConfig on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+                // console.log('*** saveConfig on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);?
 
                 await lovelace.saveConfig(newConfig);
 
@@ -186,7 +203,7 @@ export class AlarmController {
                         if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
                             Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
                         }
-                    }).catch(); //timed out
+                    }).catch(() => { }); //timed out
             } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
         } catch (err: any) {
             alert(`Saving failed: ${err.message}.`);
@@ -220,6 +237,7 @@ export class AlarmController {
         // console.log('*** nextAlarm time is past: ', dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time);
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
+            // console.log('*** _evaluate; nextAlarm passed');
             this.nextAlarmReset();
             if (this._config.debug) {
                 console.warn('*** _evaluate(); Resetting nextAlarm');
@@ -470,7 +488,7 @@ export class Helpers {
     }
 
 
-    // from source: frontend/src/common/config/version.ts
+    // source: frontend/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)
@@ -500,7 +518,7 @@ export class Helpers {
         );
     };
 
-    static testUntilTimeout = async (f, timeoutMs) => {
+    static testUntilTimeout = async (f: () => boolean, timeoutMs: number) => {
         return new Promise((resolve, reject) => {
             const timeWas = new Date();
             const wait = setInterval(function () {
@@ -515,13 +533,13 @@ export class Helpers {
         });
     }
 
-    static convertToMinutes(HHMM: string): { 'minutes': number } {
-        // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
-        const [H, M] = HHMM.split(":").map(val => parseInt(val));
-        // https://dev.to/emnudge/identifying-negative-zero-2j1o
-        let minutes = Math.abs(H) * 60 + M; minutes *= Math.sign(1 / H || H);
-        return { 'minutes': minutes };
-    };
+    // static convertToMinutes(HHMM: string): { 'minutes': number } {
+    //     // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
+    //     const [H, M] = HHMM.split(":").map(val => parseInt(val));
+    //     // https://dev.to/emnudge/identifying-negative-zero-2j1o
+    //     let minutes = Math.abs(H) * 60 + M; minutes *= Math.sign(1 / H || H);
+    //     return { 'minutes': minutes };
+    // };
 
     static updateHeight(element: LovelaceCard): boolean {
         if (this._updateHeightOnNormalCard(element)) return true;

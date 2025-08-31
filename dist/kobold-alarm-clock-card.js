@@ -1152,6 +1152,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // keyValue = AlarmController.createNextAlarm(alarmTomorrow);
         }
         this._saveConfig('next_alarm', keyValue);
+    // console.log('*** nextAlarmReset; saving new nextAlarm: ', keyValue);
     }
     static createNextAlarm(alarm, forToday = false) {
         // console.log('*** createnextalarm fired');
@@ -1173,13 +1174,14 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         this._saveConfig('next_alarm', keyValue);
     }
     get nextAlarm() {
-        // console.log('*** getting nextAlarm: ', this._config.next_alarm);// new Date().toJSON());
+        // console.log('*** getting nextAlarm before: ', this._config.next_alarm);// new Date().toJSON());
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         // const nextAlarm = this._config.next_alarm;
         if (!nextAlarm) {
-            console.warn('*** get nextAlarm; NextAlarm undefined: returning default config');
+            console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
             return $b2cd7c9abb677932$export$4dc2b60021baefca.defaultConfig.next_alarm;
         }
+        // console.log('*** getting nextAlarm after: ', this._config.next_alarm);// new Date().toJSON());
         return nextAlarm;
     }
     get isAlarmEnabled() {
@@ -1198,17 +1200,35 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             // console.log('*** saveConfig(); lovelace: ', lovelace);
             // console.log('*** saveConfig(); this: ', this);
             const newConfig = structuredClone(lovelace.config);
-            const cardConfig = $b2cd7c9abb677932$export$4dc2b60021baefca.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
+            const tabGroupArry = [
+                ...$b2cd7c9abb677932$export$4dc2b60021baefca.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
+            ];
+            // console.log('*** _saveConfig on controller(); tabGroup: ', tabGroup);
+            let viewIndex;
+            viewIndex = tabGroupArry.findIndex((tab)=>{
+                return tab.hasAttribute('active');
+            });
+            if (viewIndex === -1) viewIndex = 0;
+            // console.log('*** _saveConfig on controller(); viewIndex: ', viewIndex);
+            // console.log('*** _saveConfig on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+            const cardConfig = $b2cd7c9abb677932$export$4dc2b60021baefca.findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
+            // console.log('*** _saveConfig(); cardConfig: ', cardConfig);
+            // console.log('*** _saveConfig(); newConfig: ', newConfig);
             if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
+                // console.log('*** saveConfig on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
                 cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
                 // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
+                // console.log('*** saveConfig on controller(); saving newConfig: ', newConfig);
+                // console.log('*** saveConfig on controller(); saving cardConfig: ', cardConfig);
+                // console.log('*** saveConfig on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+                // console.log('*** saveConfig on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);?
                 await lovelace.saveConfig(newConfig);
                 $b2cd7c9abb677932$export$4dc2b60021baefca.testUntilTimeout(()=>$b2cd7c9abb677932$export$4dc2b60021baefca.getNotification(), 5000).then(()=>{
                     if ($b2cd7c9abb677932$export$4dc2b60021baefca.getNotification().labelText.includes('dashboard was updated')) $b2cd7c9abb677932$export$4dc2b60021baefca.fireEvent('hass-notification', {
                         message: 'Configuration updated'
                     }, $b2cd7c9abb677932$export$4dc2b60021baefca.getHa());
-                }).catch(); //timed out
+                }).catch(()=>{}); //timed out
             } else throw {
                 message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
             };
@@ -1238,6 +1258,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // console.log('*** nextAlarm time is past: ', dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time);
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday) && !this.isAlarmRinging()) {
+            // console.log('*** _evaluate; nextAlarm passed');
             this.nextAlarmReset();
             if (this._config.debug) {
                 console.warn('*** _evaluate(); Resetting nextAlarm');
@@ -1440,7 +1461,7 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             }
         };
     }
-    static #_9 = // from source: frontend/src/common/config/version.ts
+    static #_9 = // source: frontend/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)
@@ -1466,16 +1487,13 @@ class $b2cd7c9abb677932$export$4dc2b60021baefca {
             }, 20);
         });
     };
-    static convertToMinutes(HHMM) {
-        // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
-        const [H, M] = HHMM.split(":").map((val)=>parseInt(val));
-        // https://dev.to/emnudge/identifying-negative-zero-2j1o
-        let minutes = Math.abs(H) * 60 + M;
-        minutes *= Math.sign(1 / H || H);
-        return {
-            'minutes': minutes
-        };
-    }
+    // static convertToMinutes(HHMM: string): { 'minutes': number } {
+    //     // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
+    //     const [H, M] = HHMM.split(":").map(val => parseInt(val));
+    //     // https://dev.to/emnudge/identifying-negative-zero-2j1o
+    //     let minutes = Math.abs(H) * 60 + M; minutes *= Math.sign(1 / H || H);
+    //     return { 'minutes': minutes };
+    // };
     static updateHeight(element) {
         if (this._updateHeightOnNormalCard(element)) return true;
         if (this._updateHeightOnNestedCards(element)) return true;
@@ -3147,8 +3165,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     // return Helpers.defaultConfig;
     }
     render() {
-        this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
+        this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
         // console.log('*** render(); nextAlarm: ', this._nextAlarm);
+        // console.log('*** render(); nextAlarm.overridden: ', this._nextAlarm.overridden);
         // console.log('*** preview: ', this.preview);
         // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
         // console.log('*** render(); alarmClock class: ', this._koboldClockQ?.classList.value);
@@ -3618,6 +3637,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
         this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
         // console.log('*** firstUpdated; parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
+        // console.log('*** firstUpdated; this._config ', this._config);
         // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
         if (!this._alarmController.isAlarmRinging()) {
             // when card starts up, hide cards (prevents flicker during save)
@@ -3638,6 +3658,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     updated(_changedProperties) {
         // console.log('*** updated; changeProperties: ', _changedProperties);
+        // if (_changedProperties.has('_nextAlarm')) console.log('*** Card updated(); nextAlarm changed: ', this._nextAlarm);
         const cardWidth = this.getBoundingClientRect().width;
         // console.log('*** card width: ', cardWidth);
         if (this._koboldClockQ && this._alarmPickerQ) {
@@ -3702,9 +3723,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             }
         }
         this._config = config; //TODO: make a copy here?
-        // this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
-        // console.log('*** setConfig: config: ', this._config);
-        // Helpers.fireEvent('config-changed', { config: this._config }, this); //TODO: is this modifying saved config, or doing nothing? seems unecessary; leave while testing
+        // this._config = Helpers.deepMerge(Helpers.defaultConfig, config); //only helpful if inside editor
+        // console.log('*** Card setConfig: config: ', this._config);
+        // Helpers.fireEvent('config-changed', { config: this._config }, Helpers.getEditor()); //only works inside editor
+        // console.log('*** Card setConfig: config.nextAlarm: ', this._config.next_alarm);
         // NOTE: Some cards call setConfig() multiple times during life of card
         if (!this._alarmController) this._alarmController = new (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d)(this._config, this._cardId);
     }
@@ -4425,8 +4447,19 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     }
     setConfig(config) {
         // TODO: add check to determine whether config same as after merge with defaultconfig? If same, no need to update last_updated
+        console.log('*** Editor setConfig(); config: ', config);
+        // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
         this._config = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig, config);
-        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        const configChanges = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).deepCompareObj(this._config, config);
+        // if (!configChanges) return;
+        if (configChanges) {
+            // console.log('*** Editor setConfig(); changes v default: ', Helpers.deepCompareObj(configChanges, Helpers.defaultConfig));
+            // console.log('*** Editor setConfig(); changes v config: ', Helpers.deepCompareObj(configChanges, config));
+            console.log('*** Editor setConfig(); configChanges: ', configChanges);
+            // console.log('*** Editor setConfig(); config: ', config);
+            console.log('*** Editor setConfig(); this._config: ', (0, $b2cd7c9abb677932$export$4dc2b60021baefca).defaultConfig);
+        }
+        // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
         // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
         (0, $b2cd7c9abb677932$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
@@ -4648,7 +4681,15 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         try {
             const lovelace = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
-            const cardConfig = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card');
+            const tabGroupArry = [
+                ...(0, $b2cd7c9abb677932$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
+            ];
+            let viewIndex;
+            viewIndex = tabGroupArry.findIndex((tab)=>{
+                return tab.hasAttribute('active');
+            });
+            if (viewIndex === -1) viewIndex = 0;
+            const cardConfig = (0, $b2cd7c9abb677932$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
             if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
                 //TODO: add check to ensure save only happens if a change?
                 if (nextAlarmConfig.next_alarm.overridden) {
