@@ -1405,20 +1405,19 @@ class KoboldCardEditor extends LitElement {
   }
 
   setConfig(config) {
-    // TODO: add check to determine whether config same as after merge with defaultconfig? If same, no need to update last_updated
-    console.log('*** Editor setConfig(); config: ', config);
+    // console.log('*** Editor setConfig(); config: ', config);
     // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
     this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
     const configChanges = Helpers.deepCompareObj(this._config, config);
-    // if (!configChanges) return;
-    if (configChanges) {
-      // console.log('*** Editor setConfig(); changes v default: ', Helpers.deepCompareObj(configChanges, Helpers.defaultConfig));
-      // console.log('*** Editor setConfig(); changes v config: ', Helpers.deepCompareObj(configChanges, config));
-      console.log('*** Editor setConfig(); configChanges: ', configChanges);
-      // console.log('*** Editor setConfig(); config: ', config);
-      console.log('*** Editor setConfig(); this._config: ', Helpers.defaultConfig);
+    if (!configChanges) return;
+    // if (configChanges) {
+    //   // console.log('*** Editor setConfig(); changes v default: ', Helpers.deepCompareObj(configChanges, Helpers.defaultConfig));
+    //   // console.log('*** Editor setConfig(); changes v config: ', Helpers.deepCompareObj(configChanges, config));
+    //   console.log('*** Editor setConfig(); configChanges: ', configChanges);
+    //   // console.log('*** Editor setConfig(); config: ', config);
+    //   console.log('*** Editor setConfig(); this._config: ', Helpers.defaultConfig);
 
-    }
+    // }
     // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
     // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
     Helpers.fireEvent('config-changed', { config: this._config }, this); //updates lovelace.config
@@ -1568,12 +1567,15 @@ class KoboldCardEditor extends LitElement {
   }
 
   _handleSaveButton() {
-    // console.log('*** saveSettings called.');
+    // console.log('*** _handlSaveButton; _nextAlarmConfig: ', this._nextAlarmConfig);
+    // console.log('*** _handlSaveButton; _config.nap_duration: ', this._config.nap_duration);
     // nextAlarmConfig undefined unless nap settings tab was visited
     if (this._nextAlarmConfig) {
       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-      if (nextAlarmDiff) {
-        // console.log('*** saving nextAlarm.');
+      const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
+      if (nextAlarmDiff || napDurationDiff) {
+        // console.log('*** _handlSaveButton; nextAlarmDiff: ', nextAlarmDiff);
+        // console.log('*** _handlSaveButton; napDurationDiff: ', napDurationDiff);
         this._saveNextAlarm(this._nextAlarmConfig);
       }
     }
@@ -1658,8 +1660,9 @@ class KoboldCardEditor extends LitElement {
     // console.log('*** value: ', event.detail.value);
     if (event.detail.value === undefined) {
       // event.detail.value = this._config.nap_duration;
-      event.detail.value = Helpers.defaultConfig.nap_duration;
-      this._nextAlarmConfig.nap_duration = event.detail.value;
+      // event.detail.value = Helpers.defaultConfig.nap_duration;
+      // this._nextAlarmConfig.nap_duration = event.detail.value;
+      this._nextAlarmConfig.nap_duration = Helpers.defaultConfig.nap_duration;
       this._nextAlarmConfig.next_alarm.overridden = false;
       this.requestUpdate();
       // console.log('*** this._nextAlarmConfig.next_alarm.overridden: ', this._nextAlarmConfig.next_alarm.overridden);
@@ -1667,19 +1670,21 @@ class KoboldCardEditor extends LitElement {
       return;
     }
 
-    // TODO: same as set nextAlarm() in controller (except overridden)? use _setNextalarm below?
-    const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value));
-    const nextAlarm = {
-      ...this._nextAlarmConfig.next_alarm,
-      enabled: true,
-      nap: true,
-      time: nextAlarmTime.format('HH:mm:ss'),
-      date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
-      date: nextAlarmTime.format('YYYY-MM-DD'),
-      overridden: true
-    }
+    // // same as set nextAlarm() in controller (except overridden)? use _setNextalarm below?
+    // const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value));
+    // const nextAlarm = {
+    //   ...this._nextAlarmConfig.next_alarm,
+    //   enabled: true,
+    //   nap: true,
+    //   time: nextAlarmTime.format('HH:mm:ss'),
+    //   date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
+    //   date: nextAlarmTime.format('YYYY-MM-DD'),
+    //   overridden: true
+    // }
 
-    this._nextAlarmConfig.next_alarm = nextAlarm;
+    // this._nextAlarmConfig.next_alarm = nextAlarm;
+
+    this._nextAlarmConfig.next_alarm.overridden = true;
     this._nextAlarmConfig.nap_duration = event.detail.value;
 
     this.requestUpdate();
@@ -1693,14 +1698,11 @@ class KoboldCardEditor extends LitElement {
       const lovelace = Helpers.getLovelace().lovelace;
       const newConfig = structuredClone(lovelace.config);
       const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
-      let viewIndex;
-      viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-      if (viewIndex === -1) viewIndex = 0;
-      const cardConfig = Helpers.findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
+      const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+      const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
       if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
-        //TODO: add check to ensure save only happens if a change?
+
         if (nextAlarmConfig.next_alarm.overridden) {
-          // same as is valueChangedNap except overridden?; TODO: have both goto new _setNextAlarm() method?
           // console.log('*** saveNextAlarm; overridden is true');
           const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
           const nextAlarm = {
@@ -1714,14 +1716,36 @@ class KoboldCardEditor extends LitElement {
           }
           cardConfig.next_alarm = nextAlarm;
         } else {
-          //reset alarm when overridden is switched to false
+          //overridden is switched to false: nextAlarmReset
           // console.log('*** reset alarm');
-          const momentTomorrow = dayjs().add(1, 'day');
-          const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-          cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
+
+          const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
+          const dayToday = dayjs().format('dd').toLowerCase();
+          const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
+          const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
+          cardConfig.next_alarm = AlarmController.createNextAlarm(newAlarm, forToday);
+
+
+          // const momentTomorrow = dayjs().add(1, 'day');
+          // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
+          // // cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
+          // cardConfig.next_alarm = {
+          //   ...AlarmController.createNextAlarm(alarmTomorrow),
+          //   // overridden: false
+          // };
         }
         cardConfig.nap_duration = nextAlarmConfig.nap_duration;
-        // cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss'); //TODO: is this necessary?
+
+        // const newNextAlarmConfig = { next_alarm: cardConfig.next_alarm, nap_duration: cardConfig.nap_duration };
+        // console.log('*** saveNextAlarm(); newNextAlarmConfig: ', newNextAlarmConfig)
+        // // console.log('*** saveNextAlarm(); cardConfig: ', cardConfig)
+        // console.log('*** saveNextAlarm(); nextAlarmConfig: ', nextAlarmConfig)
+        // const configChanges = Helpers.deepCompareObj(newNextAlarmConfig, nextAlarmConfig);
+        // console.log('*** saveNextAlarm(); configChanges: ', configChanges)
+
+        cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        // console.log('*** saveNextAlarm(); saving: ', dayjs().format('YYYY-MM-DD HH:mm:ss'));
+
         await lovelace.saveConfig(newConfig);
         // Override HA refresh dashboard notification
         window.setTimeout(() => {

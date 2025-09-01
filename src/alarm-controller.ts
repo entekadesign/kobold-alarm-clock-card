@@ -81,7 +81,7 @@ export class AlarmController {
     //     this._saveConfig('next_alarm', keyValue);
     // }
 
-    //TODO: Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
+    //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
     // dismissConfig() {
     //     const momentTomorrow = dayjs().add(1, 'day');
     //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
@@ -89,7 +89,7 @@ export class AlarmController {
     //     this._saveConfig('next_alarm', keyValue);
     // }
 
-    // TODO: snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
+    // snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
     nextAlarmReset(snooze = false) {
         // console.log('*** nextAlarmReset fired');
         let keyValue;
@@ -177,13 +177,11 @@ export class AlarmController {
             const newConfig = structuredClone(lovelace.config);
             const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
             // console.log('*** _saveConfig on controller(); tabGroup: ', tabGroup);
-            let viewIndex;
-            viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-            if (viewIndex === -1) viewIndex = 0;
+            const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
             // console.log('*** _saveConfig on controller(); viewIndex: ', viewIndex);
             // console.log('*** _saveConfig on controller(); newCardConfig: ', newConfig.views[viewIndex]);
 
-            const cardConfig = Helpers.findNested(newConfig.views[viewIndex], 'type', 'custom:kobold-alarm-clock-card');
+            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
             // console.log('*** _saveConfig(); cardConfig: ', cardConfig);
             // console.log('*** _saveConfig(); newConfig: ', newConfig);
             if (cardConfig && cardConfig[key] !== undefined) {
@@ -544,7 +542,7 @@ export class Helpers {
     static updateHeight(element: LovelaceCard): boolean {
         if (this._updateHeightOnNormalCard(element)) return true;
         if (this._updateHeightOnNestedCards(element)) return true;
-        if (this._updateHeightOnMediaControlCards(element)) return true;
+        // if (this._updateHeightOnMediaControlCards(element)) return true;
         return false;
     }
     static _updateHeightOnNormalCard(element: LovelaceCard) {
@@ -569,19 +567,19 @@ export class Helpers {
         }
         return false;
     }
-    static _updateHeightOnMediaControlCards(element: LovelaceCard) {
-        if (!element.getAttribute('type-media-control')) return; // TODO: could not find this attribute anywhere in github for HA frontend; eliminate, modify?
-        if (element.children[0] && element.children[0].shadowRoot) {
-            (element.children[0] as LovelaceCard).style.height = '100%';
-            let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
-            if (bannerTag) {
-                bannerTag.style.boxSizing = "border-box";
-                bannerTag.style.height = "calc(100% - 72px)";
-                return true;
-            }
-        }
-        return false;
-    }
+    // static _updateHeightOnMediaControlCards(element: LovelaceCard) {
+    //     if (!element.getAttribute('type-media-control')) return; // could not find this attribute anywhere in github for HA frontend; eliminate, modify?
+    //     if (element.children[0] && element.children[0].shadowRoot) {
+    //         (element.children[0] as LovelaceCard).style.height = '100%';
+    //         let bannerTag: LovelaceCard = element.children[0].shadowRoot.querySelector('div.banner');
+    //         if (bannerTag) {
+    //             bannerTag.style.boxSizing = "border-box";
+    //             bannerTag.style.height = "calc(100% - 72px)";
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     static defaultConfig: CardConfig = {
         name: "kobold_clock",
