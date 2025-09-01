@@ -2,6 +2,7 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
+//TODO: is next_alarm.nap property necessary? use next_alarm.override instead?
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -4803,11 +4804,26 @@ class $2109a11e0895c6b1$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     </div>`;
     }
     _renderNapEditor() {
-        if (!this._nextAlarmConfig) // console.log('*** rederNapEditor()');
-        this._nextAlarmConfig = {
-            next_alarm: structuredClone(this._config.next_alarm),
-            nap_duration: structuredClone(this._config.nap_duration)
-        };
+        if (!this._nextAlarmConfig) {
+            // console.log('*** rederNapEditor()');
+            this._nextAlarmConfig = {
+                nap_duration: null,
+                next_alarm: null
+            };
+            if (this._config.next_alarm.overridden) {
+                // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
+                const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))()));
+                // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
+                const myDur = {
+                    hours: parseInt(dayDur.format('HH')),
+                    minutes: parseInt(dayDur.format('mm')),
+                    seconds: parseInt(dayDur.format('ss'))
+                };
+                // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
+                this._nextAlarmConfig.nap_duration = myDur;
+            } else this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+        }
         // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
         return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
       <div class="box">
