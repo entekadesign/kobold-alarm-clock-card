@@ -1,5 +1,9 @@
 //TODO: is next_alarm.nap property necessary? use next_alarm.override instead?
-import { AlarmController, Helpers } from './alarm-controller';
+//TODO: use nextAlarmReset method everywhere? combine into set nextAlarm method?
+//TODO: is createNextAlarm checking whether to set alarm today or tomorrow again after already having been checked in nextAlarmReset?
+//TODO: break kobold-card-editor into separate file?
+import { AlarmController } from './alarm-controller';
+import { Helpers } from './helpers';
 import './alarm-picker';
 
 import { LitElement, html, css, PropertyValues } from 'lit';
@@ -96,7 +100,7 @@ class KoboldAlarmClockCard extends LitElement {
   @query('#alarmButtons', true) _alarmButtonsQ: HTMLElement;
   @query('#date', true) _dateQ: HTMLElement;
   @query('ha-card', true) _haCardQ: HTMLElement;
-  @queryAll('div.optionButtons ha-icon') _optionButtonsHostsQ: NodeListOf<HTMLElement>;
+  @queryAll('div.settingsButtons ha-icon') _settingsButtonsHostsQ: NodeListOf<HTMLElement>;
   @query('#extraInfo', true) _extraInfoQ: HTMLElement;
   @query('#alarmTop div#koboldLogo', true) _koboldLogoQ: HTMLElement;
   @query('alarm-picker', true) _alarmPickerQ: HTMLElement;
@@ -204,7 +208,7 @@ class KoboldAlarmClockCard extends LitElement {
 
     return {
       alarm_entities: alarmEntities,
-      ...Helpers.defaultConfig,
+      ...Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
     }
     // return Helpers.defaultConfig;
   }
@@ -279,7 +283,7 @@ class KoboldAlarmClockCard extends LitElement {
               <div id="alarmTop" class="meta">
                 <div id="koboldLogo"></div>
                 <div id="date"></div>
-                <div class="optionButtons">
+                <div class="settingsButtons">
                   <ha-icon id="tab-0" class="settingsButton button" icon="mdi:cog" @click=${this._showEditor}></ha-icon>
                   <ha-icon id="tab-1" class="napButton button" icon="mdi:sleep" @click=${this._showEditor}></ha-icon>
                 </div>
@@ -290,7 +294,7 @@ class KoboldAlarmClockCard extends LitElement {
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
-                        @alarm-button-clicked=${this._showEditor}
+                        @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
                         ></alarm-picker>
@@ -557,7 +561,7 @@ class KoboldAlarmClockCard extends LitElement {
       margin-right: 0;
     }
 
-    .optionButtons {
+    .settingsButtons {
       text-align: right;
       width: 100%;
       margin-right: 1em;
@@ -678,7 +682,7 @@ class KoboldAlarmClockCard extends LitElement {
       display: block;
     }
 
-    :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .optionButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
+    :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
       display: none;
     }
   `;
@@ -767,13 +771,13 @@ class KoboldAlarmClockCard extends LitElement {
       let myStyle: HTMLElement;
 
       //  alarmTop styles
-      if (this._optionButtonsHostsQ) {
-        // const optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
-        const optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
-        this._optionButtonsHostsQ.forEach((optionButtonsHost) => {
+      if (this._settingsButtonsHostsQ) {
+        // const settingsButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+        const settingsButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
+        this._settingsButtonsHostsQ.forEach((settingsButtonsHost) => {
           myStyle = document.createElement('style');
-          myStyle.innerHTML = optionButtonsStyle;
-          optionButtonsHost.shadowRoot.appendChild(myStyle);
+          myStyle.innerHTML = settingsButtonsStyle;
+          settingsButtonsHost.shadowRoot.appendChild(myStyle);
         });
       }
     }
@@ -1058,6 +1062,7 @@ class KoboldAlarmClockCard extends LitElement {
   // }
 
   _toggleHideCards(event) {
+    event.stopPropagation();
     // console.log('*** _toggleHideCards fired');
     if (!this._alarmController.isAlarmRinging() && this._config.cards) {
       // if (!this._config.hide_cards_default) {
@@ -1408,7 +1413,7 @@ class KoboldCardEditor extends LitElement {
   setConfig(config) {
     // console.log('*** Editor setConfig(); config: ', config);
     // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
-    this._config = Helpers.deepMerge(Helpers.defaultConfig, config);
+    this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), config);
     const configChanges = Helpers.deepCompareObj(this._config, config);
     if (!configChanges) return;
     // if (configChanges) {
@@ -1614,7 +1619,7 @@ class KoboldCardEditor extends LitElement {
           // event.detail.value[item] = this._oldConfig[item];
           // event.detail.value[item] = this._config[item];
           // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(Helpers.defaultConfig[item]));
-          event.detail.value[item] = Helpers.defaultConfig[item];
+          event.detail.value[item] = Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }))[item];
           // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._oldConfig[item]));
           // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._config[item]));
         }
@@ -1644,7 +1649,7 @@ class KoboldCardEditor extends LitElement {
     // console.log('*** before value.alarms_enabled: ', event.detail.value.alarms_enabled);
     // console.log('*** before value: ', event.detail.value);
     // console.log('*** before config.next_alarm: ', this._config.next_alarm);
-    this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
+    this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), event.detail.value);
     // console.log('*** after value.alarms_enabled: ', event.detail.value.alarms_enabled);
     // console.log('*** after value: ', event.detail.value);
     // console.log('*** after config.next_alarm: ', this._config.next_alarm);
@@ -1658,12 +1663,13 @@ class KoboldCardEditor extends LitElement {
   }
 
   _valueChangedNap(event) {
+    event.stopPropagation();
     // console.log('*** value: ', event.detail.value);
     if (event.detail.value === undefined) {
       // event.detail.value = this._config.nap_duration;
       // event.detail.value = Helpers.defaultConfig.nap_duration;
       // this._nextAlarmConfig.nap_duration = event.detail.value;
-      this._nextAlarmConfig.nap_duration = Helpers.defaultConfig.nap_duration;
+      this._nextAlarmConfig.nap_duration = Helpers.defaultConfig().nap_duration;
       this._nextAlarmConfig.next_alarm.overridden = false;
       this.requestUpdate();
       // console.log('*** this._nextAlarmConfig.next_alarm.overridden: ', this._nextAlarmConfig.next_alarm.overridden);

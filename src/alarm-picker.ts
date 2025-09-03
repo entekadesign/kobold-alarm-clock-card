@@ -1,4 +1,5 @@
 // import { AlarmConfiguration } from './alarm-controller';
+// import { AlarmController } from './alarm-controller';
 
 import { LitElement, html, css } from 'lit';
 import { property, state, customElement, query } from "lit/decorators.js";
@@ -19,6 +20,7 @@ class AlarmPicker extends LitElement {
 
     @property({ reflect: false }) config: CardConfig;
     // @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
+    // @property({ reflect: false }) alarmController: AlarmController;
     @property({ reflect: false }) nextAlarm: NextAlarmObject;
     @property({ reflect: false }) time: string;
     @property({ reflect: false }) disabled: boolean;
@@ -34,7 +36,7 @@ class AlarmPicker extends LitElement {
         return html`
             <div class="alarm" id="alarmPicker">
                 ${this.getAttribute('show-icon') ? html`
-                    <ha-icon icon=${this._getAlarmPickerIcon(this.nextAlarm)} @click=${this.openSchedule} class="button"></ha-icon>
+                    <ha-icon icon=${this._getScheduleButtonIcon(this.nextAlarm)} @click=${this._openSchedule} class="button"></ha-icon>
                 ` : ''}
 
                 <slot></slot>
@@ -71,7 +73,7 @@ class AlarmPicker extends LitElement {
                     </ha-textfield>
                 </div>
 
-                <ha-switch id="alarmEnabledToggleButton" ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this.toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
+                <ha-switch id="alarmEnabledToggleButton" ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this._toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
 
             </div>
         `;
@@ -270,7 +272,7 @@ class AlarmPicker extends LitElement {
         document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
     }
 
-    _getAlarmPickerIcon(nextAlarm: NextAlarmObject) {
+    _getScheduleButtonIcon(nextAlarm: NextAlarmObject) {
         if (!nextAlarm.enabled) {
             return 'mdi:alarm-off';
         } else if (nextAlarm.snooze) {
@@ -287,7 +289,7 @@ class AlarmPicker extends LitElement {
         this.dispatchEvent(new CustomEvent('nextAlarm-changed', { detail: { nextAlarm: this.nextAlarm } }));
     }
 
-    toggleAlarmEnabled(event: Event) {
+    _toggleAlarmEnabled(event: Event) {
         // const alarm = Object.assign({}, this.alarm);
         this.nextAlarm.enabled = (<HTMLInputElement>event.target).checked;
         // alarm.enabled = (<HTMLInputElement>event.target).checked;
@@ -296,11 +298,12 @@ class AlarmPicker extends LitElement {
         // this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: { time: alarm.time, enabled: alarm.enabled } } }));
     }
 
-    openSchedule() {
-        this.dispatchEvent(new CustomEvent('alarm-button-clicked'));
+    _openSchedule() {
+        this.dispatchEvent(new CustomEvent('schedule-button-clicked'));
     }
 
-    get value() {
-        return this.nextAlarm;
-    }
+    // get value() {
+    //     console.log('*** get value on alarm-picker; returning nextalarm');
+    //     return this.nextAlarm;
+    // }
 }
