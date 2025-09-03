@@ -29,6 +29,12 @@ export class Helpers {
         }
     };
 
+    static DOMAINS_ALARM_ENTITIES = [
+        "input_boolean",
+        "switch",
+        "media_player"
+    ];
+
     static getHa = () => {
         let root: any = document.querySelector('home-assistant');
         return root;

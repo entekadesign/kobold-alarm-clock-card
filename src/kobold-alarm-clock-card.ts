@@ -1,10 +1,10 @@
 //TODO: is next_alarm.nap property necessary? use next_alarm.override instead?
 //TODO: use nextAlarmReset method everywhere? combine into set nextAlarm method?
 //TODO: is createNextAlarm checking whether to set alarm today or tomorrow again after already having been checked in nextAlarmReset?
-//TODO: break kobold-card-editor into separate file?
 import { AlarmController } from './alarm-controller';
 import { Helpers } from './helpers';
 import './alarm-picker';
+import './kobold-card-editor';
 
 import { LitElement, html, css, PropertyValues } from 'lit';
 // import { classMap } from 'lit/directives/class-map.js';
@@ -53,11 +53,11 @@ declare global {
   }
 }
 
-const DOMAINS_ALARM_ENTITIES = [
-  "input_boolean",
-  "switch",
-  "media_player"
-];
+// const DOMAINS_ALARM_ENTITIES = [
+//   "input_boolean",
+//   "switch",
+//   "media_player"
+// ];
 
 window.customCards = window.customCards || [];
 window.customCards.push({
@@ -195,7 +195,7 @@ class KoboldAlarmClockCard extends LitElement {
     const ents = entities.filter((e) => {
       const domain = e.split(".")[0];
       // console.log('*** getStubConfig; domain: ', domain);
-      return DOMAINS_ALARM_ENTITIES.includes(domain);
+      return Helpers.DOMAINS_ALARM_ENTITIES.includes(domain);
     });
     // console.log('*** getStubConfig; ents: ', ents[Math.floor(Math.random() * ents.length)] || "");
     // console.log('*** getStubConfig; ents: ', ents);
@@ -212,480 +212,6 @@ class KoboldAlarmClockCard extends LitElement {
     }
     // return Helpers.defaultConfig;
   }
-
-  render() {
-    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
-    // console.log('*** render(); nextAlarm: ', this._nextAlarm);
-    // console.log('*** render(); nextAlarm.overridden: ', this._nextAlarm.overridden);
-
-    // console.log('*** preview: ', this.preview);
-    // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
-    // console.log('*** render(); alarmClock class: ', this._koboldClockQ?.classList.value);
-
-    // this._alarmClockClasses = this._alarmClockClasses || {};
-    // this._alarmButtonsClasses = this._alarmButtonsClasses || {};
-    // this._footClasses = this._footClasses || {};
-    // this._clockClasses = this._clockClasses || { clock: true };
-
-    // const isAlarmRinging = this._alarmController.isAlarmRinging();
-    // if (isAlarmRinging && !this._ringingBegun) {
-    //   this._ringingBegun = true;
-    //   this._alarmClockClasses = { fullscreen: false };
-    //   this._alarmButtonsClasses = { showButtons: true };
-    //   this._footClasses = { hideFoot: false };
-    // } else if (!isAlarmRinging && this._ringingBegun) {
-    //   this._ringingBegun = false;
-    //   this._alarmButtonsClasses = { showButtons: false };
-    // }
-    // const isAlarmRinging = this._alarmController.isAlarmRinging();
-    // console.log('*** isAlarmRinging: ', isAlarmRinging);
-
-    // if (isAlarmRinging && !this._ringingBegun) {
-    //   this._ringingBegun = true;
-    //   this._alarmButtonsQ.classList.add('showButtons');
-    //   this._koboldClockQ.classList.remove('fullscreen');
-    //   this._footQ.classList.remove('hideFoot');
-    // } else if (!isAlarmRinging && this._ringingBegun) {
-    //   this._ringingBegun = false;
-    //   this._alarmButtonsQ.classList.remove('showButtons');
-    // }
-
-    const isAlarmRinging = this._alarmController.isAlarmRinging();
-
-    // console.log('*** clock: ', this._clockQ);
-    // console.log('*** alarmButtons: ', this._alarmButtonsQ);
-    // console.log('*** isAlarmRinging: ' + isAlarmRinging + '; ringingBegun: ' + this._ringingBegun);
-
-    if (this._clockQ) {
-      if (isAlarmRinging && !this._ringingBegun) {
-        // console.log('*** adding "showButtons" class');
-        this._ringingBegun = true;
-        this._footQ.classList.remove('hideFoot');
-        this._alarmButtonsQ.classList.add('showButtons');
-        this._koboldClockQ.classList.remove('fullscreen');
-      } else if (!isAlarmRinging && this._ringingBegun) {
-        // console.log('*** removing "showButtons" class');
-        this._ringingBegun = false;
-        // allow animations to complete before saving
-        window.setTimeout(() => {
-          this._alarmButtonsQ.classList.remove('showButtons');
-        }, 250);
-        this._koboldClockQ.classList.add('fullscreen');
-        this._footQ.classList.add('hideFoot');
-      }
-    }
-
-    return html`
-        <ha-card>
-          <div>
-
-            <div id="koboldClock">
-              <div id="alarmTop" class="meta">
-                <div id="koboldLogo"></div>
-                <div id="date"></div>
-                <div class="settingsButtons">
-                  <ha-icon id="tab-0" class="settingsButton button" icon="mdi:cog" @click=${this._showEditor}></ha-icon>
-                  <ha-icon id="tab-1" class="napButton button" icon="mdi:sleep" @click=${this._showEditor}></ha-icon>
-                </div>
-                ${this._areAlarmsEnabled() ? html`
-                    <alarm-picker
-                        id="tab-2"
-                        show-icon="true"
-                        .nextAlarm=${this._nextAlarm}
-                        .config=${this._config}
-                        .time=${this._time}
-                        @schedule-button-clicked=${this._showEditor}
-                        @nextAlarm-changed=${this._onAlarmChanged}
-                        @toggle-logo-visibility=${this._toggleLogoVisibility}
-                        ></alarm-picker>
-                  ` : html`
-                  <ha-icon id="tab-2" class="alarmpickerButton button" icon="mdi:alarm"
-                                @click=${this._showEditor}></ha-icon>
-                  ` }
-              </div>
-              <div id="clock" @click=${!this.preview ? this._toggleHideCards : null}>TIME</div>
-            </div>
-          </div>
-        </ha-card>
-
-        <div id="foot">
-          <div id="alarmButtons">
-            <div class="alarmButton button">
-              <button id="snooze" @click=${this._handleAlarmButtonsClick}>Snooze</button>
-            </div>
-            <div class="alarmButton button">
-              <button id="dismiss" @click=${this._handleAlarmButtonsClick}>Dismiss</button>
-            </div>
-          </div>
-
-          <div id="extraInfo">
-              <div class="loading" style="text-align: center;">Loading cards...</div>
-          </div>
-        </div>
-      `;
-  }
-
-  static styles = css`
-
-    /* ************ */
-    /* *** main *** */
-    /* ************ */
-
-    /* narrow screen, container size */
-    /*@media (max-width: 750px) {
-      div#alarmTop > div#koboldLogo {
-        display: none;
-      }
-    }
-    @container (max-width: 750px) {
-      div#alarmTop > div#koboldLogo {
-        display: none;
-      }
-    }*/
-
-    #koboldClock {
-      container-type: inline-size;
-      padding: 1.5rem;
-      height: 65vh;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      opacity: 1;
-      transition: height 240ms, opacity 240ms;
-    }
-
-    #koboldClock.narrow div#koboldLogo {
-      display: none;
-    }
-
-    #koboldClock.fullscreen {
-      height: 100vh;
-    }
-
-    #koboldClock.fullscreen #clock {
-      padding-top: 0;
-    }
-
-    #alarmTop {
-      position: relative;
-      font-size: calc(1rem + 1vh);
-      font-size: calc(0.5cqw + 1em);
-      display: flex;
-      justify-content: space-between;
-      height: 4vh;
-      white-space: nowrap;
-      align-items: center;
-      color: var(--secondary-text-color);
-    }
-
-    #alarmTop div#koboldLogo {
-      background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27175%27%20viewBox%3D%270%200%20198.437%2046.302%27%3E%3Cdefs%3E%3Cpath%20id%3D%27a%27%20d%3D%27M134.532%20279.996h1013.197v243.84H134.532z%27%2F%3E%3C%2Fdefs%3E%3Cg%20aria-label%3D%27KOBOLD%27%20style%3D%27font-size%3A192px%3Bline-height%3A1.25%3Bwhite-space%3Apre%3Bshape-inside%3Aurl%28%23a%29%27%20transform%3D%27translate%28-39.822%2011.568%29%20scale%28.26458%29%27%3E%3Cpath%20d%3D%27M297.007%20381.147v7.723l-36.756%2043.764q9.01%2010.87%2018.307%2022.025%209.439%2011.013%2018.45%2021.739v7.723h-23.17l-33.753-40.331H219.92v40.331h-22.311V381.147h22.31v40.331h20.166q3.29-3.718%206.436-7.58%203.147-3.861%206.436-7.723l20.881-25.028zm232.264%2040.474q0%204.005-1%206.58%202.144%202.717%203.575%206.292%201.43%203.433%201.43%207.151v21.31q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147h77.802q4.291%200%208.153%201.716%203.861%201.573%206.721%204.434%203.004%202.86%204.577%206.722%201.716%203.861%201.716%208.295zM452.47%20461.81h58.352v-18.879H452.47Zm0-41.19h54.347v-17.162H452.47Zm222.958-39.616h22.168v80.806h80.807v22.311H675.428Zm193.22.143q4.434%200%208.295%201.716%203.862%201.573%206.722%204.434%202.86%202.86%204.577%206.722%201.716%203.861%201.716%208.295v60.64q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147Zm-59.496%2080.663h58.352v-58.352h-58.352z%27%20style%3D%27font-family%3AOrbitron%3B-inkscape-font-specification%3AOrbitron%3Bstroke-width%3A.744895%27%20transform%3D%27translate%28-33.794%20-401.053%29%20scale%281.02854%29%27%2F%3E%3Cpath%20d%3D%27M419.64%20675.367A117.536%20117.536%200%200%200%20302.101%20792.9%20117.536%20117.536%200%200%200%20419.64%20910.437%20117.536%20117.536%200%200%200%20537.172%20792.9%20117.536%20117.536%200%200%200%20419.64%20675.367Zm-.71%2012.63%203.237%2036.913%203.195%2036.426h.043l-.032.141.032.346h-.106l-3.132%2014.648-3.237%2015.135-3.237-15.135-3.135-14.648h-.102l.028-.346-.028-.14h.042l3.195-36.427zm-1.728%20106.955-5.173%208.6-5.007%208.322.078.138-.194.06-.05.081-.031-.056-20.703%206.41-20.977%206.496%2016.118-14.916%2015.9-14.722-.032-.057h.095l.148-.14.082.137%209.71-.173z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%2895.652%20-407.931%29%20scale%28.56969%29%27%2F%3E%3Cpath%20d%3D%27M705.391%20675.367A117.536%20117.536%200%200%200%20587.855%20792.9%20117.536%20117.536%200%200%200%20705.39%20910.437%20117.536%20117.536%200%200%200%20822.925%20792.9%20117.536%20117.536%200%200%200%20705.39%20675.367Zm.54%2012.63%203.237%2036.913%203.195%2036.426h.042l-.032.141.032.346h-.106l-3.131%2014.648-3.237%2015.135-3.24-15.135-3.132-14.648h-.102l.028-.346-.028-.14h.042l3.191-36.427zm1.57%20106.856%2010.035.18%209.715.173.077-.138.152.141h.091l-.031.057%2015.9%2014.722%2016.118%2014.916-20.978-6.495-20.699-6.411-.031.056-.05-.08-.197-.06.077-.138-5.007-8.322z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%28185.991%20-407.931%29%20scale%28.56969%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
-
-      height: calc(0.55em + 1vh);
-      height: calc(0.05cqw + 1em);
-      width: 100%;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center center;
-      filter: invert(1) brightness(0.41); /* match --secondary-text-color */
-      position: absolute;
-      display: block;
-    }
-    #alarmTop div#koboldLogo.hidden {
-      display: none;
-    }
-
-    #clock {
-      -webkit-font-smoothing: subpixel-antialiased !important;
-      text-rendering:optimizeLegibility !important;
-      overflow: hidden;
-      transition: padding-top 240ms;
-      padding-top: 0.15em;
-      /*padding-right: 0.05em;*/
-      display: flex;
-      justify-content: center;
-      height: 100%;
-      /*font-size: calc(14vw + 5em);*/
-      /*font-size: 40vh;*/
-      font-size: 18.23em;
-      font-size: calc(14cqw + 5em);
-      /*font-size: 100vh;
-      font-size: 100cqh;*/
-      letter-spacing: -0.02em;
-      /*font-weight: 500;*/
-      align-items: center;
-      white-space-collapse: collapse;
-      text-wrap-mode: nowrap;
-      white-space: nowrap;
-      text-shadow: 0 0 0.04em var(--primary-text-color);
-    }
-    /* Safari before v16 */
-    @supports not (trim-margin: block) {
-      @media not all and (min-resolution: 0.001dpcm) {
-        /* Early Safari: bounding box incorrect when child in vertical writing mode */
-        #clock {
-          padding-right: 0.2em;
-        }
-      }
-    }
-    /*#clock svg {
-      fill: currentColor;
-    }*/
-    #clock .periodName {
-      position: relative;
-      /*bottom: 2.2vh;*/
-      bottom: 0.2em;
-      margin-left: -0.2em;
-      /*font-size: 31%;*/
-      font-size: 0.3em;
-      font-weight: 900 !important;
-      writing-mode: vertical-lr;
-      /*writing-mode: tb;*/ /* SVG 1 syntax */
-      /*glyph-orientation-vertical: 0;*/ /* SVG 1 syntax */
-      text-orientation: upright;
-      letter-spacing: -0.15em;
-    }
-    /* Firefox */
-    @-moz-document url-prefix() {
-      #clock .periodName {
-        letter-spacing: -0.05em;
-      }
-    }
-    /* Safari */
-    @media not all and (min-resolution: 0.001dpcm) {
-      #clock .periodName {
-        letter-spacing: -0.05em;
-      }
-    }
-    #clock .periodName.periodKern {
-      margin-left: -0.3em;
-    }
-    #clock .colonKernL {
-      margin-left: -0.1em;
-    }
-    #clock .colonKernR {
-      margin-right: -0.05em;
-    }
-    #clock .colon {
-      position: relative;
-      /*bottom: 3.3vh;*/
-      bottom: 0.09em;
-    }
-
-    #clock.fontFace1 {
-      font-family: 'noto_sansmedium';
-      /*font-family: 'Noto Sans', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
-      font-style: normal;
-      /*font-variation-settings: 'wdth' 87.5;*/
-      letter-spacing: 0;
-    }
-    #clock.fontFace1 .periodName {
-      /*bottom: 4vh;*/
-      bottom: 0.43em;
-      letter-spacing: -0.5em;
-    }
-    /* Firefox */
-    @-moz-document url-prefix() {
-      #clock.fontFace1 .periodName {
-        bottom: 0.12em;
-        letter-spacing: -0.05em;
-      }
-    }
-    /* Safari */
-    @media not all and (min-resolution: 0.001dpcm) {
-      #clock.fontFace1 .periodName {
-        bottom: 0.12em;
-        letter-spacing: -0.05em;
-      }
-    }
-    /*#clock.fontFace1 .periodName.periodKern {
-      margin-left: -0.5em;
-    }*/
-
-    #clock.fontFace2 {
-      font-family: 'oswald_regularregular';
-      /*font-family: 'Oswald', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
-      font-style: normal;
-      letter-spacing: 0;
-    }
-    #clock.fontFace2 .colonKernL {
-      margin-left: -0.05em;
-    }
-    #clock.fontFace2 .colonKernR {
-      margin-right: 0;
-    }
-    #clock.fontFace2 .periodName {
-      /*bottom: 1.8vh;*/
-      /*letter-spacing: -0.4em;*/
-      letter-spacing: 0;
-    }
-
-    #clock.fontFace3 {
-      font-family: 'ibm_plex_sansmedium';
-      /*font-family: 'IBM Plex Sans', sans-serif;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
-      font-style: normal;
-      letter-spacing: 0;
-    }
-    #clock.fontFace3 .periodName {
-      letter-spacing: -0.4em;
-      /*bottom: 4.5vh;*/
-      bottom: 0.43em;
-    }
-    /* Firefox */
-    @-moz-document url-prefix() {
-      #clock.fontFace3 .periodName {
-        letter-spacing: -0.05em;
-        bottom: 0.19em;
-      }
-    }
-    /* Safari */
-    @media not all and (min-resolution: 0.001dpcm) {
-      #clock.fontFace3 .periodName {
-        letter-spacing: -0.05em;
-        bottom: 0.19em;
-      }
-    }
-    #clock.fontFace3 .colonKernL {
-      margin-left: 0;
-    }
-    #clock.fontFace3 .colonKernR {
-      margin-right: 0;
-    }
-
-    .settingsButtons {
-      text-align: right;
-      width: 100%;
-      margin-right: 1em;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .settingsButton.button {
-      margin: 0 1em;
-    }
-
-    #foot {
-      position: relative;
-      height: 35vh;
-      display: flex;
-      transition: height 240ms;
-    }
-
-     #foot.hideFoot {
-      height: 0;
-      overflow: hidden;
-    }
-
-    #alarmButtons, #extraInfo {
-      justify-content: space-between;
-      box-sizing: border-box;
-      height: 35vh;
-      gap: 10px;
-    }
-
-    #extraInfo {
-      display: flex;
-      position: absolute;
-      width: 100%;
-      top: 0;
-    }
-
-    #alarmButtons {
-      display: none;
-      position: relative;
-      z-index: 8;
-      background: var(--ha-card-background,var(--card-background-color,#fff));
-      flex: auto;
-    }
-
-    #alarmButtons.showButtons {
-      display: flex;
-    }
-
-    #alarmButtons > *, #extraInfo > * {
-      flex: 1 1 0;
-    }
-
-    .button {
-      cursor: pointer;
-    }
-
-    .alarmButton {
-      display: flex;
-      justify-content: center;
-      height: 100%;
-    }
-
-    .alarmButton button {
-      color: black !important;
-      background-color: white;
-      font-size: 4em;
-      font-weight: 900;
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 0 5px -1px white;
-      transition: background-color 120ms;
-      text-shadow: 0 0 5px rgba(0,0,0,0.4);
-    }
-
-    .alarmButton button:hover {
-      background-color: rgba(255,255,255,0.90);
-    }
-
-
-    /* *************** */
-    /* *** preview *** */
-    /* *************** */
-
-    :host([preview]) #koboldClock {
-      height: 65vh;
-    }
-    :host([preview]) #clock {
-      text-shadow: none;
-      font-size: calc(5em + 100%);
-      /*font-size: 10em;*/
-      /*font-size: 12em;*/
-      font-size: calc(5cqw + 5em);
-    }
-    :host([preview]) #clock.seconds {
-      /*font-size: 7em;*/
-    }
-    :host([preview]) #clock .periodName {
-      margin-left: 0.3em;
-      /*bottom: 0.3em;*/
-    }
-    :host([preview]) #clock .periodName.periodKern {
-      margin-left: 0.01em;
-    }
-    :host([preview]) #clock.fontFace3 .periodName.periodKern {
-      margin-left: 0.1em;
-    }
-    :host([preview]) #clock .colon {
-      /*bottom: 0.07em;*/
-    }
-
-    /*:host([preview]) #alarmTop #koboldLogo {
-      filter: invert(1) brightness(0);
-      display: block !important;
-    }*/
-    :host([preview]) div#alarmTop > div#koboldLogo {
-      filter: invert(1) brightness(0);
-      display: block;
-    }
-
-    :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
-      display: none;
-    }
-  `;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
   }
@@ -1155,796 +681,480 @@ class KoboldAlarmClockCard extends LitElement {
     }
     this._clockQ.style.display = 'flex';
   }
-  // end of kobold-alarm-clock-card
-}
-
-@customElement('kobold-card-editor')
-class KoboldCardEditor extends LitElement {
-
-  private _configSchemaSettings = [
-    {
-      name: "alarm_entities",
-      label: "Alarm Ringer Entities",
-      selector: { entity: { multiple: true, filter: { domain: DOMAINS_ALARM_ENTITIES } } },
-    },
-    {
-      name: "time_format",
-      label: "Time Format",
-      selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
-    },
-    {
-      name: "clock_display_font",
-      label: "Clock Display Font",
-      selector: { select: { options: [{ label: "System", value: 0 }, { label: "Noto Sans", value: 1 }, { label: "Oswald", value: 2 }, { label: "IBM Plex Sans", value: 3 }] } },
-    },
-    // {
-    //   name: "hide_cards_default",
-    //   label: "Hide Cards by Default",
-    //   selector: { boolean: {} },
-    // },
-    // {
-    //   type: "grid", schema: [
-    //     {}, { name: "stuff", label: "", selector: { duration: {} } }
-    //   ]
-    // },
-    {
-      name: "snooze_duration_default",
-      label: "Snooze Duration Default",
-      selector: { duration: {} },
-    },
-    {
-      name: "alarm_duration_default",
-      label: "Alarm Duration Default",
-      selector: { duration: {} },
-    },
-    {
-      name: "alarm_actions",
-      label: "Alarm Actions",
-      selector: {
-        object: {
-          label_field: "entity",
-          description_field: "when",
-          multiple: true,
-          fields: {
-            entity: {
-              label: "Alarm Action Entity",
-              selector: { entity: {} },
-              required: true,
-            },
-            when: {
-              label: "Activate Action When",
-              selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "Offset from Alarm Ring Time", value: "offset" }] } },
-              required: true,
-            },
-            offset: {
-              label: "Offset Duration",
-              selector: { duration: {} },
-            },
-            negative: {
-              label: "Offset Negative",
-              selector: { boolean: {} },
-            },
-          }
-        }
-      },
-    },
-    {
-      name: "cards",
-      label: "Cards to Display",
-      selector: {
-        object: {
-          label_field: "entity",
-          multiple: true,
-          fields: {
-            entity: {
-              label: "Card Entity",
-              selector: { entity: {} },
-              required: true,
-            },
-            "": {
-              label: "Card Configuration",
-              selector: { object: {} },
-            }
-          }
-        },
-      }
-    },
-    {
-      name: "debug",
-      label: "Debug Mode",
-      selector: { boolean: {} },
-    },
-  ]
-
-  private _configSchemaSchedule = (alarms_disabled?: boolean) => [
-    {
-      name: "alarms_enabled",
-      label: "Alarms Schedule Enabled",
-      selector: { boolean: {} },
-    },
-    {
-      type: "grid",
-      name: "mo",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(0),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "tu",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(1),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "we",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(2),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "th",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(3),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "fr",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(4),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "sa",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(5),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-    {
-      type: "grid",
-      name: "su",
-      schema: [
-        {
-          name: "enabled",
-          label: this._getDayOfWeek(6),
-          selector: { boolean: {} },
-          disabled: alarms_disabled,
-        },
-        {
-          name: "time",
-          label: "",
-          selector: { time: {} },
-          disabled: alarms_disabled,
-        },
-      ],
-    },
-  ]
-
-  private _oldConfig: CardConfig;
-  // private _injectStylesDone: boolean;
-
-  @state() _hass: HomeAssistant;
-  @state() _config: CardConfig;
-  @state() _selectedTab = 0;
-  @state() _nextAlarmConfig: NextAlarmConfig;
-
-  // @query('hui-dialog-edit-card', true) _editorQ: HTMLElement;
-  // @query('div#editor') _editorQ: HTMLElement;
-
-  constructor() {
-    super();
-    Helpers.fireEvent('kobold-editor', { editorEl: this }, Helpers.getHa());
-  }
-
-  set hass(hass: HomeAssistant) {
-    this._hass = hass;
-  }
-
-  setConfig(config) {
-    // console.log('*** Editor setConfig(); config: ', config);
-    // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
-    this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), config);
-    const configChanges = Helpers.deepCompareObj(this._config, config);
-    if (!configChanges) return;
-    // if (configChanges) {
-    //   // console.log('*** Editor setConfig(); changes v default: ', Helpers.deepCompareObj(configChanges, Helpers.defaultConfig));
-    //   // console.log('*** Editor setConfig(); changes v config: ', Helpers.deepCompareObj(configChanges, config));
-    //   console.log('*** Editor setConfig(); configChanges: ', configChanges);
-    //   // console.log('*** Editor setConfig(); config: ', config);
-    //   console.log('*** Editor setConfig(); this._config: ', Helpers.defaultConfig);
-
-    // }
-    // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    // console.log('*** setConfig on card(); last_updated: ', this._config.last_updated);
-    Helpers.fireEvent('config-changed', { config: this._config }, this); //updates lovelace.config
-    if (!this._oldConfig) this._oldConfig = this._config;
-  }
-
-  protected firstUpdated(_changedProperties: PropertyValues): void {
-    // console.log('*** this._nextAlarmConfig: ', this._nextAlarmConfig);
-    // const saveButton = Helpers.getEditorButtons().querySelectorAll('mwc-button')[1];
-    // if (saveButton) {
-    //   saveButton.addEventListener('click', () => {
-    //     if (this._nextAlarmConfig) {
-    //       const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-    //       if (nextAlarmDiff) {
-    //         this._saveNextAlarm(this._nextAlarmConfig);
-    //       }
-    //     }
-    //   });
-    // } else {
-    //   console.error(`*** Save button not found`);
-    // }
-
-    // console.log('*** editor: ', Helpers.getEditor().shadowRoot.querySelector('hui-card-element-editor').shadowRoot.querySelector('hui-stack-card-editor').shadowRoot.querySelector('hui-card-element-editor').shadowRoot.querySelector('kobold-card-editor').shadowRoot.querySelector('#kobold-card-config'));
-    // console.log('*** this: ', this.shadowRoot);//.querySelector('*'));
-
-    const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
-
-    const myDialog = Helpers.getEditor().shadowRoot.querySelector('ha-dialog');
-    if (myDialog) {
-      myDialog.addEventListener('keydown', (event) => {
-        //https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event#keydown_events_with_ime
-        if (event.isComposing || event.keyCode === 229) {
-          // console.log('*** ignorable key event fired; returning');
-          return;
-        }
-        // console.log('*** key hit: ', event.key);
-        if (event.key === 'Enter') {
-          // console.log('*** saving after key event.');
-          if (editorStyleTag) editorStyleTag.remove();
-          this._handleSaveButton();
-        }
-      });
-    } else {
-      console.error('*** firstUpdated(); Editor dialog not found. Refresh browser');
-      // if (editorStyleTag) editorStyleTag.remove();
-    }
-
-    const cancelButton = Helpers.getHa().shadowRoot.querySelector('hui-dialog-edit-card').shadowRoot.querySelector('ha-icon-button[dialogaction=cancel]');
-    if (cancelButton) {
-      cancelButton.addEventListener('click', (event) => {
-        // console.log('*** event: ', event);
-        if (editorStyleTag) editorStyleTag.remove();
-      });
-    } else {
-      console.error('*** firstUpdated(); Cancel button not found. Refresh browser');
-      // if (editorStyleTag) editorStyleTag.remove();
-    }
-
-    let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
-    if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
-    // console.log('*** editButtons: ', editButtons);
-    if (editButtons.length > 0) {
-      editButtons.forEach(
-        (button, index) => {
-          // ['click', 'keypress'].forEach(event => {
-          //   button.addEventListener(event, function (e, myNextAlarmConfig) {
-          //     if (event === 'click' || e.keyCode === 13) {
-          //       if (Helpers.getLovelace().shadowRoot) {
-          //         Helpers.getLovelace().shadowRoot.querySelector('div > style').remove();
-          //       }
-
-          //       if (index === 1) {
-          //         // console.log('*** this._nextAlarmConfig: ', this._nextAlarmConfig);
-          //         // console.log('*** this._nextAlarmConfig: ', myNextAlarmConfig);
-          //         if (this._nextAlarmConfig) {
-          //           const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-          //           if (nextAlarmDiff) {
-          //             this._saveNextAlarm(this._nextAlarmConfig);
-          //           }
-          //         }
-          //       }
-          //     }
-          //   });
-          // });
-
-          button.addEventListener('click', () => {
-            if (editorStyleTag) editorStyleTag.remove();
-
-            if (index === 1) {
-              // console.log('*** saving after click event');
-              this._handleSaveButton();
-              // if (this._nextAlarmConfig) {
-              //   const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-              //   if (nextAlarmDiff) {
-              //     this._saveNextAlarm(this._nextAlarmConfig);
-              //   }
-              // }
-            }
-          })
-        }
-      );
-    } else {
-      console.error('*** firstUpdated(); Editor buttons not found. Refresh browser');
-      // if (editorStyleTag) editorStyleTag.remove();
-    }
-
-    //   if (Helpers.getPreview()) {
-    //     let myStyle;
-    //     console.log('*** firstUpdated; preview: ', Helpers.getPreview());
-    //     const clockStyle = '#clock { background-color: green !important}; }';
-    //     myStyle = document.createElement('style');
-    //     myStyle.innerHTML = clockStyle;
-    //     let card = Helpers.getPreview().querySelector('kobold-alarm-clock-card');
-    //     if (!card) {
-    //       card = Helpers.getPreview().shadowRoot?.querySelector('kobold-alarm-clock-card');
-    //       if (!card) {
-    //         console.warn('*** firstUpdated(); No card found for preview');
-    //         Helpers.getPreview().style.visibility = 'hidden';
-    //       }
-    //     }
-    //     if (card) card.appendChild(myStyle);
-    //   }
-  }
-
-  protected updated(_changedProperties: PropertyValues): void {
-    //   // console.log('*** updated; changed properties: ', _changedProperties);
-    // if (!this._injectStylesDone) {
-    const formRootHost = this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot;
-    // console.log('*** formRootHost: ', formRootHost);
-
-    if (formRootHost) {
-      if (!formRootHost.querySelector('style#formRoot')) {
-        // if (formRootHost.style.contains('ha-form-grid')) {
-        // console.log('*** style already added');
-        // console.log('*** style: ', formRootHost.querySelector('style'));
-        // this._injectStylesDone = true;
-        // const formStyle = 'ha-form-grid { grid-template-columns: repeat(2, calc(50% - 4px)) !important; }';
-        // const formStyle = 'ha-form-grid { grid-template-columns: auto auto !important; justify-content: end; }';
-        // const formStyle = 'ha-form-grid { grid-template-columns: auto calc(60% - 4px) !important; justify-content: end; }';
-        const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
-        let myStyle = document.createElement('style');
-        myStyle.setAttribute('id', 'formRoot');
-        myStyle.innerHTML = formStyle;
-        formRootHost.appendChild(myStyle);
-      }
-    }
-  }
-
-  _handleSaveButton() {
-    // console.log('*** _handlSaveButton; _nextAlarmConfig: ', this._nextAlarmConfig);
-    // console.log('*** _handlSaveButton; _config.nap_duration: ', this._config.nap_duration);
-    // nextAlarmConfig undefined unless nap settings tab was visited
-    if (this._nextAlarmConfig) {
-      const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-      const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
-      if (nextAlarmDiff || napDurationDiff) {
-        // console.log('*** _handlSaveButton; nextAlarmDiff: ', nextAlarmDiff);
-        // console.log('*** _handlSaveButton; napDurationDiff: ', napDurationDiff);
-        this._saveNextAlarm(this._nextAlarmConfig);
-      }
-    }
-  }
-
-  _getDayOfWeek(days: number) {
-    // returns day of week in language set in set hass() method of card
-    return dayjs('2018-08-27').add(days, 'days').format('dddd');
-  }
-
-  _valueChanged(event: CustomEvent) {
-    event.stopPropagation();
-    if (!this._config) return;
-    // console.log('*** value: ', event.detail.value);
-    const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
-    if (!configChanges) return;
-    // console.log('*** valueChanged(); configChanges: ', configChanges);
-    // console.log('*** valueChanged(); oldConfig: ', this._oldConfig);
-    // console.log('*** valueChanged(); event value: ', event.detail.value);
-    // console.log('*** before: config.snooze_duration_default: ', this._config.snooze_duration_default);
-    // this._config = Helpers.deepMerge(Helpers.defaultConfig, event.detail.value);
-    // this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    // console.log('*** valueChanged(); new config: ', this._config);
-    // const momentTomorrow = dayjs().add(1, 'day');
-    // const dayTomorrow = momentTomorrow.format('dd').toLowerCase();
-    const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
-    const dayToday = dayjs().format('dd').toLowerCase();
-
-    Object.keys(configChanges).forEach(
-      (item) => {
-        // console.log('*** item: ', item);
-        // console.log('*** item.time: ', event.detail.value[item]?.time);
-        // console.log('*** undefined. value: ' + event.detail.value[item] + '; value.time: ' + (event.detail.value[item].time && !event.detail.value[item].time));
-        if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
-          // event.detail.value[item] = this._oldConfig[item];
-          // event.detail.value[item] = this._config[item];
-          // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(Helpers.defaultConfig[item]));
-          event.detail.value[item] = Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }))[item];
-          // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._oldConfig[item]));
-          // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._config[item]));
-        }
-        // update nextAlarm
-        if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
-          // console.log('*** changed item: ', item);
-          // const alarmTomorrow = this._config[dayTomorrow];
-          // const alarmTomorrow = event.detail.value[dayTomorrow];
-
-          const forToday = item === dayToday && dayjs().format('HH:mm:ss') < event.detail.value[item].time;
-          // console.log('*** now: ' + dayjs().add(1, 'minute').format('HH:mm:ss') + ' < ' + event.detail.value[item].time);
-          // console.log('*** forToday: ', forToday);
-          const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
-          // this._config.next_alarm = AlarmController.createNextAlarm(alarmTomorrow); // sometimes undesired: resets overridden, etc
-          // this._config.next_alarm = {
-          event.detail.value.next_alarm = {
-            ...this._config.next_alarm,
-            // ...AlarmController.createNextAlarm(alarmTomorrow),
-            ...AlarmController.createNextAlarm(newAlarm, forToday),
-          }
-          // console.log('*** new next_alarm.enabled: ', event.detail.value.next_alarm);
-        }
-      });
-
-    // this.requestUpdate();
-    // console.log('*** before value.next_alarm: ', event.detail.value.next_alarm);
-    // console.log('*** before value.alarms_enabled: ', event.detail.value.alarms_enabled);
-    // console.log('*** before value: ', event.detail.value);
-    // console.log('*** before config.next_alarm: ', this._config.next_alarm);
-    this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), event.detail.value);
-    // console.log('*** after value.alarms_enabled: ', event.detail.value.alarms_enabled);
-    // console.log('*** after value: ', event.detail.value);
-    // console.log('*** after config.next_alarm: ', this._config.next_alarm);
-    this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    // console.log('*** valueChanged(); last_updated: ', this._config.last_updated);
-
-    this._oldConfig = this._config;
-    // console.log('*** after: config.snooze_duration_default: ', this._config.snooze_duration_default);
-    // console.log('*** config: ', this._config);
-    Helpers.fireEvent('config-changed', { config: this._config }, this);
-  }
-
-  _valueChangedNap(event) {
-    event.stopPropagation();
-    // console.log('*** value: ', event.detail.value);
-    if (event.detail.value === undefined) {
-      // event.detail.value = this._config.nap_duration;
-      // event.detail.value = Helpers.defaultConfig.nap_duration;
-      // this._nextAlarmConfig.nap_duration = event.detail.value;
-      this._nextAlarmConfig.nap_duration = Helpers.defaultConfig().nap_duration;
-      this._nextAlarmConfig.next_alarm.overridden = false;
-      this.requestUpdate();
-      // console.log('*** this._nextAlarmConfig.next_alarm.overridden: ', this._nextAlarmConfig.next_alarm.overridden);
-      // console.log('*** this._config.next_alarm.overridden: ', this._config.next_alarm.overridden);
-      return;
-    }
-
-    // // same as set nextAlarm() in controller (except overridden)? use _setNextalarm below?
-    // const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value));
-    // const nextAlarm = {
-    //   ...this._nextAlarmConfig.next_alarm,
-    //   enabled: true,
-    //   nap: true,
-    //   time: nextAlarmTime.format('HH:mm:ss'),
-    //   date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
-    //   date: nextAlarmTime.format('YYYY-MM-DD'),
-    //   overridden: true
-    // }
-
-    // this._nextAlarmConfig.next_alarm = nextAlarm;
-
-    this._nextAlarmConfig.next_alarm.overridden = true;
-    this._nextAlarmConfig.nap_duration = event.detail.value;
-
-    this.requestUpdate();
-  }
-
-  // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
-  async _saveNextAlarm(nextAlarmConfig) {
-    // console.log('*** saveNextAlarm; overridden: ', nextAlarmConfig.next_alarm.overridden);
-    // console.log('*** saveNextAlarm called');
-    try {
-      const lovelace = Helpers.getLovelace().lovelace;
-      const newConfig = structuredClone(lovelace.config);
-      const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
-      const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-      const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-      if (cardConfig && cardConfig.next_alarm && cardConfig.nap_duration) {
-
-        if (nextAlarmConfig.next_alarm.overridden) {
-          // console.log('*** saveNextAlarm; overridden is true');
-          const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
-          const nextAlarm = {
-            ...this._nextAlarmConfig.next_alarm,
-            enabled: true,
-            nap: true,
-            time: nextAlarmTime.format('HH:mm:ss'),
-            date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
-            date: nextAlarmTime.format('YYYY-MM-DD'),
-            // overridden: true
-          }
-          cardConfig.next_alarm = nextAlarm;
-        } else {
-          //overridden is switched to false: nextAlarmReset
-          // console.log('*** reset alarm');
-
-          const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
-          const dayToday = dayjs().format('dd').toLowerCase();
-          const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
-          const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
-          cardConfig.next_alarm = AlarmController.createNextAlarm(newAlarm, forToday);
-
-
-          // const momentTomorrow = dayjs().add(1, 'day');
-          // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()];
-          // // cardConfig.next_alarm = AlarmController.createNextAlarm(alarmTomorrow);
-          // cardConfig.next_alarm = {
-          //   ...AlarmController.createNextAlarm(alarmTomorrow),
-          //   // overridden: false
-          // };
-        }
-        cardConfig.nap_duration = nextAlarmConfig.nap_duration;
-
-        // const newNextAlarmConfig = { next_alarm: cardConfig.next_alarm, nap_duration: cardConfig.nap_duration };
-        // console.log('*** saveNextAlarm(); newNextAlarmConfig: ', newNextAlarmConfig)
-        // // console.log('*** saveNextAlarm(); cardConfig: ', cardConfig)
-        // console.log('*** saveNextAlarm(); nextAlarmConfig: ', nextAlarmConfig)
-        // const configChanges = Helpers.deepCompareObj(newNextAlarmConfig, nextAlarmConfig);
-        // console.log('*** saveNextAlarm(); configChanges: ', configChanges)
-
-        cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-        // console.log('*** saveNextAlarm(); saving: ', dayjs().format('YYYY-MM-DD HH:mm:ss'));
-
-        await lovelace.saveConfig(newConfig);
-        // Override HA refresh dashboard notification
-        window.setTimeout(() => {
-          Helpers.fireEvent('hass-notification', { message: 'Successfully saved' }, Helpers.getHa());
-        }, 50);
-      } else {
-        throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
-      };
-    } catch (err: any) {
-      alert(`Saving failed: ${err.message}.`);
-      // Override HA successful save notification
-      window.setTimeout(() => {
-        Helpers.fireEvent('hass-notification', { message: 'Saving failed' }, Helpers.getHa());
-      }, 50);
-    }
-  }
-
-  _handleSwitchTab(event) {
-    switch (event.detail.name) {
-      case 'settings':
-        this._selectedTab = 0;
-        break;
-      case 'nap':
-        this._selectedTab = 1;
-        break;
-      case 'schedule':
-        this._selectedTab = 2;
-        break;
-      default:
-        this._selectedTab = 0;
-    }
-  }
 
   render() {
-    if (!this._hass || !this._config) {
-      return html``;
-    }
+    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
+    // console.log('*** render(); nextAlarm: ', this._nextAlarm);
+    // console.log('*** render(); nextAlarm.overridden: ', this._nextAlarm.overridden);
 
-    return html`
-    <div id="kobold-card-config" class="card-config"
-        @kobold-tab=${(event) => { this._selectedTab = event.detail.tab }}
-    >
-        <div class="toolbar">
-          <sl-tab-group
-            @sl-tab-show=${this._handleSwitchTab}
-          >
-            <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
-            <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
-            <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
-          </sl-tab-group>
-        </div>
-        <div id="editor">
-          ${[this._renderSettingsEditor, this._renderNapEditor, this._renderScheduleEditor][
-        this._selectedTab
-      ].bind(this)()}
-        </div>
-    </div>
-    `;
-  }
+    // console.log('*** preview: ', this.preview);
+    // console.log('*** render(); alarmClockClasses: ', this._alarmClockClasses);
+    // console.log('*** render(); alarmClock class: ', this._koboldClockQ?.classList.value);
 
-  _renderSettingsEditor() {
-    // console.log('*** when: ', this._config.alarm_actions);
-    return html`<div class="box">
-      <ha-form
-          .hass=${this._hass}
-          .data=${this._config}
-          .schema=${this._configSchemaSettings}
-          .computeLabel=${(s) => s.label ?? s.name}
-          @value-changed=${this._valueChanged}
-      ></ha-form>
-    </div>`;
-  }
+    // this._alarmClockClasses = this._alarmClockClasses || {};
+    // this._alarmButtonsClasses = this._alarmButtonsClasses || {};
+    // this._footClasses = this._footClasses || {};
+    // this._clockClasses = this._clockClasses || { clock: true };
 
-  _renderNapEditor() {
-    if (!this._nextAlarmConfig) {
-      // console.log('*** rederNapEditor()');
-      this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-      if (this._config.next_alarm.overridden) {
-        // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
-        const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-        // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
-        const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-        // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
-        this._nextAlarmConfig.nap_duration = myDur;
-      } else {
-        this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+    // const isAlarmRinging = this._alarmController.isAlarmRinging();
+    // if (isAlarmRinging && !this._ringingBegun) {
+    //   this._ringingBegun = true;
+    //   this._alarmClockClasses = { fullscreen: false };
+    //   this._alarmButtonsClasses = { showButtons: true };
+    //   this._footClasses = { hideFoot: false };
+    // } else if (!isAlarmRinging && this._ringingBegun) {
+    //   this._ringingBegun = false;
+    //   this._alarmButtonsClasses = { showButtons: false };
+    // }
+    // const isAlarmRinging = this._alarmController.isAlarmRinging();
+    // console.log('*** isAlarmRinging: ', isAlarmRinging);
+
+    // if (isAlarmRinging && !this._ringingBegun) {
+    //   this._ringingBegun = true;
+    //   this._alarmButtonsQ.classList.add('showButtons');
+    //   this._koboldClockQ.classList.remove('fullscreen');
+    //   this._footQ.classList.remove('hideFoot');
+    // } else if (!isAlarmRinging && this._ringingBegun) {
+    //   this._ringingBegun = false;
+    //   this._alarmButtonsQ.classList.remove('showButtons');
+    // }
+
+    const isAlarmRinging = this._alarmController.isAlarmRinging();
+
+    // console.log('*** clock: ', this._clockQ);
+    // console.log('*** alarmButtons: ', this._alarmButtonsQ);
+    // console.log('*** isAlarmRinging: ' + isAlarmRinging + '; ringingBegun: ' + this._ringingBegun);
+
+    if (this._clockQ) {
+      if (isAlarmRinging && !this._ringingBegun) {
+        // console.log('*** adding "showButtons" class');
+        this._ringingBegun = true;
+        this._footQ.classList.remove('hideFoot');
+        this._alarmButtonsQ.classList.add('showButtons');
+        this._koboldClockQ.classList.remove('fullscreen');
+      } else if (!isAlarmRinging && this._ringingBegun) {
+        // console.log('*** removing "showButtons" class');
+        this._ringingBegun = false;
+        // allow animations to complete before saving
+        window.setTimeout(() => {
+          this._alarmButtonsQ.classList.remove('showButtons');
+        }, 250);
+        this._koboldClockQ.classList.add('fullscreen');
+        this._footQ.classList.add('hideFoot');
       }
-      this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
     }
 
-    // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
     return html`
-      <div class="box">
-        <div class="kobold-nap-form">
-          <div class="ha-form-grid">
-            <div class="ha-form">
-              <div class="ha-formfield">
-                <span><p>Nap Duration</p></span>
-                <ha-switch ?checked=${this._nextAlarmConfig.next_alarm.overridden} @change=${() => { this._nextAlarmConfig.next_alarm.overridden = !this._nextAlarmConfig.next_alarm.overridden; this.requestUpdate() }}></ha-switch>
+        <ha-card>
+          <div>
+
+            <div id="koboldClock">
+              <div id="alarmTop" class="meta">
+                <div id="koboldLogo"></div>
+                <div id="date"></div>
+                <div class="settingsButtons">
+                  <ha-icon id="tab-0" class="settingsButton button" icon="mdi:cog" @click=${this._showEditor}></ha-icon>
+                  <ha-icon id="tab-1" class="napButton button" icon="mdi:sleep" @click=${this._showEditor}></ha-icon>
+                </div>
+                ${this._areAlarmsEnabled() ? html`
+                    <alarm-picker
+                        id="tab-2"
+                        show-icon="true"
+                        .nextAlarm=${this._nextAlarm}
+                        .config=${this._config}
+                        .time=${this._time}
+                        @schedule-button-clicked=${this._showEditor}
+                        @nextAlarm-changed=${this._onAlarmChanged}
+                        @toggle-logo-visibility=${this._toggleLogoVisibility}
+                        ></alarm-picker>
+                  ` : html`
+                  <ha-icon id="tab-2" class="alarmpickerButton button" icon="mdi:alarm"
+                                @click=${this._showEditor}></ha-icon>
+                  ` }
               </div>
-            </div>
-            <div class="ha-form">
-              <ha-duration-input
-                .data=${this._nextAlarmConfig.nap_duration}
-                @value-changed=${this._valueChangedNap}
-              ></ha-duration-input>
+              <div id="clock" @click=${!this.preview ? this._toggleHideCards : null}>TIME</div>
             </div>
           </div>
+        </ha-card>
+
+        <div id="foot">
+          <div id="alarmButtons">
+            <div class="alarmButton button">
+              <button id="snooze" @click=${this._handleAlarmButtonsClick}>Snooze</button>
+            </div>
+            <div class="alarmButton button">
+              <button id="dismiss" @click=${this._handleAlarmButtonsClick}>Dismiss</button>
+            </div>
+          </div>
+
+          <div id="extraInfo">
+              <div class="loading" style="text-align: center;">Loading cards...</div>
+          </div>
         </div>
-      </div>`;
+      `;
   }
 
-  _renderScheduleEditor() {
-    // console.log('*** alarms_enabled: ', this._config.alarms_enabled);
-    return html`<div class="box" id="schedule">
-      <ha-form
-        .hass=${this._hass}
-        .data=${this._config}
-        .schema=${this._configSchemaSchedule(!this._config.alarms_enabled)}
-        .computeLabel=${(s) => s.label ?? s.name}
-        @value-changed=${this._valueChanged}
-      ></ha-form>
-    </div>`;
-  };
+  static styles = css`
 
-  static get styles() {
-    return css`
-          sl-tab-group {
-            margin-bottom: 16px;
-          }
+    /* ************ */
+    /* *** main *** */
+    /* ************ */
 
-          sl-tab {
-            flex: 1;
-          }
+    /* narrow screen, container size */
+    /*@media (max-width: 750px) {
+      div#alarmTop > div#koboldLogo {
+        display: none;
+      }
+    }
+    @container (max-width: 750px) {
+      div#alarmTop > div#koboldLogo {
+        display: none;
+      }
+    }*/
 
-          sl-tab::part(base) {
-            width: 100%;
-            justify-content: center;
-          }
+    #koboldClock {
+      container-type: inline-size;
+      padding: 1.5rem;
+      height: 65vh;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 1;
+      transition: height 240ms, opacity 240ms;
+    }
 
-          .box {
-            margin-top: 8px;
-            border: 1px solid var(--divider-color);
-            padding: 12px;
-          }
-          .box .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-            gap: 8px;
-          }
-          .gui-mode-button {
-            margin-right: auto;
-          }
+    #koboldClock.narrow div#koboldLogo {
+      display: none;
+    }
 
-          .kobold-nap-form .ha-form-grid {
-            display: grid !important;
-            /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
-            /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-            /*grid-template-columns: auto auto;*/
-            grid-template-columns: auto 50%;
-            /*grid-template-columns: calc(35% - 4px) auto;*/
-            grid-column-gap: 8px;
-            grid-row-gap: 24px;
-            justify-content: end;
-          }
+    #koboldClock.fullscreen {
+      height: 100vh;
+    }
 
-          .kobold-nap-form .ha-form {
-            display: block;
-          }
+    #koboldClock.fullscreen #clock {
+      padding-top: 0;
+    }
 
-          /*.kobold-nap-form .ha-form {
-            display: inline-block !important;
-            vertical-align: top;
-            width: calc(50% - 4px);
-            margin: 0 0 24px 0;
-          }*/
+    #alarmTop {
+      position: relative;
+      font-size: calc(1rem + 1vh);
+      font-size: calc(0.5cqw + 1em);
+      display: flex;
+      justify-content: space-between;
+      height: 4vh;
+      white-space: nowrap;
+      align-items: center;
+      color: var(--secondary-text-color);
+    }
 
-          .kobold-nap-form .ha-formfield {
-            justify-content: space-between;
-            align-items: var(--ha-formfield-align-items, center);
-            gap: 4px;
-            width: 100%;
-            display: flex;
-            min-height: 56px;
-            align-items: center;
-            --mdc-typography-body2-font-size: 1em;
-          }
+    #alarmTop div#koboldLogo {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27175%27%20viewBox%3D%270%200%20198.437%2046.302%27%3E%3Cdefs%3E%3Cpath%20id%3D%27a%27%20d%3D%27M134.532%20279.996h1013.197v243.84H134.532z%27%2F%3E%3C%2Fdefs%3E%3Cg%20aria-label%3D%27KOBOLD%27%20style%3D%27font-size%3A192px%3Bline-height%3A1.25%3Bwhite-space%3Apre%3Bshape-inside%3Aurl%28%23a%29%27%20transform%3D%27translate%28-39.822%2011.568%29%20scale%28.26458%29%27%3E%3Cpath%20d%3D%27M297.007%20381.147v7.723l-36.756%2043.764q9.01%2010.87%2018.307%2022.025%209.439%2011.013%2018.45%2021.739v7.723h-23.17l-33.753-40.331H219.92v40.331h-22.311V381.147h22.31v40.331h20.166q3.29-3.718%206.436-7.58%203.147-3.861%206.436-7.723l20.881-25.028zm232.264%2040.474q0%204.005-1%206.58%202.144%202.717%203.575%206.292%201.43%203.433%201.43%207.151v21.31q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147h77.802q4.291%200%208.153%201.716%203.861%201.573%206.721%204.434%203.004%202.86%204.577%206.722%201.716%203.861%201.716%208.295zM452.47%20461.81h58.352v-18.879H452.47Zm0-41.19h54.347v-17.162H452.47Zm222.958-39.616h22.168v80.806h80.807v22.311H675.428Zm193.22.143q4.434%200%208.295%201.716%203.862%201.573%206.722%204.434%202.86%202.86%204.577%206.722%201.716%203.861%201.716%208.295v60.64q0%204.434-1.716%208.295-1.717%203.862-4.577%206.722-2.86%202.86-6.722%204.577-3.861%201.573-8.295%201.573h-81.664V381.147Zm-59.496%2080.663h58.352v-58.352h-58.352z%27%20style%3D%27font-family%3AOrbitron%3B-inkscape-font-specification%3AOrbitron%3Bstroke-width%3A.744895%27%20transform%3D%27translate%28-33.794%20-401.053%29%20scale%281.02854%29%27%2F%3E%3Cpath%20d%3D%27M419.64%20675.367A117.536%20117.536%200%200%200%20302.101%20792.9%20117.536%20117.536%200%200%200%20419.64%20910.437%20117.536%20117.536%200%200%200%20537.172%20792.9%20117.536%20117.536%200%200%200%20419.64%20675.367Zm-.71%2012.63%203.237%2036.913%203.195%2036.426h.043l-.032.141.032.346h-.106l-3.132%2014.648-3.237%2015.135-3.237-15.135-3.135-14.648h-.102l.028-.346-.028-.14h.042l3.195-36.427zm-1.728%20106.955-5.173%208.6-5.007%208.322.078.138-.194.06-.05.081-.031-.056-20.703%206.41-20.977%206.496%2016.118-14.916%2015.9-14.722-.032-.057h.095l.148-.14.082.137%209.71-.173z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%2895.652%20-407.931%29%20scale%28.56969%29%27%2F%3E%3Cpath%20d%3D%27M705.391%20675.367A117.536%20117.536%200%200%200%20587.855%20792.9%20117.536%20117.536%200%200%200%20705.39%20910.437%20117.536%20117.536%200%200%200%20822.925%20792.9%20117.536%20117.536%200%200%200%20705.39%20675.367Zm.54%2012.63%203.237%2036.913%203.195%2036.426h.042l-.032.141.032.346h-.106l-3.131%2014.648-3.237%2015.135-3.24-15.135-3.132-14.648h-.102l.028-.346-.028-.14h.042l3.191-36.427zm1.57%20106.856%2010.035.18%209.715.173.077-.138.152.141h.091l-.031.057%2015.9%2014.722%2016.118%2014.916-20.978-6.495-20.699-6.411-.031.056-.05-.08-.197-.06.077-.138-5.007-8.322z%27%20style%3D%27fill%3A%23000%3Bstroke-width%3A.999999%27%20transform%3D%27translate%28185.991%20-407.931%29%20scale%28.56969%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
 
-          .kobold-nap-form p {
-            margin: 0;
-          }
-        `;
-  }
+      height: calc(0.55em + 1vh);
+      height: calc(0.05cqw + 1em);
+      width: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+      filter: invert(1) brightness(0.41); /* match --secondary-text-color */
+      position: absolute;
+      display: block;
+    }
+    #alarmTop div#koboldLogo.hidden {
+      display: none;
+    }
+
+    #clock {
+      -webkit-font-smoothing: subpixel-antialiased !important;
+      text-rendering:optimizeLegibility !important;
+      overflow: hidden;
+      transition: padding-top 240ms;
+      padding-top: 0.15em;
+      /*padding-right: 0.05em;*/
+      display: flex;
+      justify-content: center;
+      height: 100%;
+      /*font-size: calc(14vw + 5em);*/
+      /*font-size: 40vh;*/
+      font-size: 18.23em;
+      font-size: calc(14cqw + 5em);
+      /*font-size: 100vh;
+      font-size: 100cqh;*/
+      letter-spacing: -0.02em;
+      /*font-weight: 500;*/
+      align-items: center;
+      white-space-collapse: collapse;
+      text-wrap-mode: nowrap;
+      white-space: nowrap;
+      text-shadow: 0 0 0.04em var(--primary-text-color);
+    }
+    /* Safari before v16 */
+    @supports not (trim-margin: block) {
+      @media not all and (min-resolution: 0.001dpcm) {
+        /* Early Safari: bounding box incorrect when child in vertical writing mode */
+        #clock {
+          padding-right: 0.2em;
+        }
+      }
+    }
+    /*#clock svg {
+      fill: currentColor;
+    }*/
+    #clock .periodName {
+      position: relative;
+      /*bottom: 2.2vh;*/
+      bottom: 0.2em;
+      margin-left: -0.2em;
+      /*font-size: 31%;*/
+      font-size: 0.3em;
+      font-weight: 900 !important;
+      writing-mode: vertical-lr;
+      /*writing-mode: tb;*/ /* SVG 1 syntax */
+      /*glyph-orientation-vertical: 0;*/ /* SVG 1 syntax */
+      text-orientation: upright;
+      letter-spacing: -0.15em;
+    }
+    /* Firefox */
+    @-moz-document url-prefix() {
+      #clock .periodName {
+        letter-spacing: -0.05em;
+      }
+    }
+    /* Safari */
+    @media not all and (min-resolution: 0.001dpcm) {
+      #clock .periodName {
+        letter-spacing: -0.05em;
+      }
+    }
+    #clock .periodName.periodKern {
+      margin-left: -0.3em;
+    }
+    #clock .colonKernL {
+      margin-left: -0.1em;
+    }
+    #clock .colonKernR {
+      margin-right: -0.05em;
+    }
+    #clock .colon {
+      position: relative;
+      /*bottom: 3.3vh;*/
+      bottom: 0.09em;
+    }
+
+    #clock.fontFace1 {
+      font-family: 'noto_sansmedium';
+      /*font-family: 'Noto Sans', sans-serif;*/
+      /*font-optical-sizing: auto;*/
+      /*font-weight: 600;*/
+      /*font-weight: normal;*/
+      font-style: normal;
+      /*font-variation-settings: 'wdth' 87.5;*/
+      letter-spacing: 0;
+    }
+    #clock.fontFace1 .periodName {
+      /*bottom: 4vh;*/
+      bottom: 0.43em;
+      letter-spacing: -0.5em;
+    }
+    /* Firefox */
+    @-moz-document url-prefix() {
+      #clock.fontFace1 .periodName {
+        bottom: 0.12em;
+        letter-spacing: -0.05em;
+      }
+    }
+    /* Safari */
+    @media not all and (min-resolution: 0.001dpcm) {
+      #clock.fontFace1 .periodName {
+        bottom: 0.12em;
+        letter-spacing: -0.05em;
+      }
+    }
+    /*#clock.fontFace1 .periodName.periodKern {
+      margin-left: -0.5em;
+    }*/
+
+    #clock.fontFace2 {
+      font-family: 'oswald_regularregular';
+      /*font-family: 'Oswald', sans-serif;*/
+      /*font-optical-sizing: auto;*/
+      /*font-weight: 600;*/
+      /*font-weight: normal;*/
+      font-style: normal;
+      letter-spacing: 0;
+    }
+    #clock.fontFace2 .colonKernL {
+      margin-left: -0.05em;
+    }
+    #clock.fontFace2 .colonKernR {
+      margin-right: 0;
+    }
+    #clock.fontFace2 .periodName {
+      /*bottom: 1.8vh;*/
+      /*letter-spacing: -0.4em;*/
+      letter-spacing: 0;
+    }
+
+    #clock.fontFace3 {
+      font-family: 'ibm_plex_sansmedium';
+      /*font-family: 'IBM Plex Sans', sans-serif;*/
+      /*font-weight: 600;*/
+      /*font-weight: normal;*/
+      font-style: normal;
+      letter-spacing: 0;
+    }
+    #clock.fontFace3 .periodName {
+      letter-spacing: -0.4em;
+      /*bottom: 4.5vh;*/
+      bottom: 0.43em;
+    }
+    /* Firefox */
+    @-moz-document url-prefix() {
+      #clock.fontFace3 .periodName {
+        letter-spacing: -0.05em;
+        bottom: 0.19em;
+      }
+    }
+    /* Safari */
+    @media not all and (min-resolution: 0.001dpcm) {
+      #clock.fontFace3 .periodName {
+        letter-spacing: -0.05em;
+        bottom: 0.19em;
+      }
+    }
+    #clock.fontFace3 .colonKernL {
+      margin-left: 0;
+    }
+    #clock.fontFace3 .colonKernR {
+      margin-right: 0;
+    }
+
+    .settingsButtons {
+      text-align: right;
+      width: 100%;
+      margin-right: 1em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .settingsButton.button {
+      margin: 0 1em;
+    }
+
+    #foot {
+      position: relative;
+      height: 35vh;
+      display: flex;
+      transition: height 240ms;
+    }
+
+     #foot.hideFoot {
+      height: 0;
+      overflow: hidden;
+    }
+
+    #alarmButtons, #extraInfo {
+      justify-content: space-between;
+      box-sizing: border-box;
+      height: 35vh;
+      gap: 10px;
+    }
+
+    #extraInfo {
+      display: flex;
+      position: absolute;
+      width: 100%;
+      top: 0;
+    }
+
+    #alarmButtons {
+      display: none;
+      position: relative;
+      z-index: 8;
+      background: var(--ha-card-background,var(--card-background-color,#fff));
+      flex: auto;
+    }
+
+    #alarmButtons.showButtons {
+      display: flex;
+    }
+
+    #alarmButtons > *, #extraInfo > * {
+      flex: 1 1 0;
+    }
+
+    .button {
+      cursor: pointer;
+    }
+
+    .alarmButton {
+      display: flex;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .alarmButton button {
+      color: black !important;
+      background-color: white;
+      font-size: 4em;
+      font-weight: 900;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 5px -1px white;
+      transition: background-color 120ms;
+      text-shadow: 0 0 5px rgba(0,0,0,0.4);
+    }
+
+    .alarmButton button:hover {
+      background-color: rgba(255,255,255,0.90);
+    }
+
+
+    /* *************** */
+    /* *** preview *** */
+    /* *************** */
+
+    :host([preview]) #koboldClock {
+      /*height: 65vh;*/
+      height: 15rem;
+    }
+    :host([preview]) #clock {
+      text-shadow: none;
+      font-size: calc(5em + 100%);
+      /*font-size: 10em;*/
+      /*font-size: 12em;*/
+      font-size: calc(5cqw + 5em);
+    }
+    :host([preview]) #clock.seconds {
+      /*font-size: 7em;*/
+    }
+    :host([preview]) #clock .periodName {
+      margin-left: 0.3em;
+      /*bottom: 0.3em;*/
+    }
+    :host([preview]) #clock .periodName.periodKern {
+      margin-left: 0.01em;
+    }
+    :host([preview]) #clock.fontFace3 .periodName.periodKern {
+      margin-left: 0.1em;
+    }
+    :host([preview]) #clock .colon {
+      /*bottom: 0.07em;*/
+    }
+
+    /*:host([preview]) #alarmTop #koboldLogo {
+      filter: invert(1) brightness(0);
+      display: block !important;
+    }*/
+    :host([preview]) div#alarmTop > div#koboldLogo {
+      filter: invert(1) brightness(0);
+      display: block;
+    }
+
+    :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
+      display: none;
+    }
+  `;
 }
+
