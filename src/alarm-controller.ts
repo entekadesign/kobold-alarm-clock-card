@@ -226,6 +226,8 @@ export class AlarmController {
         const dateToday = dayjs().format('YYYY-MM-DD');
 
         // console.log('*** evaluate(); config: ', this._config);
+        // console.log('*** evaluate(); nextAlarm.date_time: ', nextAlarm.date_time);
+        // console.log('*** evaluate; date test: ', dayjs('2025-09-05 00:00:00').subtract(1, 'minute') > dayjs('2025-09-05 11:00:00'));
 
         // if (dayjs().format('HH:mm') === '23:58' && nextAlarm.date <= dateToday) {
         // if nextAlarm has passed, reset alarm
@@ -237,7 +239,8 @@ export class AlarmController {
         // console.log('*** date today: ', dateToday);
         // console.log('*** nextAlarm time is past: ', dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time);
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
-        if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
+        // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
+        if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             // console.log('*** _evaluate; nextAlarm passed');
             this.nextAlarmReset();
             if (this._config.debug) {
