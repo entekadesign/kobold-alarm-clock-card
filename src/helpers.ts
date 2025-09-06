@@ -5,12 +5,11 @@ import type { LovelaceCard } from "custom-card-helpers";
 
 export class Helpers {
 
-    static defaultConfig = (nextAlarm?): CardConfig => {
+    static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
         return {
             name: "kobold_clock",
             type: "custom:kobold-alarm-clock-card",
             alarms_enabled: false,
-            // next_alarm: { enabled: false, time: "07:00:00", date: dayjs().add(1, 'day').format('YYYY-MM-DD'), date_time: dayjs().add(1, 'day').format('YYYY-MM-DD') + " 07:00:00", overridden: false },
             next_alarm: { ...nextAlarm, overridden: false },
             mo: { enabled: false, time: "07:00:00" },
             tu: { enabled: false, time: "07:00:00" },

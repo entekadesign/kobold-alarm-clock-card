@@ -274,7 +274,8 @@ export class AlarmController {
                 this.dismiss();
             }
             // NOTE: alarm_actions don't execute during nap or snooze
-        } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) {
+            // } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) {
+        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) {
             // console.log('*** _evaluate(); not ringing, no nap, no snooze alarm actions present');
             // this._config.alarm_actions
             //     .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])

@@ -2,9 +2,9 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
-//TODO: is next_alarm.nap property necessary? use next_alarm.override instead?
 //TODO: use nextAlarmReset method everywhere? combine into set nextAlarm method?
 //TODO: is createNextAlarm checking whether to set alarm today or tomorrow again after already having been checked in nextAlarmReset?
+//TODO: move alarm-controller code to card and access config directly everywhere?
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -1065,12 +1065,16 @@ var $8cbe425b16190a93$exports = {};
 
 
 class $1656612fccd2685e$export$4dc2b60021baefca {
-    static #_ = this.defaultConfig = (nextAlarm)=>{
+    static #_ = this.defaultConfig = (nextAlarm = {
+        enabled: false,
+        time: "07:00:00",
+        date: "2013-09-17",
+        date_time: "2013-09-17 07:00:00"
+    })=>{
         return {
             name: "kobold_clock",
             type: "custom:kobold-alarm-clock-card",
             alarms_enabled: false,
-            // next_alarm: { enabled: false, time: "07:00:00", date: dayjs().add(1, 'day').format('YYYY-MM-DD'), date_time: dayjs().add(1, 'day').format('YYYY-MM-DD') + " 07:00:00", overridden: false },
             next_alarm: {
                 ...nextAlarm,
                 overridden: false
@@ -1532,7 +1536,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         {
             if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) // console.log('*** _evaluate(); dismissing ringing automatically');
             this.dismiss();
-        } else if (!nextAlarm.snooze && !nextAlarm.nap && this._config.alarm_actions) // console.log('*** _evaluate(); not ringing, no nap, no snooze alarm actions present');
+        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) // console.log('*** _evaluate(); not ringing, no nap, no snooze alarm actions present');
         // this._config.alarm_actions
         //     .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
         //     .filter(action => dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(Helpers.convertToMinutes(action.when))).format('HH:mm:ss') <= dayjs().format('HH:mm:ss'))
@@ -3057,7 +3061,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                                 required: true
                             },
                             when: {
-                                label: "Activate Action When",
+                                label: "Activate Action",
                                 selector: {
                                     select: {
                                         options: [
@@ -3070,7 +3074,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                                                 value: "on_dismiss"
                                             },
                                             {
-                                                label: "Offset from Alarm Ring Time",
+                                                label: "At Time Offset from Alarm",
                                                 value: "offset"
                                             }
                                         ]
@@ -3560,7 +3564,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     const nextAlarm = {
                         ...this._nextAlarmConfig.next_alarm,
                         enabled: true,
-                        nap: true,
+                        // nap: true,
                         time: nextAlarmTime.format('HH:mm:ss'),
                         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
                         date: nextAlarmTime.format('YYYY-MM-DD')
@@ -4253,7 +4257,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         }
     }
     _areAlarmsEnabled() {
-        return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap;
+        // return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap;
+        return this._config.alarms_enabled || !!this._alarmController.nextAlarm.overridden;
     }
     _onAlarmChanged(event) {
         // this only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js

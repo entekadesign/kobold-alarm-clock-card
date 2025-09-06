@@ -1,6 +1,6 @@
-//TODO: is next_alarm.nap property necessary? use next_alarm.override instead?
 //TODO: use nextAlarmReset method everywhere? combine into set nextAlarm method?
 //TODO: is createNextAlarm checking whether to set alarm today or tomorrow again after already having been checked in nextAlarmReset?
+//TODO: move alarm-controller code to card and access config directly everywhere?
 import { AlarmController } from './alarm-controller';
 import { Helpers } from './helpers';
 import './alarm-picker';
@@ -519,7 +519,8 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _areAlarmsEnabled() {
-    return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap;
+    // return this._config.alarms_enabled || !!this._alarmController.nextAlarm.nap;
+    return this._config.alarms_enabled || !!this._alarmController.nextAlarm.overridden;
   }
 
   _onAlarmChanged(event: CustomEvent) {

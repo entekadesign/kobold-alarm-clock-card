@@ -56,8 +56,8 @@ class KoboldCardEditor extends LitElement {
                             required: true,
                         },
                         when: {
-                            label: "Activate Action When",
-                            selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "Offset from Alarm Ring Time", value: "offset" }] } },
+                            label: "Activate Action",
+                            selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "At Time Offset from Alarm", value: "offset" }] } },
                             required: true,
                         },
                         offset: {
@@ -559,7 +559,7 @@ class KoboldCardEditor extends LitElement {
                     const nextAlarm = {
                         ...this._nextAlarmConfig.next_alarm,
                         enabled: true,
-                        nap: true,
+                        // nap: true,
                         time: nextAlarmTime.format('HH:mm:ss'),
                         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss'),
                         date: nextAlarmTime.format('YYYY-MM-DD'),
