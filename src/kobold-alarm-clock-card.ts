@@ -33,7 +33,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 
-import type { CardConfig, NextAlarmObject, NextAlarmConfig, Duration } from './types';
+import type { CardConfig, NextAlarmObject, KoboldEditor } from './types';
 
 // HA types
 import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
@@ -90,7 +90,7 @@ class KoboldAlarmClockCard extends LitElement {
   // @state() _alarmButtonsClasses: { [key: string]: boolean };
   // @state() _footClasses: { [key: string]: boolean };
   // @state() _clockClasses: { [key: string]: boolean };
-  @state() _koboldEditor: LitElement;
+  @state() _koboldEditor: KoboldEditor;
 
   @property({ type: Boolean, reflect: true }) public preview = false;
 
@@ -187,7 +187,13 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   static getConfigElement() {
+    // console.log('*** getting editor');
     return document.createElement("kobold-card-editor");
+    // const el: any = document.createElement("kobold-card-editor");
+    // el.setAttribute('alarm-controller', this._alarmController);
+    // console.log('*** getConfigElement; this: ', this.preview);
+    // el.controller = this._alarmController;
+    // return el;
   }
 
   static getStubConfig(hass, entities) {
@@ -233,9 +239,9 @@ class KoboldAlarmClockCard extends LitElement {
     // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
     if (!this._alarmController.isAlarmRinging()) {
       // when card starts up, hide cards (prevents flicker during save)
-      this._enforceHideCards(true);
+      this._hideCards(true);
       window.setTimeout(() => {
-        if (!this._config.hide_cards_default && this._config.cards) this._enforceHideCards(false);
+        if (!this._config.hide_cards_default && this._config.cards) this._hideCards(false);
       }, 250);
     }
     this._updateTime();
@@ -328,7 +334,7 @@ class KoboldAlarmClockCard extends LitElement {
       };
     }
 
-    this._config = config;  //TODO: make a copy here?
+    this._config = config;
     // this._config = Helpers.deepMerge(Helpers.defaultConfig, config); //only helpful if inside editor
     // console.log('*** Card setConfig: config: ', this._config);
     // Helpers.fireEvent('config-changed', { config: this._config }, Helpers.getEditor()); //only works inside editor
@@ -396,7 +402,7 @@ class KoboldAlarmClockCard extends LitElement {
         });
     } else {
       // console.log('*** no cards; hiding foot');
-      // this._enforceHideCards(true);
+      // this._hideCards(true);
     }
   }
 
@@ -453,7 +459,7 @@ class KoboldAlarmClockCard extends LitElement {
       (force
         || this._time !== time
         // || this._ringing !== isAlarmRinging
-        // TODO: test if it is possible for these lastupdated variables to come apart now
+        // TODO: test if it is possible for these lastupdated variables to come apart now (maybe testing diff btwn last_updated for config on card and config on controller)
         // || this._controllersAlarmConfigLastUpdate !== this._config.last_updated
       )) {
       this._time = time;
@@ -531,16 +537,24 @@ class KoboldAlarmClockCard extends LitElement {
     // } else {
     //   this._alarmController.nextAlarm = event.detail.nextAlarm;
     // }
-    let data;
-    if (!event.detail.nextAlarm.enabled) {
-      data = { enabled: false, time: event.detail.nextAlarm.time };
-    } else {
-      data = event.detail.nextAlarm;
-    }
-    if (!this._config.hide_cards_default) this._enforceHideCards(true);
+
+    // let data;
+    // if (!event.detail.nextAlarm.enabled) {
+    //   data = { enabled: false, time: event.detail.nextAlarm.time };
+    // } else {
+    //   data = event.detail.nextAlarm;
+    // }
+
+    let data = { enabled: event.detail.nextAlarm.enabled, time: event.detail.nextAlarm.time };
+
+    // hide cards during save to avoid flicker
+    if (!this._config.hide_cards_default) this._hideCards(true);
     // allow animations to complete before saving
     window.setTimeout(() => {
-      this._alarmController.nextAlarm = data;
+      // this._alarmController.nextAlarmOld = data;
+      // console.log('*** onAlarmChanged; data: ', data);
+      // console.log('*** onAlarmChanged; nextAlarm: ', AlarmController.createNextAlarm(data, true, true));
+      this._alarmController.nextAlarm = AlarmController.createNextAlarm(data, true, true);
     }, 250);
   }
 
@@ -604,7 +618,7 @@ class KoboldAlarmClockCard extends LitElement {
       // const state = !this._config.hide_cards_default ? true : false;
       if (!this._config.hide_cards_default) {
         // hiding cards
-        this._enforceHideCards(true);
+        this._hideCards(true);
         // allow animation to complete before saving
         window.setTimeout(() => {
           this._alarmController.hideCardsDefault = true;
@@ -616,7 +630,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _enforceHideCards(hideCards: boolean) {
+  _hideCards(hideCards: boolean) {
     // hide cards requested, not already hiding cards
     if (hideCards && !this._koboldClockQ.classList.contains('fullscreen')) {
       this._koboldClockQ.classList.add('fullscreen');
@@ -676,7 +690,10 @@ class KoboldAlarmClockCard extends LitElement {
       if (rounds === 6) {
         console.warn('*** _showEditor(); Timed out waiting for editor');
       } else {
+        this._koboldEditor.alarmController = this._alarmController;
         Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+        // this._koboldEditor.setAttribute('controller', 'chump'); //this._alarmController);
+        // console.log('*** _showEditor; koboldEditor: ', this._koboldEditor);
         this._koboldEditor = undefined;
       }
     }

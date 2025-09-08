@@ -1,5 +1,6 @@
 // HA types
 import type { LovelaceCardConfig } from "custom-card-helpers";
+import { LitElement } from "lit";
 
 export interface TimeObject {
     enabled: boolean;
@@ -10,7 +11,7 @@ export interface NextAlarmObject extends TimeObject {
     date: string;
     date_time: string;
     snooze?: boolean;
-    nap?: boolean;
+    // nap?: boolean;
     overridden?: boolean;
 }
 
@@ -51,6 +52,10 @@ export interface AlarmActionsObject {
     when: string;
     offset: Duration;
     negative: boolean;
+}
+
+export interface KoboldEditor extends LitElement {
+    alarmController: any;
 }
 
 // export interface RingerEntity {

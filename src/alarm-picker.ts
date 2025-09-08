@@ -18,12 +18,12 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueH: string;
     @state() private _displayedValueM: string;
 
-    @property({ reflect: false }) config: CardConfig;
+    @property({ attribute: false, reflect: false }) config: CardConfig;
     // @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
     // @property({ reflect: false }) alarmController: AlarmController;
-    @property({ reflect: false }) nextAlarm: NextAlarmObject;
-    @property({ reflect: false }) time: string;
-    @property({ reflect: false }) disabled: boolean;
+    @property({ attribute: false, reflect: false }) nextAlarm: NextAlarmObject;
+    @property({ attribute: false, reflect: false }) time: string;
+    @property({ attribute: false, reflect: false }) disabled: boolean;
     // @property({ reflect: false }) preview: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;

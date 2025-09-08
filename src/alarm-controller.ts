@@ -80,7 +80,7 @@ export class AlarmController {
     //         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
     //     }
     //     // console.log('*** time now: ' + dayjs().format('HH:mm:ss') + '; new nextAlarm time: ' + keyValue.time);
-    //     this._saveConfig('next_alarm', keyValue);
+    //     this._saveConfigEntry('next_alarm', keyValue);
     // }
 
     //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
@@ -88,7 +88,7 @@ export class AlarmController {
     //     const momentTomorrow = dayjs().add(1, 'day');
     //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
     //     const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
-    //     this._saveConfig('next_alarm', keyValue);
+    //     this._saveConfigEntry('next_alarm', keyValue);
     // }
 
     // snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
@@ -106,7 +106,7 @@ export class AlarmController {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             }
         } else {
-            // new nextAlarm will set nap, snooze, and overridden to default settings
+            // new nextAlarm will set snooze, and overridden to default settings
             const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
             const dayToday = dayjs().format('dd').toLowerCase();
             const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
@@ -116,32 +116,50 @@ export class AlarmController {
             // const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
             // keyValue = AlarmController.createNextAlarm(alarmTomorrow);
         }
-        this._saveConfig('next_alarm', keyValue);
+        // this._saveConfigEntry('next_alarm', keyValue);
+        this.nextAlarm = keyValue;
         // console.log('*** nextAlarmReset; saving new nextAlarm: ', keyValue);
     }
 
-    static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
+    static createNextAlarm(alarm: TimeObject, forToday = false, overridden = false): NextAlarmObject {
         // console.log('*** createnextalarm fired');
         let alarmDate = dayjs();
         if (!((alarm.time >= alarmDate.format('HH:mm:ss')) && forToday)) {
             alarmDate = alarmDate.add(1, 'day');
         }
 
-        return {
+        let data: NextAlarmObject = {
             ...alarm,
             date: alarmDate.format('YYYY-MM-DD'),
             date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
         }
+
+        if (overridden) data.overridden = true;
+
+        return data;
     }
 
-    set nextAlarm(alarm: TimeObject) {
-        // console.log('*** set nextAlarm on contoller');
-        const forToday = true;
-        const keyValue = {
-            ...AlarmController.createNextAlarm(alarm, forToday),
-            overridden: true
-        };
-        this._saveConfig('next_alarm', keyValue);
+    // set nextAlarmOld(alarm: TimeObject) {
+    //     // console.log('*** set nextAlarmOld on contoller');
+    //     const forToday = true;
+    //     const keyValue = {
+    //         ...AlarmController.createNextAlarm(alarm, forToday),
+    //         overridden: true
+    //     };
+    //     this._saveConfigEntry('next_alarm', keyValue);
+    // }
+
+    // set napDuration(napDuration: Duration) {
+    //     // console.log('*** set nextAlarm on contoller');
+    //     this._saveConfigEntry('nap_duration', napDuration);
+    // }
+
+    set nextAlarm(nextAlarm: NextAlarmObject) {
+        console.log('*** set nextAlarm on contoller; nextAlarm: ', nextAlarm);
+        this._saveConfigEntries({ next_alarm: nextAlarm });
+    }
+    set configEntries(entries: Object) {
+        this._saveConfigEntries(entries);
     }
 
     get nextAlarm(): NextAlarmObject {
@@ -169,33 +187,83 @@ export class AlarmController {
 
     set hideCardsDefault(keyValue) {
         // console.log('*** saving hide_cards_default: ', keyValue);
-        this._saveConfig('hide_cards_default', keyValue);
+        this._saveConfigEntry('hide_cards_default', keyValue);
     }
 
-    async _saveConfig(key, value) {
+    async _saveConfigEntry(key, value) {
         try {
             const lovelace = Helpers.getLovelace().lovelace;
-            // console.log('*** saveConfig(); lovelace: ', lovelace);
-            // console.log('*** saveConfig(); this: ', this);
+            // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
+            // console.log('*** saveConfigEntry(); this: ', this);
             const newConfig = structuredClone(lovelace.config);
             const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
-            // console.log('*** _saveConfig on controller(); tabGroup: ', tabGroup);
+            // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
             const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-            // console.log('*** _saveConfig on controller(); viewIndex: ', viewIndex);
-            // console.log('*** _saveConfig on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+            // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
+            // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
 
             const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-            // console.log('*** _saveConfig(); cardConfig: ', cardConfig);
-            // console.log('*** _saveConfig(); newConfig: ', newConfig);
+            // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
+            // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
             if (cardConfig && cardConfig[key] !== undefined) {
                 cardConfig[key] = value;
-                // console.log('*** saveConfig on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
+                // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-                // console.log('*** saveConfig on controller(); last_updated: ', this._config.last_updated);
-                // console.log('*** saveConfig on controller(); saving newConfig: ', newConfig);
-                // console.log('*** saveConfig on controller(); saving cardConfig: ', cardConfig);
-                // console.log('*** saveConfig on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
-                // console.log('*** saveConfig on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);?
+                // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
+                // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
+                // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
+                // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+                // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
+
+                await lovelace.saveConfig(newConfig);
+
+                Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
+                    .then(() => {
+                        if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
+                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+                        }
+                    }).catch(() => { }); //timed out
+            } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
+        } catch (err: any) {
+            alert(`Saving failed: ${err.message}.`);
+        }
+    }
+
+    async _saveConfigEntries(entries) {
+        try {
+            const lovelace = Helpers.getLovelace().lovelace;
+            // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
+            // console.log('*** saveConfigEntry(); this: ', this);
+            const newConfig = structuredClone(lovelace.config);
+            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+            // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
+            const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+            // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
+            // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+
+            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+            // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
+            // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
+
+            if (cardConfig) {
+                Object.keys(entries).forEach(entry => {
+                    if (cardConfig[entry] !== undefined) {
+                        cardConfig[entry] = entries[entry];
+                    } else {
+                        console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
+                    };
+                });
+                cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+                // if (cardConfig && cardConfig[entry] !== undefined) {
+                // cardConfig[key] = value;
+                // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
+                // cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+                // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
+                // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
+                // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
+                // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+                // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
 
                 await lovelace.saveConfig(newConfig);
 
