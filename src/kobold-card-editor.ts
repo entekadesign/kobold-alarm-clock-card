@@ -437,9 +437,9 @@ class KoboldCardEditor extends LitElement {
         if (this._nextAlarmConfig) {
             const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
             const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
-            console.log('*** handleSaveButton; napDurationDiff: ', napDurationDiff);
-            console.log('*** handleSaveButton; nextAlarmConfig.nap_duration: ', this._nextAlarmConfig.nap_duration);
-            console.log('*** handleSaveButton; config.nap_duration: ', this._config.nap_duration);
+            // console.log('*** handleSaveButton; napDurationDiff: ', napDurationDiff);
+            // console.log('*** handleSaveButton; nextAlarmConfig.nap_duration: ', this._nextAlarmConfig.nap_duration);
+            // console.log('*** handleSaveButton; config.nap_duration: ', this._config.nap_duration);
             if (nextAlarmDiff || napDurationDiff) {
                 // console.log('*** _handlSaveButton; nextAlarmDiff: ', nextAlarmDiff);
                 // console.log('*** _handlSaveButton; napDurationDiff: ', napDurationDiff);
@@ -793,10 +793,14 @@ class KoboldCardEditor extends LitElement {
             //     this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
             // }
 
-            this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-        } else {
+            // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+            // } else {
             // console.log('*** renderNapEditor: nextAlarmConfig: ', this._nextAlarmConfig);
+
+            this._nextAlarmConfig = {
+                next_alarm: structuredClone(this._config.next_alarm),
+                nap_duration: structuredClone(this._config.nap_duration),
+            }
         }
 
         // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);

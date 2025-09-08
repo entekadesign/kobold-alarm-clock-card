@@ -2,9 +2,6 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
-//TODO: use nextAlarmReset method everywhere? combine into set nextAlarm method?
-//TODO: is createNextAlarm checking whether to set alarm today or tomorrow again after already having been checked in nextAlarmReset?
-//TODO: move alarm-controller code to card and access config directly everywhere?
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -1428,14 +1425,14 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     //     // console.log('*** set nextAlarm on contoller');
     //     this._saveConfigEntry('nap_duration', napDuration);
     // }
+    set configEntries(entries) {
+        this._saveConfigEntries(entries);
+    }
     set nextAlarm(nextAlarm) {
-        console.log('*** set nextAlarm on contoller; nextAlarm: ', nextAlarm);
+        // console.log('*** set nextAlarm on contoller; nextAlarm: ', nextAlarm);
         this._saveConfigEntries({
             next_alarm: nextAlarm
         });
-    }
-    set configEntries(entries) {
-        this._saveConfigEntries(entries);
     }
     get nextAlarm() {
         // console.log('*** nextAlarm: ', Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm);
@@ -1460,48 +1457,47 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     }
     set hideCardsDefault(keyValue) {
         // console.log('*** saving hide_cards_default: ', keyValue);
-        this._saveConfigEntry('hide_cards_default', keyValue);
+        // this._saveConfigEntry('hide_cards_default', keyValue);
+        // this._saveConfigEntries({ hide_cards_default: keyValue });
+        this.configEntries = {
+            hide_cards_default: keyValue
+        };
     }
-    async _saveConfigEntry(key, value) {
-        try {
-            const lovelace = (0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().lovelace;
-            // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
-            // console.log('*** saveConfigEntry(); this: ', this);
-            const newConfig = structuredClone(lovelace.config);
-            const tabGroupArry = [
-                ...(0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
-            ];
-            // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
-            const viewIndex = tabGroupArry.findIndex((tab)=>{
-                return tab.hasAttribute('active');
-            });
-            // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
-            // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
-            const cardConfig = (0, $1656612fccd2685e$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-            // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
-            // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
-            if (cardConfig && cardConfig[key] !== undefined) {
-                cardConfig[key] = value;
-                // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
-                cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
-                // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
-                // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
-                // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
-                // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
-                // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
-                await lovelace.saveConfig(newConfig);
-                (0, $1656612fccd2685e$export$4dc2b60021baefca).testUntilTimeout(()=>(0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification(), 5000).then(()=>{
-                    if ((0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification().labelText.includes('dashboard was updated')) (0, $1656612fccd2685e$export$4dc2b60021baefca).fireEvent('hass-notification', {
-                        message: 'Configuration updated'
-                    }, (0, $1656612fccd2685e$export$4dc2b60021baefca).getHa());
-                }).catch(()=>{}); //timed out
-            } else throw {
-                message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
-            };
-        } catch (err) {
-            alert(`Saving failed: ${err.message}.`);
-        }
-    }
+    // async _saveConfigEntry(key, value) {
+    //     try {
+    //         const lovelace = Helpers.getLovelace().lovelace;
+    //         // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
+    //         // console.log('*** saveConfigEntry(); this: ', this);
+    //         const newConfig = structuredClone(lovelace.config);
+    //         const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+    //         // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
+    //         const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+    //         // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
+    //         // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+    //         const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+    //         // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
+    //         // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
+    //         if (cardConfig && cardConfig[key] !== undefined) {
+    //             cardConfig[key] = value;
+    //             // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
+    //             cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    //             // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
+    //             // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
+    //             // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
+    //             // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+    //             // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
+    //             await lovelace.saveConfig(newConfig);
+    //             Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
+    //                 .then(() => {
+    //                     if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
+    //                         Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+    //                     }
+    //                 }).catch(() => { }); //timed out
+    //         } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
+    //     } catch (err: any) {
+    //         alert(`Saving failed: ${err.message}.`);
+    //     }
+    // }
     async _saveConfigEntries(entries) {
         try {
             const lovelace = (0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().lovelace;
@@ -3512,9 +3508,9 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         if (this._nextAlarmConfig) {
             const nextAlarmDiff = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
             const napDurationDiff = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
-            console.log('*** handleSaveButton; napDurationDiff: ', napDurationDiff);
-            console.log('*** handleSaveButton; nextAlarmConfig.nap_duration: ', this._nextAlarmConfig.nap_duration);
-            console.log('*** handleSaveButton; config.nap_duration: ', this._config.nap_duration);
+            // console.log('*** handleSaveButton; napDurationDiff: ', napDurationDiff);
+            // console.log('*** handleSaveButton; nextAlarmConfig.nap_duration: ', this._nextAlarmConfig.nap_duration);
+            // console.log('*** handleSaveButton; config.nap_duration: ', this._config.nap_duration);
             if (nextAlarmDiff || napDurationDiff) // console.log('*** _handlSaveButton; nextAlarmDiff: ', nextAlarmDiff);
             // console.log('*** _handlSaveButton; napDurationDiff: ', napDurationDiff);
             this._saveNextAlarm(this._nextAlarmConfig);
@@ -3836,22 +3832,25 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     </div>`;
     }
     _renderNapEditor() {
-        if (!this._nextAlarmConfig) {
-            // console.log('*** rederNapEditor; nextAlarmConfig undefined');
-            // this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-            // if (this._config.next_alarm.overridden) {
-            //     // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
-            //     const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-            //     // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
-            //     const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-            //     // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
-            //     this._nextAlarmConfig.nap_duration = myDur;
-            // } else {
-            //     this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-            // }
-            this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-        }
+        if (!this._nextAlarmConfig) // console.log('*** rederNapEditor; nextAlarmConfig undefined');
+        // this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
+        // if (this._config.next_alarm.overridden) {
+        //     // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
+        //     const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+        //     // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
+        //     const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+        //     // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
+        //     this._nextAlarmConfig.nap_duration = myDur;
+        // } else {
+        //     this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+        // }
+        // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+        // } else {
+        // console.log('*** renderNapEditor: nextAlarmConfig: ', this._nextAlarmConfig);
+        this._nextAlarmConfig = {
+            next_alarm: structuredClone(this._config.next_alarm),
+            nap_duration: structuredClone(this._config.nap_duration)
+        };
         // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
         return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
       <div class="box">

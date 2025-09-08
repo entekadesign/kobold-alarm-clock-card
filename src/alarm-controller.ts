@@ -154,14 +154,14 @@ export class AlarmController {
     //     this._saveConfigEntry('nap_duration', napDuration);
     // }
 
-    set nextAlarm(nextAlarm: NextAlarmObject) {
-        console.log('*** set nextAlarm on contoller; nextAlarm: ', nextAlarm);
-        this._saveConfigEntries({ next_alarm: nextAlarm });
-    }
     set configEntries(entries: Object) {
         this._saveConfigEntries(entries);
     }
 
+    set nextAlarm(nextAlarm: NextAlarmObject) {
+        // console.log('*** set nextAlarm on contoller; nextAlarm: ', nextAlarm);
+        this._saveConfigEntries({ next_alarm: nextAlarm });
+    }
     get nextAlarm(): NextAlarmObject {
         // console.log('*** nextAlarm: ', Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm);
         // console.log('*** getting nextAlarm before: ', this._config.next_alarm);// new Date().toJSON());
@@ -187,47 +187,49 @@ export class AlarmController {
 
     set hideCardsDefault(keyValue) {
         // console.log('*** saving hide_cards_default: ', keyValue);
-        this._saveConfigEntry('hide_cards_default', keyValue);
+        // this._saveConfigEntry('hide_cards_default', keyValue);
+        // this._saveConfigEntries({ hide_cards_default: keyValue });
+        this.configEntries = { hide_cards_default: keyValue };
     }
 
-    async _saveConfigEntry(key, value) {
-        try {
-            const lovelace = Helpers.getLovelace().lovelace;
-            // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
-            // console.log('*** saveConfigEntry(); this: ', this);
-            const newConfig = structuredClone(lovelace.config);
-            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
-            // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
-            const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-            // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
-            // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
+    // async _saveConfigEntry(key, value) {
+    //     try {
+    //         const lovelace = Helpers.getLovelace().lovelace;
+    //         // console.log('*** saveConfigEntry(); lovelace: ', lovelace);
+    //         // console.log('*** saveConfigEntry(); this: ', this);
+    //         const newConfig = structuredClone(lovelace.config);
+    //         const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+    //         // console.log('*** _saveConfigEntry on controller(); tabGroup: ', tabGroup);
+    //         const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+    //         // console.log('*** _saveConfigEntry on controller(); viewIndex: ', viewIndex);
+    //         // console.log('*** _saveConfigEntry on controller(); newCardConfig: ', newConfig.views[viewIndex]);
 
-            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-            // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
-            // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
-            if (cardConfig && cardConfig[key] !== undefined) {
-                cardConfig[key] = value;
-                // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
-                cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-                // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
-                // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
-                // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
-                // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
-                // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
+    //         const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+    //         // console.log('*** _saveConfigEntry(); cardConfig[key]: ', cardConfig[key]);
+    //         // console.log('*** _saveConfigEntry(); newConfig: ', newConfig);
+    //         if (cardConfig && cardConfig[key] !== undefined) {
+    //             cardConfig[key] = value;
+    //             // console.log('*** saveConfigEntry on controller(); key: ' + JSON.stringify(key) + '; value: ' + JSON.stringify(value));
+    //             cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    //             // console.log('*** saveConfigEntry on controller(); last_updated: ', this._config.last_updated);
+    //             // console.log('*** saveConfigEntry on controller(); saving newConfig: ', newConfig);
+    //             // console.log('*** saveConfigEntry on controller(); saving cardConfig: ', cardConfig);
+    //             // console.log('*** saveConfigEntry on controller(); cardConfig.next_alarm: ', cardConfig.next_alarm);
+    //             // console.log('*** saveConfigEntry on controller(); newConfig.next_alarm: ', Helpers.findNested(newConfig, 'type', 'custom:kobold-alarm-clock-card').next_alarm);
 
-                await lovelace.saveConfig(newConfig);
+    //             await lovelace.saveConfig(newConfig);
 
-                Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
-                    .then(() => {
-                        if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
-                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
-                        }
-                    }).catch(() => { }); //timed out
-            } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
-        } catch (err: any) {
-            alert(`Saving failed: ${err.message}.`);
-        }
-    }
+    //             Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
+    //                 .then(() => {
+    //                     if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
+    //                         Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+    //                     }
+    //                 }).catch(() => { }); //timed out
+    //         } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
+    //     } catch (err: any) {
+    //         alert(`Saving failed: ${err.message}.`);
+    //     }
+    // }
 
     async _saveConfigEntries(entries) {
         try {
