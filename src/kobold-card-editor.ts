@@ -2,7 +2,7 @@ import { Helpers } from './helpers';
 import { AlarmController } from './alarm-controller';
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { state, customElement, property } from "lit/decorators.js";
-import type { CardConfig, NextAlarmConfig, Duration } from './types';
+import type { CardConfig, NextAlarmConfig } from './types';
 // HA types
 import type { HomeAssistant } from "custom-card-helpers";
 
@@ -19,7 +19,7 @@ class KoboldCardEditor extends LitElement {
         {
             name: "alarm_entities",
             label: "Alarm Ringer Entities",
-            selector: { entity: { multiple: true, filter: { domain: Helpers.DOMAINS_ALARM_ENTITIES } } },
+            selector: { entity: { multiple: true, filter: { domain: AlarmController.DOMAINS_ALARM_ENTITIES } } },
         },
         {
             name: "time_format",
@@ -257,10 +257,21 @@ class KoboldCardEditor extends LitElement {
         this._hass = hass;
     }
 
+    // connectedCallback() {
+    //     super.connectedCallback();
+    // }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
+        if (editorStyleTag) editorStyleTag.remove();
+        // console.log('*** disconnectedCallback; editor closed. check that editmode is false? remove editorstyleelement? move all editor style logic to connected and disconnected callbacks?');
+    }
+
     setConfig(config) {
         // console.log('*** Editor setConfig(); config: ', config);
         // console.log('*** Editor setConfig; config nextAlarm overridden: ', config.next_alarm.overridden);
-        this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), config);
+        this._config = Helpers.deepMerge(AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), config);
         const configChanges = Helpers.deepCompareObj(this._config, config);
         if (!configChanges) return;
         // if (configChanges) {
@@ -307,7 +318,7 @@ class KoboldCardEditor extends LitElement {
         // console.log('*** editor: ', Helpers.getEditor().shadowRoot.querySelector('hui-card-element-editor').shadowRoot.querySelector('hui-stack-card-editor').shadowRoot.querySelector('hui-card-element-editor').shadowRoot.querySelector('kobold-card-editor').shadowRoot.querySelector('#kobold-card-config'));
         // console.log('*** this: ', this.shadowRoot);//.querySelector('*'));
 
-        const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
+        // const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
 
         const myDialog = Helpers.getEditor().shadowRoot.querySelector('ha-dialog');
         if (myDialog) {
@@ -320,7 +331,7 @@ class KoboldCardEditor extends LitElement {
                 // console.log('*** key hit: ', event.key);
                 if (event.key === 'Enter') {
                     // console.log('*** saving after key event.');
-                    if (editorStyleTag) editorStyleTag.remove();
+                    // if (editorStyleTag) editorStyleTag.remove();
                     this._handleSaveButton();
                 }
             });
@@ -329,16 +340,16 @@ class KoboldCardEditor extends LitElement {
             // if (editorStyleTag) editorStyleTag.remove();
         }
 
-        const cancelButton = Helpers.getHa().shadowRoot.querySelector('hui-dialog-edit-card').shadowRoot.querySelector('ha-icon-button[dialogaction=cancel]');
-        if (cancelButton) {
-            cancelButton.addEventListener('click', (event) => {
-                // console.log('*** event: ', event);
-                if (editorStyleTag) editorStyleTag.remove();
-            });
-        } else {
-            console.error('*** firstUpdated(); Cancel button not found. Refresh browser');
-            // if (editorStyleTag) editorStyleTag.remove();
-        }
+        // const cancelButton = Helpers.getHa().shadowRoot.querySelector('hui-dialog-edit-card').shadowRoot.querySelector('ha-icon-button[dialogaction=cancel]');
+        // if (cancelButton) {
+        //     cancelButton.addEventListener('click', (event) => {
+        //         // console.log('*** event: ', event);
+        //         if (editorStyleTag) editorStyleTag.remove();
+        //     });
+        // } else {
+        //     console.error('*** firstUpdated(); Cancel button not found. Refresh browser');
+        //     // if (editorStyleTag) editorStyleTag.remove();
+        // }
 
         let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
         if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
@@ -368,7 +379,7 @@ class KoboldCardEditor extends LitElement {
                     // });
 
                     button.addEventListener('click', () => {
-                        if (editorStyleTag) editorStyleTag.remove();
+                        // if (editorStyleTag) editorStyleTag.remove();
 
                         if (index === 1) {
                             // console.log('*** saving after click event');
@@ -480,7 +491,7 @@ class KoboldCardEditor extends LitElement {
                     // event.detail.value[item] = this._oldConfig[item];
                     // event.detail.value[item] = this._config[item];
                     // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(Helpers.defaultConfig[item]));
-                    event.detail.value[item] = Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }))[item];
+                    event.detail.value[item] = AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }))[item];
                     // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._oldConfig[item]));
                     // console.log('*** undefined item: ' + item + '; new value: ' + JSON.stringify(this._config[item]));
                 }
@@ -510,7 +521,7 @@ class KoboldCardEditor extends LitElement {
         // console.log('*** before value.alarms_enabled: ', event.detail.value.alarms_enabled);
         // console.log('*** before value: ', event.detail.value);
         // console.log('*** before config.next_alarm: ', this._config.next_alarm);
-        this._config = Helpers.deepMerge(Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), event.detail.value);
+        this._config = Helpers.deepMerge(AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), event.detail.value);
         // console.log('*** after value.alarms_enabled: ', event.detail.value.alarms_enabled);
         // console.log('*** after value: ', event.detail.value);
         // console.log('*** after config.next_alarm: ', this._config.next_alarm);
@@ -530,7 +541,7 @@ class KoboldCardEditor extends LitElement {
             // event.detail.value = this._config.nap_duration;
             // event.detail.value = Helpers.defaultConfig.nap_duration;
             // this._nextAlarmConfig.nap_duration = event.detail.value;
-            this._nextAlarmConfig.nap_duration = Helpers.defaultConfig().nap_duration;
+            this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig().nap_duration;
             this._nextAlarmConfig.next_alarm.overridden = false;
             this.requestUpdate();
             // console.log('*** this._nextAlarmConfig.next_alarm.overridden: ', this._nextAlarmConfig.next_alarm.overridden);
@@ -611,7 +622,7 @@ class KoboldCardEditor extends LitElement {
     //                 //   // overridden: false
     //                 // };
     //             }
-    //             cardConfig.nap_duration = nextAlarmConfig.nap_duration; //TODO: move this to nextAlarm (e.g., nextAlarm.nap_duration) so only one save needed here
+    //             cardConfig.nap_duration = nextAlarmConfig.nap_duration; // move this to nextAlarm (e.g., nextAlarm.nap_duration) so only one save needed here
 
     //             // const newNextAlarmConfig = { next_alarm: cardConfig.next_alarm, nap_duration: cardConfig.nap_duration };
     //             // console.log('*** saveNextAlarm(); newNextAlarmConfig: ', newNextAlarmConfig)
@@ -692,7 +703,7 @@ class KoboldCardEditor extends LitElement {
                 //   // overridden: false
                 // };
             }
-            // cardConfig.nap_duration = nextAlarmConfig.nap_duration; //TODO: move this to nextAlarm (e.g., nextAlarm.nap_duration) so only one save needed here
+            // cardConfig.nap_duration = nextAlarmConfig.nap_duration; //move this to nextAlarm (e.g., nextAlarm.nap_duration) so only one save needed here
             // this.alarmController.napDuration = nextAlarmConfig.nap_duration;
             this.alarmController.configEntries = { nap_duration: nextAlarmConfig.nap_duration, next_alarm: nextAlarm };
 

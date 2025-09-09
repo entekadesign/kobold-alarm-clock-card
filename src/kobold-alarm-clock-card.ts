@@ -198,7 +198,7 @@ class KoboldAlarmClockCard extends LitElement {
     const ents = entities.filter((e) => {
       const domain = e.split(".")[0];
       // console.log('*** getStubConfig; domain: ', domain);
-      return Helpers.DOMAINS_ALARM_ENTITIES.includes(domain);
+      return AlarmController.DOMAINS_ALARM_ENTITIES.includes(domain);
     });
     // console.log('*** getStubConfig; ents: ', ents[Math.floor(Math.random() * ents.length)] || "");
     // console.log('*** getStubConfig; ents: ', ents);
@@ -211,7 +211,7 @@ class KoboldAlarmClockCard extends LitElement {
 
     return {
       alarm_entities: alarmEntities,
-      ...Helpers.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
+      ...AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
     }
     // return Helpers.defaultConfig;
   }
@@ -462,6 +462,11 @@ class KoboldAlarmClockCard extends LitElement {
       this._time = time;
       // this._ringing = isAlarmRinging;  //TODO: do we need both these variables? seems not; leave for testing
       // this._controllersAlarmConfigLastUpdate = this._config.last_updated;
+      if (this._alarmController.controllerConfigLastUpdated !== this._config.last_updated) {
+        //TODO: testing
+        console.log('*** updateTime; controller config and card config differ');
+        this._hass.callService('system_log', 'write', { 'message': '*** updateTime; controller config and card config differ', 'level': 'info' });
+      }
       // console.log('*** updateTime(); last_updated: ', this._config.last_updated);
 
       let timeDisplay: string;
