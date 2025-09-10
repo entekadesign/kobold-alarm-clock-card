@@ -7,7 +7,7 @@ import { Helpers } from './helpers';
 import type { CardConfig, NextAlarmObject, TimeObject, AlarmActionsObject, Duration } from './types';
 
 // HA types
-import type { HomeAssistant, LovelaceCard } from "custom-card-helpers";
+import type { HomeAssistant } from "custom-card-helpers";
 
 export class AlarmController {
 
@@ -15,24 +15,58 @@ export class AlarmController {
     private _config: CardConfig;
     private _isAlarmRinging: boolean = false;
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
-    private _setAlarmRinging: (state: boolean) => void;
+    // private _throttleAlarmRinging: (state: boolean) => void;
+    // private _throttleNextAlarmReset: () => void;
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
+
+    static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
+        return {
+            name: "kobold_clock",
+            type: "custom:kobold-alarm-clock-card",
+            alarms_enabled: false,
+            next_alarm: { ...nextAlarm, overridden: false },
+            mo: { enabled: false, time: "07:00:00" },
+            tu: { enabled: false, time: "07:00:00" },
+            we: { enabled: false, time: "07:00:00" },
+            th: { enabled: false, time: "07:00:00" },
+            fr: { enabled: false, time: "07:00:00" },
+            sa: { enabled: false, time: "09:00:00" },
+            su: { enabled: false, time: "09:00:00" },
+            snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
+            alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
+            nap_duration: { hours: 0, minutes: 30, seconds: 0 },
+            time_format: "12hr",
+            clock_display_font: 0,
+            hide_cards_default: true,
+            debug: false,
+        }
+    };
+
+    static DOMAINS_ALARM_ENTITIES = [
+        "input_boolean",
+        "switch",
+        "media_player"
+    ];
 
     constructor(config: CardConfig, cardId?: string) {
 
         this._cardId = cardId;
         this._config = config; // TODO: make a copy here?
 
-        this._setAlarmRinging = Helpers.throttle((state) => {
-            if (state) {
-                this._isAlarmRinging = true;
-                this._callAlarmRingingService('turn_on');
-            } else {
-                this._isAlarmRinging = false;
-                this._callAlarmRingingService('turn_off');
-            }
-        }, 1000);
+        // this._throttleNextAlarmReset = Helpers.throttle(() => {
+        //     this.nextAlarmReset();
+        // }, 1000);
+
+        // this._throttleAlarmRinging = Helpers.throttle((state) => {
+        //     if (state) {
+        //         this._isAlarmRinging = true;
+        //         this._callAlarmRingingService('turn_on');
+        //     } else {
+        //         this._isAlarmRinging = false;
+        //         this._callAlarmRingingService('turn_off');
+        //     }
+        // }, 1000);
     }
 
     set hass(hass: HomeAssistant) {
@@ -41,10 +75,10 @@ export class AlarmController {
     }
 
     snooze() {
-        this._setAlarmRinging(false);
+        this._throttleAlarmRinging(false);
         // allow animations to complete before saving
         window.setTimeout(() => {
-            this.nextAlarmReset(true);// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+            this.nextAlarmReset(true);
         }, 250);
         if (this._config.alarm_actions) {
             this._config.alarm_actions
@@ -54,11 +88,11 @@ export class AlarmController {
     }
 
     dismiss() {
-        this._setAlarmRinging(false);
+        this._throttleAlarmRinging(false);
         // console.log('*** dismiss fired');
         // allow animations to complete before saving
         window.setTimeout(() => {
-            this.nextAlarmReset();// TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+            this.nextAlarmReset();
         }, 250);
 
         if (this._config.alarm_actions) {
@@ -91,7 +125,14 @@ export class AlarmController {
     //     this._saveConfigEntry('next_alarm', keyValue);
     // }
 
-    // snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
+    _throttleNextAlarmReset = Helpers.throttle(() => {
+        if (this._config.debug) {
+            console.warn('*** _evaluate(); Resetting nextAlarm');
+            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
+        }
+        this.nextAlarmReset();
+    }, 1000);
+
     nextAlarmReset(snooze = false) {
         // console.log('*** nextAlarmReset fired');
         let keyValue;
@@ -316,11 +357,8 @@ export class AlarmController {
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             // console.log('*** _evaluate; nextAlarm passed');
-            this.nextAlarmReset();
-            if (this._config.debug) {
-                console.warn('*** _evaluate(); Resetting nextAlarm');
-                this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
-            }
+            // TODO: this funciton should be throttled, since sometimes saving update takes time
+            this._throttleNextAlarmReset();
         }
 
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
@@ -340,7 +378,7 @@ export class AlarmController {
         // console.log('*** _evaluate(); snooze: ' + nextAlarm.snooze + '; nap: ' + nextAlarm.nap + '; actions: ' + this._config.alarm_actions);
 
         if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
-            this._setAlarmRinging(true);
+            this._throttleAlarmRinging(true);
         } else if (this.isAlarmRinging()) {
             // dismiss alarm after alarm_duration_default time elapses
             if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
@@ -383,6 +421,16 @@ export class AlarmController {
         this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
     }
 
+    _throttleAlarmRinging = Helpers.throttle((state) => {
+        if (state) {
+            this._isAlarmRinging = true;
+            this._callAlarmRingingService('turn_on');
+        } else {
+            this._isAlarmRinging = false;
+            this._callAlarmRingingService('turn_off');
+        }
+    }, 1000);
+
     _callAlarmRingingService(action: string) {
         if (this._config.debug) {
             this._hass.callService('system_log', 'write', { 'message': '*** _callAlarmRingingService; action: ' + action + '; editor ID: ' + this._cardId, 'level': 'info' });
@@ -412,33 +460,4 @@ export class AlarmController {
             return;
         }
     }
-
-    static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
-        return {
-            name: "kobold_clock",
-            type: "custom:kobold-alarm-clock-card",
-            alarms_enabled: false,
-            next_alarm: { ...nextAlarm, overridden: false },
-            mo: { enabled: false, time: "07:00:00" },
-            tu: { enabled: false, time: "07:00:00" },
-            we: { enabled: false, time: "07:00:00" },
-            th: { enabled: false, time: "07:00:00" },
-            fr: { enabled: false, time: "07:00:00" },
-            sa: { enabled: false, time: "09:00:00" },
-            su: { enabled: false, time: "09:00:00" },
-            snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
-            alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
-            nap_duration: { hours: 0, minutes: 30, seconds: 0 },
-            time_format: "12hr",
-            clock_display_font: 0,
-            hide_cards_default: true,
-            debug: false,
-        }
-    };
-
-    static DOMAINS_ALARM_ENTITIES = [
-        "input_boolean",
-        "switch",
-        "media_player"
-    ];
 }

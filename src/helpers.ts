@@ -5,7 +5,7 @@ import type { LovelaceCard } from "custom-card-helpers";
 
 export class Helpers {
 
-    //TODO: move defaultconfig and domains back to controller?
+    //move defaultconfig and domains back to controller?
     // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
     //     return {
     //         name: "kobold_clock",

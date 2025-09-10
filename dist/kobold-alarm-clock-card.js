@@ -1062,7 +1062,7 @@ var $8cbe425b16190a93$exports = {};
 
 
 class $1656612fccd2685e$export$4dc2b60021baefca {
-    static #_ = //TODO: move defaultconfig and domains back to controller?
+    static #_ = //move defaultconfig and domains back to controller?
     // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
     //     return {
     //         name: "kobold_clock",
@@ -1268,6 +1268,74 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
 
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($8cbe425b16190a93$exports))));
 class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
+    static #_ = this.defaultConfig = (nextAlarm = {
+        enabled: false,
+        time: "07:00:00",
+        date: "2013-09-17",
+        date_time: "2013-09-17 07:00:00"
+    })=>{
+        return {
+            name: "kobold_clock",
+            type: "custom:kobold-alarm-clock-card",
+            alarms_enabled: false,
+            next_alarm: {
+                ...nextAlarm,
+                overridden: false
+            },
+            mo: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            tu: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            we: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            th: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            fr: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            sa: {
+                enabled: false,
+                time: "09:00:00"
+            },
+            su: {
+                enabled: false,
+                time: "09:00:00"
+            },
+            snooze_duration_default: {
+                hours: 0,
+                minutes: 15,
+                seconds: 0
+            },
+            alarm_duration_default: {
+                hours: 0,
+                minutes: 30,
+                seconds: 0
+            },
+            nap_duration: {
+                hours: 0,
+                minutes: 30,
+                seconds: 0
+            },
+            time_format: "12hr",
+            clock_display_font: 0,
+            hide_cards_default: true,
+            debug: false
+        };
+    };
+    static #_2 = this.DOMAINS_ALARM_ENTITIES = [
+        "input_boolean",
+        "switch",
+        "media_player"
+    ];
     constructor(config, cardId){
         this._isAlarmRinging = false;
         this._mappingMediaPlayer = {
@@ -1275,9 +1343,37 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             'turn_off': 'media_pause'
         };
         this._alarmActionsScript = [];
-        this._cardId = cardId;
-        this._config = config; // TODO: make a copy here?
-        this._setAlarmRinging = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle((state)=>{
+        // snoozeConfig(snoozeDuration: Duration) {
+        //     const nextAlarmTime = dayjs().add(dayjs.duration(snoozeDuration));
+        //     const keyValue = {
+        //         overridden: true,
+        //         snooze: true,
+        //         enabled: true,
+        //         time: nextAlarmTime.format('HH:mm:ss'),
+        //         date: nextAlarmTime.format('YYYY-MM-DD'),
+        //         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
+        //     }
+        //     // console.log('*** time now: ' + dayjs().format('HH:mm:ss') + '; new nextAlarm time: ' + keyValue.time);
+        //     this._saveConfigEntry('next_alarm', keyValue);
+        // }
+        //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
+        // dismissConfig() {
+        //     const momentTomorrow = dayjs().add(1, 'day');
+        //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+        //     const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
+        //     this._saveConfigEntry('next_alarm', keyValue);
+        // }
+        this._throttleNextAlarmReset = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle(()=>{
+            if (this._config.debug) {
+                console.warn('*** _evaluate(); Resetting nextAlarm');
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** Resetting nextAlarm',
+                    'level': 'info'
+                });
+            }
+            this.nextAlarmReset();
+        }, 1000);
+        this._throttleAlarmRinging = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle((state)=>{
             if (state) {
                 this._isAlarmRinging = true;
                 this._callAlarmRingingService('turn_on');
@@ -1286,52 +1382,45 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 this._callAlarmRingingService('turn_off');
             }
         }, 1000);
+        this._cardId = cardId;
+        this._config = config; // TODO: make a copy here?
+    // this._throttleNextAlarmReset = Helpers.throttle(() => {
+    //     this.nextAlarmReset();
+    // }, 1000);
+    // this._throttleAlarmRinging = Helpers.throttle((state) => {
+    //     if (state) {
+    //         this._isAlarmRinging = true;
+    //         this._callAlarmRingingService('turn_on');
+    //     } else {
+    //         this._isAlarmRinging = false;
+    //         this._callAlarmRingingService('turn_off');
+    //     }
+    // }, 1000);
     }
     set hass(hass) {
         this._hass = hass;
         this._evaluate();
     }
     snooze() {
-        this._setAlarmRinging(false);
+        this._throttleAlarmRinging(false);
         // allow animations to complete before saving
         window.setTimeout(()=>{
-            this.nextAlarmReset(true); // TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+            this.nextAlarmReset(true);
         }, 250);
         if (this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when === 'on_snooze').forEach((action)=>this._runAction(action));
     }
     dismiss() {
-        this._setAlarmRinging(false);
+        this._throttleAlarmRinging(false);
         // console.log('*** dismiss fired');
         // allow animations to complete before saving
         window.setTimeout(()=>{
-            this.nextAlarmReset(); // TODO: should not refer directly to config, rather to accessors on this controller; same everywhere
+            this.nextAlarmReset();
         }, 250);
         if (this._config.alarm_actions) {
             this._config.alarm_actions.filter((action)=>action.when === 'on_dismiss').forEach((action)=>this._runAction(action));
             this._alarmActionsScript = [];
         }
     }
-    // snoozeConfig(snoozeDuration: Duration) {
-    //     const nextAlarmTime = dayjs().add(dayjs.duration(snoozeDuration));
-    //     const keyValue = {
-    //         overridden: true,
-    //         snooze: true,
-    //         enabled: true,
-    //         time: nextAlarmTime.format('HH:mm:ss'),
-    //         date: nextAlarmTime.format('YYYY-MM-DD'),
-    //         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
-    //     }
-    //     // console.log('*** time now: ' + dayjs().format('HH:mm:ss') + '; new nextAlarm time: ' + keyValue.time);
-    //     this._saveConfigEntry('next_alarm', keyValue);
-    // }
-    //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
-    // dismissConfig() {
-    //     const momentTomorrow = dayjs().add(1, 'day');
-    //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
-    //     const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
-    //     this._saveConfigEntry('next_alarm', keyValue);
-    // }
-    // snoozeconfig and dismissconfig should maybe be setters on this controller, since they modify and save config
     nextAlarmReset(snooze = false) {
         // console.log('*** nextAlarmReset fired');
         let keyValue;
@@ -1531,17 +1620,9 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // console.log('*** nextAlarm time is past: ', dayjs().subtract(1, "minute").format("HH:mm:ss") > nextAlarm.time);
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
-        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) {
-            // console.log('*** _evaluate; nextAlarm passed');
-            this.nextAlarmReset();
-            if (this._config.debug) {
-                console.warn('*** _evaluate(); Resetting nextAlarm');
-                this._hass.callService('system_log', 'write', {
-                    'message': '*** Resetting nextAlarm',
-                    'level': 'info'
-                });
-            }
-        }
+        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) // console.log('*** _evaluate; nextAlarm passed');
+        // TODO: this funciton should be throttled, since sometimes saving update takes time
+        this._throttleNextAlarmReset();
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
         //     return;
         // }
@@ -1552,7 +1633,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         if (!this.isAlarmEnabled) return;
         // console.log('*** _evaluate(); alarm enabled');
         // console.log('*** _evaluate(); snooze: ' + nextAlarm.snooze + '; nap: ' + nextAlarm.nap + '; actions: ' + this._config.alarm_actions);
-        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._setAlarmRinging(true);
+        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
         {
             if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) // console.log('*** _evaluate(); dismissing ringing automatically');
@@ -1611,74 +1692,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             return;
         }
     }
-    static #_ = this.defaultConfig = (nextAlarm = {
-        enabled: false,
-        time: "07:00:00",
-        date: "2013-09-17",
-        date_time: "2013-09-17 07:00:00"
-    })=>{
-        return {
-            name: "kobold_clock",
-            type: "custom:kobold-alarm-clock-card",
-            alarms_enabled: false,
-            next_alarm: {
-                ...nextAlarm,
-                overridden: false
-            },
-            mo: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            tu: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            we: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            th: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            fr: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            sa: {
-                enabled: false,
-                time: "09:00:00"
-            },
-            su: {
-                enabled: false,
-                time: "09:00:00"
-            },
-            snooze_duration_default: {
-                hours: 0,
-                minutes: 15,
-                seconds: 0
-            },
-            alarm_duration_default: {
-                hours: 0,
-                minutes: 30,
-                seconds: 0
-            },
-            nap_duration: {
-                hours: 0,
-                minutes: 30,
-                seconds: 0
-            },
-            time_format: "12hr",
-            clock_display_font: 0,
-            hide_cards_default: true,
-            debug: false
-        };
-    };
-    static #_2 = this.DOMAINS_ALARM_ENTITIES = [
-        "input_boolean",
-        "switch",
-        "media_player"
-    ];
 }
 
 
@@ -4606,7 +4619,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // Helpers.getLovelace().style.filter = 'blur(10px)';
         //  dialogBackground styles
         if ((0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().shadowRoot) {
-            const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 750ms; }';
+            const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
+            // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 750ms; }';
             const myStyle = document.createElement('style');
             myStyle.innerHTML = dialogBackgroundStyle;
             // console.log('*** lovelace style: ', Helpers.getLovelace().shadowRoot.querySelector('div'));
@@ -5102,7 +5116,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
   `;
     constructor(...args){
-        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON(), this.preview = false, this._connectionStatusEvent = (event)=>{
+        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this.preview = false, this._connectionStatusEvent = (event)=>{
             if (event.detail === 'connected') {
                 if (this._config.debug) {
                     this._hass.callService('system_log', 'write', {

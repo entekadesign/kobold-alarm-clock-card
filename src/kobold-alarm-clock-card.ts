@@ -68,7 +68,7 @@ window.customCards.push({
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
 
-  private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toJSON();
+  private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString();
   private _config: CardConfig;
   private _updateLoopId: number;
   private _alarmController: AlarmController;
@@ -669,7 +669,8 @@ class KoboldAlarmClockCard extends LitElement {
     //  dialogBackground styles
 
     if (Helpers.getLovelace().shadowRoot) {
-      const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 750ms; }';
+      const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
+      // const dialogBackgroundStyle = 'hui-view, div.header { opacity: 0; transition: opacity 750ms; }';
       const myStyle = document.createElement('style');
       myStyle.innerHTML = dialogBackgroundStyle;
       // console.log('*** lovelace style: ', Helpers.getLovelace().shadowRoot.querySelector('div'));
