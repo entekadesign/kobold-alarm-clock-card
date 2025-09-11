@@ -357,7 +357,6 @@ export class AlarmController {
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             // console.log('*** _evaluate; nextAlarm passed');
-            // TODO: this funciton should be throttled, since sometimes saving update takes time
             this._throttleNextAlarmReset();
         }
 

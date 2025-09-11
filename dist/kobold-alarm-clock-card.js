@@ -1628,7 +1628,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
         if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) // console.log('*** _evaluate; nextAlarm passed');
-        // TODO: this funciton should be throttled, since sometimes saving update takes time
         this._throttleNextAlarmReset();
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
         //     return;
@@ -2777,7 +2776,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
                 // let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
-                let iconStyle = 'ha-svg-icon { height: calc(1.25rem + 0.5cqw); width: calc(1.25rem + 0.5cqw); }';
+                let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
@@ -3017,8 +3016,10 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
 
        #alarmEnabledToggleButton {
             filter: invert(1);
-            scale: 1.25;
             margin: 0 0.5rem;
+        }
+        :host(:not(.narrow)) #alarmEnabledToggleButton {
+            scale: 1.25;
         }
 
         :host([hide-toggle-button]) #alarmEnabledToggleButton {

@@ -53,7 +53,7 @@ class AlarmPicker extends LitElement {
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
                 // let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
-                let iconStyle = 'ha-svg-icon { height: calc(1.25rem + 0.5cqw); width: calc(1.25rem + 0.5cqw); }';
+                let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
@@ -302,8 +302,10 @@ class AlarmPicker extends LitElement {
 
        #alarmEnabledToggleButton {
             filter: invert(1);
-            scale: 1.25;
             margin: 0 0.5rem;
+        }
+        :host(:not(.narrow)) #alarmEnabledToggleButton {
+            scale: 1.25;
         }
 
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
