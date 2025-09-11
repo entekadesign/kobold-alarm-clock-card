@@ -78,6 +78,15 @@ export class Helpers {
         return root;
     };
 
+
+    static getBackground = () => {
+        let root: any = this.getLovelace();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('hui-view-background');
+        // console.log('*** getBackground(); root: ', root);
+        return root;
+    };
+
     static getDrawer = () => {
         let root: any = this.getHa();
         root = root && root.shadowRoot;

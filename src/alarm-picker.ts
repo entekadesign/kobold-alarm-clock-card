@@ -24,6 +24,7 @@ class AlarmPicker extends LitElement {
     @property({ attribute: false, reflect: false }) nextAlarm: NextAlarmObject;
     @property({ attribute: false, reflect: false }) time: string;
     @property({ attribute: false, reflect: false }) disabled: boolean;
+    @property({ attribute: false, reflect: false }) glow: boolean;
     // @property({ reflect: false }) preview: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;
@@ -40,7 +41,10 @@ class AlarmPicker extends LitElement {
             let myStyle: HTMLElement;
             if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                if (this.glow) {
+                    switchStyle += ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                }
                 myStyle.innerHTML = switchStyle;
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }

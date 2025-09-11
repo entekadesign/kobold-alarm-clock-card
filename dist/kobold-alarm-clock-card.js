@@ -1128,7 +1128,14 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
         // console.log('*** getLovelace(); root: ', root);
         return root;
     };
-    static #_6 = this.getDrawer = ()=>{
+    static #_6 = this.getBackground = ()=>{
+        let root = this.getLovelace();
+        root = root && root.shadowRoot;
+        root = root && root.querySelector('hui-view-background');
+        // console.log('*** getBackground(); root: ', root);
+        return root;
+    };
+    static #_7 = this.getDrawer = ()=>{
         let root = this.getHa();
         root = root && root.shadowRoot;
         root = root && root.querySelector('home-assistant-main');
@@ -1139,7 +1146,7 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
         // console.log('*** getDrawer(); root: ', root);
         return root;
     };
-    static #_7 = this.getNotification = ()=>{
+    static #_8 = this.getNotification = ()=>{
         let root = this.getHa();
         root = root && root.shadowRoot;
         root = root && root.querySelector('notification-manager');
@@ -1148,7 +1155,7 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
         // console.log('*** getNotification(); root: ', root);
         return root;
     };
-    static #_8 = this.fireEvent = (event, detail, element = this.getLovelace())=>{
+    static #_9 = this.fireEvent = (event, detail, element = this.getLovelace())=>{
         element.dispatchEvent(new CustomEvent(event, {
             detail: detail,
             bubbles: true,
@@ -1212,7 +1219,7 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
             }
         };
     }
-    static #_9 = // source: frontend/src/common/config/version.ts
+    static #_10 = // source: frontend/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)
@@ -1221,7 +1228,7 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
         const [haMajor, haMinor, haPatch] = version.split(".", 3);
         return Number(haMajor) > major || Number(haMajor) === major && (patch === undefined ? Number(haMinor) >= minor : Number(haMinor) > minor) || patch !== undefined && Number(haMajor) === major && Number(haMinor) === minor && Number(haPatch) >= patch;
     };
-    static #_10 = this.testUntilTimeout = async (f, timeoutMs)=>{
+    static #_11 = this.testUntilTimeout = async (f, timeoutMs)=>{
         return new Promise((resolve, reject)=>{
             const timeWas = new Date();
             const wait = setInterval(function() {
@@ -2761,7 +2768,8 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             let myStyle;
             if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let switchStyle = 'div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                if (this.glow) switchStyle += ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                 myStyle.innerHTML = switchStyle;
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
@@ -3048,6 +3056,12 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         reflect: false
     })
 ], $3ce236f40c9404d3$var$AlarmPicker.prototype, "disabled", void 0);
+(0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
+    (0, $6bc2845c2b7eed7f$export$d541bacb2bda4494)({
+        attribute: false,
+        reflect: false
+    })
+], $3ce236f40c9404d3$var$AlarmPicker.prototype, "glow", void 0);
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $08419c1b2039b9cc$export$2fa187e846a241c4)('div#alarmPicker.alarm ha-switch')
 ], $3ce236f40c9404d3$var$AlarmPicker.prototype, "_alarmPickerSwitchQ", void 0);
@@ -4248,10 +4262,22 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         };
     // return Helpers.defaultConfig;
     }
-    willUpdate(_changedProperties) {}
+    willUpdate(_changedProperties) {
+        // add glow to elements when background dark
+        var cardBackgroundColor = window.getComputedStyle((0, $1656612fccd2685e$export$4dc2b60021baefca).getBackground())?.getPropertyValue("background-color");
+        const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+        const matches = matchPattern.exec(cardBackgroundColor);
+        if (matches) {
+            const brightness = Math.round((parseInt(matches[1]) * 299 + parseInt(matches[2]) * 587 + parseInt(matches[3]) * 114) / 1000);
+            // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
+            // console.log('*** firstUpdated; brightness of background: ', brightness);
+            if (brightness < 64) this._glow = true;
+            else this._glow = false;
+        }
+    }
     // protected update(_changedProperties: PropertyValues): void {
     //   super.update(_changedProperties);
-    //   console.log('*** update(); changed properties: ', _changedProperties);
+    //   // console.log('*** update(); changed properties: ', _changedProperties);
     // }
     firstUpdated(_changedProperties) {
         // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
@@ -4308,6 +4334,42 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 document.querySelector('body').style.position = 'fixed';
                 document.querySelector('body').style.width = '100%';
             }
+            // // add glow to numerals when background dark
+            // var cardBackgroundColor = window.getComputedStyle(Helpers.getBackground())?.getPropertyValue("background-color");
+            // const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+            // const matches = matchPattern.exec(cardBackgroundColor);
+            // if (matches) {
+            //   const brightness = Math.round(((parseInt(matches[1]) * 299) + (parseInt(matches[2]) * 587) + (parseInt(matches[3]) * 114)) / 1000);
+            //   // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
+            //   // console.log('*** firstUpdated; brightness of background: ', brightness);
+            //   if (brightness < 64) {
+            //     this._glow = true;
+            //     this._clockQ.classList.add('glow');
+            //     this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.add('glow') });
+            //   } else {
+            //     this._clockQ.classList.remove('glow');
+            //     this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('glow') });
+            //   }
+            // }
+            // add glow to numerals and nextAlarm switch when background dark
+            if (this._glow) {
+                this._clockQ.classList.add('glow');
+                this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
+                    button.classList.add('glow');
+                });
+            } else {
+                this._clockQ.classList.remove('glow');
+                this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
+                    button.classList.remove('glow');
+                });
+            }
+            // let myStyle: HTMLElement;
+            // if (this._clockQ) {
+            //   const clockStyle = '';
+            //   myStyle = document.createElement('style');
+            //   myStyle.innerHTML = clockStyle;
+            //   this._clockQ.appendChild(myStyle);
+            // }
             // inject style into mdc form fields
             let myStyle;
             //  alarmTop styles
@@ -4412,9 +4474,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         const fontNum = !this._config.clock_display_font ? '0' : this._config.clock_display_font;
         let clockClass = 'fontFace' + fontNum;
         const showSeconds = false;
-        if (showSeconds) clockClass += ' seconds';
+        // if (showSeconds) clockClass += ',seconds';
         // this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
-        this._clockQ.classList.value = clockClass;
+        // this._clockQ.classList.value = clockClass;
+        if (showSeconds) this._clockQ.classList.add(clockClass, 'seconds');
+        else this._clockQ.classList.add(clockClass);
         const time = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
         const isAlarmRinging = this._alarmController.isAlarmRinging();
         // // console.log('*** isAlarmRinging: ' + isAlarmRinging + '; ringingBegun: ' + this._ringingBegun);
@@ -4723,6 +4787,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
+                        .glow=${this._glow}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
@@ -4846,6 +4911,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       white-space-collapse: collapse;
       text-wrap-mode: nowrap;
       white-space: nowrap;
+    }
+    #clock.glow {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
     /* Safari before v16 */
@@ -5060,13 +5127,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       font-weight: 900;
       width: 100%;
       border-radius: 12px;
-      box-shadow: 0 0 5px -1px white;
       transition: background-color 120ms;
-      text-shadow: 0 0 5px rgba(0,0,0,0.4);
     }
 
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
+    }
+    .alarmButton button.glow {
+      text-shadow: 0 0 5px rgba(0,0,0,0.4);
+      box-shadow: 0 0 5px -1px white;
     }
 
 

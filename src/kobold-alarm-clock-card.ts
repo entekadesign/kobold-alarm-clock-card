@@ -76,6 +76,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _elements: Array<LovelaceCard>;
   private _injectStylesDone: boolean;
   private _cardHelpers: any;
+  private _glow: boolean;
   // private _time: string;
   // private _ringing: boolean;
   // private _controllersAlarmConfigLastUpdate: string;
@@ -217,11 +218,25 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   protected willUpdate(_changedProperties: PropertyValues): void {
+    // add glow to elements when background dark
+    var cardBackgroundColor = window.getComputedStyle(Helpers.getBackground())?.getPropertyValue("background-color");
+    const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+    const matches = matchPattern.exec(cardBackgroundColor);
+    if (matches) {
+      const brightness = Math.round(((parseInt(matches[1]) * 299) + (parseInt(matches[2]) * 587) + (parseInt(matches[3]) * 114)) / 1000);
+      // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
+      // console.log('*** firstUpdated; brightness of background: ', brightness);
+      if (brightness < 64) {
+        this._glow = true;
+      } else {
+        this._glow = false;
+      }
+    }
   }
 
   // protected update(_changedProperties: PropertyValues): void {
   //   super.update(_changedProperties);
-  //   console.log('*** update(); changed properties: ', _changedProperties);
+  //   // console.log('*** update(); changed properties: ', _changedProperties);
   // }
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
@@ -295,6 +310,43 @@ class KoboldAlarmClockCard extends LitElement {
         document.querySelector('body').style.position = 'fixed';
         document.querySelector('body').style.width = '100%';
       }
+
+      // // add glow to numerals when background dark
+      // var cardBackgroundColor = window.getComputedStyle(Helpers.getBackground())?.getPropertyValue("background-color");
+      // const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+      // const matches = matchPattern.exec(cardBackgroundColor);
+      // if (matches) {
+      //   const brightness = Math.round(((parseInt(matches[1]) * 299) + (parseInt(matches[2]) * 587) + (parseInt(matches[3]) * 114)) / 1000);
+      //   // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
+      //   // console.log('*** firstUpdated; brightness of background: ', brightness);
+      //   if (brightness < 64) {
+      //     this._glow = true;
+      //     this._clockQ.classList.add('glow');
+      //     this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.add('glow') });
+      //   } else {
+      //     this._clockQ.classList.remove('glow');
+      //     this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('glow') });
+      //   }
+      // }
+
+      // add glow to numerals and nextAlarm switch when background dark
+      if (this._glow) {
+        this._clockQ.classList.add('glow');
+        this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.add('glow') });
+      } else {
+        this._clockQ.classList.remove('glow');
+        this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('glow') });
+      }
+
+
+      // let myStyle: HTMLElement;
+      // if (this._clockQ) {
+      //   const clockStyle = '';
+      //   myStyle = document.createElement('style');
+      //   myStyle.innerHTML = clockStyle;
+      //   this._clockQ.appendChild(myStyle);
+      // }
+
 
       // inject style into mdc form fields
       let myStyle: HTMLElement;
@@ -430,9 +482,14 @@ class KoboldAlarmClockCard extends LitElement {
     const fontNum = (!this._config.clock_display_font) ? '0' : this._config.clock_display_font;
     let clockClass = 'fontFace' + fontNum;
     const showSeconds = false;
-    if (showSeconds) clockClass += ' seconds';
+    // if (showSeconds) clockClass += ',seconds';
     // this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
-    this._clockQ.classList.value = clockClass;
+    // this._clockQ.classList.value = clockClass;
+    if (showSeconds) {
+      this._clockQ.classList.add(clockClass, 'seconds');
+    } else {
+      this._clockQ.classList.add(clockClass);
+    }
 
     const time = dayjs().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
@@ -784,6 +841,7 @@ class KoboldAlarmClockCard extends LitElement {
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
+                        .glow=${this._glow}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
@@ -908,6 +966,8 @@ class KoboldAlarmClockCard extends LitElement {
       white-space-collapse: collapse;
       text-wrap-mode: nowrap;
       white-space: nowrap;
+    }
+    #clock.glow {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
     /* Safari before v16 */
@@ -1122,13 +1182,15 @@ class KoboldAlarmClockCard extends LitElement {
       font-weight: 900;
       width: 100%;
       border-radius: 12px;
-      box-shadow: 0 0 5px -1px white;
       transition: background-color 120ms;
-      text-shadow: 0 0 5px rgba(0,0,0,0.4);
     }
 
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
+    }
+    .alarmButton button.glow {
+      text-shadow: 0 0 5px rgba(0,0,0,0.4);
+      box-shadow: 0 0 5px -1px white;
     }
 
 
