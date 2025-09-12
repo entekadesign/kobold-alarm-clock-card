@@ -24,7 +24,7 @@ class AlarmPicker extends LitElement {
     @property({ attribute: false, reflect: false }) nextAlarm: NextAlarmObject;
     @property({ attribute: false, reflect: false }) time: string;
     @property({ attribute: false, reflect: false }) disabled: boolean;
-    @property({ attribute: false, reflect: false }) glow: boolean;
+    // @property({ attribute: false, reflect: false }) dark: boolean;
     // @property({ reflect: false }) preview: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;
@@ -39,14 +39,14 @@ class AlarmPicker extends LitElement {
             // let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
             // let pickerOrOptionsDialogStyle = '';
             let myStyle: HTMLElement;
-            if (this._alarmPickerSwitchQ.shadowRoot) {
-                myStyle = document.createElement('style');
-                let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
-                if (this.glow) {
-                    switchStyle += ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+            if (this.config.dark_mode) {
+                if (this._alarmPickerSwitchQ.shadowRoot) {
+                    myStyle = document.createElement('style');
+                    // let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                    const switchStyle = ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                    myStyle.innerHTML = switchStyle;
+                    this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
                 }
-                myStyle.innerHTML = switchStyle;
-                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
             // if (this.id === 'tab-2') {
 
@@ -64,6 +64,8 @@ class AlarmPicker extends LitElement {
             // if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
             //     pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             // }
+
+            // TODO: text color not consistent; should be default unless dark mode
             if (this._alarmTimeInputQ.shadowRoot) {
                 const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
                 const pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
@@ -301,7 +303,7 @@ class AlarmPicker extends LitElement {
         }
 
        #alarmEnabledToggleButton {
-            filter: invert(1);
+            /*filter: invert(1);*/
             margin: 0 0.5rem;
         }
         :host(:not(.narrow)) #alarmEnabledToggleButton {

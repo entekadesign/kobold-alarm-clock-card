@@ -27,6 +27,11 @@ class KoboldCardEditor extends LitElement {
             selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
         },
         {
+            name: "dark_mode",
+            label: "Dark Mode",
+            selector: { boolean: {} },
+        },
+        {
             name: "clock_display_font",
             label: "Clock Display Font",
             selector: { select: { options: [{ label: "System", value: 0 }, { label: "Noto Sans", value: 1 }, { label: "Oswald", value: 2 }, { label: "IBM Plex Sans", value: 3 }] } },

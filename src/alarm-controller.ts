@@ -37,6 +37,7 @@ export class AlarmController {
             alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
             nap_duration: { hours: 0, minutes: 30, seconds: 0 },
             time_format: "12hr",
+            dark_mode: false,
             clock_display_font: 0,
             hide_cards_default: true,
             debug: false,

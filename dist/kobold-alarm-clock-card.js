@@ -1333,6 +1333,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 seconds: 0
             },
             time_format: "12hr",
+            dark_mode: false,
             clock_display_font: 0,
             hide_cards_default: true,
             debug: false
@@ -2765,12 +2766,14 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             // let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
             // let pickerOrOptionsDialogStyle = '';
             let myStyle;
-            if (this._alarmPickerSwitchQ.shadowRoot) {
-                myStyle = document.createElement('style');
-                let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
-                if (this.glow) switchStyle += ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
-                myStyle.innerHTML = switchStyle;
-                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
+            if (this.config.dark_mode) {
+                if (this._alarmPickerSwitchQ.shadowRoot) {
+                    myStyle = document.createElement('style');
+                    // let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                    const switchStyle = ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                    myStyle.innerHTML = switchStyle;
+                    this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
+                }
             }
             // if (this.id === 'tab-2') {
             if (this._iconButtonQ.shadowRoot) {
@@ -2786,6 +2789,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             // if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
             //     pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             // }
+            // TODO: text color not consistent; should be default unless dark mode
             if (this._alarmTimeInputQ.shadowRoot) {
                 const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
                 const pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
@@ -3015,7 +3019,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         }
 
        #alarmEnabledToggleButton {
-            filter: invert(1);
+            /*filter: invert(1);*/
             margin: 0 0.5rem;
         }
         :host(:not(.narrow)) #alarmEnabledToggleButton {
@@ -3057,12 +3061,6 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         reflect: false
     })
 ], $3ce236f40c9404d3$var$AlarmPicker.prototype, "disabled", void 0);
-(0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
-    (0, $6bc2845c2b7eed7f$export$d541bacb2bda4494)({
-        attribute: false,
-        reflect: false
-    })
-], $3ce236f40c9404d3$var$AlarmPicker.prototype, "glow", void 0);
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $08419c1b2039b9cc$export$2fa187e846a241c4)('div#alarmPicker.alarm ha-switch')
 ], $3ce236f40c9404d3$var$AlarmPicker.prototype, "_alarmPickerSwitchQ", void 0);
@@ -3123,6 +3121,13 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                             }
                         ]
                     }
+                }
+            },
+            {
+                name: "dark_mode",
+                label: "Dark Mode",
+                selector: {
+                    boolean: {}
                 }
             },
             {
@@ -4264,17 +4269,20 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     // return Helpers.defaultConfig;
     }
     willUpdate(_changedProperties) {
-        // add glow to elements when background dark
-        var cardBackgroundColor = window.getComputedStyle((0, $1656612fccd2685e$export$4dc2b60021baefca).getBackground())?.getPropertyValue("background-color");
-        const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-        const matches = matchPattern.exec(cardBackgroundColor);
-        if (matches) {
-            const brightness = Math.round((parseInt(matches[1]) * 299 + parseInt(matches[2]) * 587 + parseInt(matches[3]) * 114) / 1000);
-            // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
-            // console.log('*** firstUpdated; brightness of background: ', brightness);
-            if (brightness < 64) this._glow = true;
-            else this._glow = false;
-        }
+    // add glow to elements when background dark
+    // var cardBackgroundColor = window.getComputedStyle(Helpers.getBackground())?.getPropertyValue("background-color");
+    // const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+    // const matches = matchPattern.exec(cardBackgroundColor);
+    // if (matches) {
+    //   const brightness = Math.round(((parseInt(matches[1]) * 299) + (parseInt(matches[2]) * 587) + (parseInt(matches[3]) * 114)) / 1000);
+    //   // const brightness = Math.round(((parseInt(255) * 299) + (parseInt(255) * 587) + (parseInt(255) * 114)) / 1000);  // range: 0-255
+    //   // console.log('*** firstUpdated; brightness of background: ', brightness);
+    //   if (brightness < 64) {
+    //     this._glow = true;
+    //   } else {
+    //     this._glow = false;
+    //   }
+    // }
     }
     // protected update(_changedProperties: PropertyValues): void {
     //   super.update(_changedProperties);
@@ -4353,15 +4361,22 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             //   }
             // }
             // add glow to numerals and nextAlarm switch when background dark
-            if (this._glow) {
-                this._clockQ.classList.add('glow');
+            // if (this._glow) {
+            //   this._clockQ.classList.add('glow');
+            //   this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.add('glow') });
+            // } else {
+            //   this._clockQ.classList.remove('glow');
+            //   this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('glow') });
+            // }
+            if (this._config.dark_mode) {
+                this._clockQ.classList.add('dark');
                 this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
-                    button.classList.add('glow');
+                    button.classList.add('dark');
                 });
             } else {
-                this._clockQ.classList.remove('glow');
+                this._clockQ.classList.remove('dark');
                 this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
-                    button.classList.remove('glow');
+                    button.classList.remove('dark');
                 });
             }
             // let myStyle: HTMLElement;
@@ -4788,7 +4803,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
-                        .glow=${this._glow}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
@@ -4913,7 +4927,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       text-wrap-mode: nowrap;
       white-space: nowrap;
     }
-    #clock.glow {
+    #clock.dark {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
     /* Safari before v16 */
@@ -5134,7 +5148,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
     }
-    .alarmButton button.glow {
+    .alarmButton button.dark {
       text-shadow: 0 0 5px rgba(0,0,0,0.4);
       box-shadow: 0 0 5px -1px white;
     }
