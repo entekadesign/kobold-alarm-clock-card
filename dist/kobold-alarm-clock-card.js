@@ -1333,7 +1333,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
                 seconds: 0
             },
             time_format: "12hr",
-            dark_mode: false,
+            // dark_mode: false,
             clock_display_font: 0,
             hide_cards_default: true,
             debug: false
@@ -2765,12 +2765,14 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             // inject style into mdc text field, switch, icon
             // let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
             // let pickerOrOptionsDialogStyle = '';
+            // console.log('*** updated on alarm-picker; this.classList: ', this.classList);
             let myStyle;
-            if (this.config.dark_mode) {
+            if (this.classList.contains('dark')) {
                 if (this._alarmPickerSwitchQ.shadowRoot) {
                     myStyle = document.createElement('style');
                     // let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
-                    const switchStyle = ' div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; } div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
+                    // const switchStyle = '.mdc-switch:not(.mdc-switch--checked) div.mdc-switch__thumb { background-color: #696969; border-color: #696969; } .mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; background-color: var(--primary-text-color); border-color: var(--primary-text-color); } div.mdc-switch__track { background-color: #696969 !important; border-color: #696969 !important; }';
+                    const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                     myStyle.innerHTML = switchStyle;
                     this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
                 }
@@ -2789,10 +2791,9 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             // if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
             //     pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
             // }
-            // TODO: text color not consistent; should be default unless dark mode
             if (this._alarmTimeInputQ.shadowRoot) {
                 const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
-                const pickerStyle = ' .mdc-text-field__input { color: #969696 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
+                const pickerStyle = ' .mdc-text-field__input { color: #696969 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
                 myStyle = document.createElement('style');
                 myStyle.innerHTML = allStyle + pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
@@ -2932,6 +2933,16 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         `;
     }
     static #_ = this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
+        :host {
+            --primary-color: var(--primary-text-color);
+            --mdc-theme-primary: var(--primary-text-color);
+            --switch-unchecked-button-color: #696969;
+            --switch-checked-button-color: var(--primary-text-color);
+            --switch-checked-track-color: #696969;
+            --md-slider-inactive-track-color: #696969;
+            --md-slider-label-text-color: var(--card-background-color);
+        }
+
         @media (max-width: 600px), (max-height: 600px) {
             div#alarmPicker.alarm {
                 height: 2rem;
@@ -2984,12 +2995,12 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
         }
 
         #alarmTimeInput {
-            filter: invert(1);
+            /*filter: invert(1);*/
             margin: 0 0.5em;
         }
 
         #alarmTimeInput[overridden] {
-            border: 1px dotted #969696;
+            border: 1px dotted #696969;
             padding: 1px;
         }
 
@@ -3123,13 +3134,11 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     }
                 }
             },
-            {
-                name: "dark_mode",
-                label: "Dark Mode",
-                selector: {
-                    boolean: {}
-                }
-            },
+            // {
+            //     name: "dark_mode",
+            //     label: "Dark Mode",
+            //     selector: { boolean: {} },
+            // },
             {
                 name: "clock_display_font",
                 label: "Clock Display Font",
@@ -3231,6 +3240,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                     object: {
                         label_field: "entity",
                         multiple: true,
+                        reorder: true,
                         fields: {
                             entity: {
                                 label: "Card Entity",
@@ -3907,25 +3917,31 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     </div>`;
     }
     _renderNapEditor() {
-        if (!this._nextAlarmConfig) // console.log('*** rederNapEditor; nextAlarmConfig undefined');
-        // this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-        // if (this._config.next_alarm.overridden) {
-        //     // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
-        //     const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-        //     // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
-        //     const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-        //     // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
-        //     this._nextAlarmConfig.nap_duration = myDur;
-        // } else {
-        //     this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-        // }
-        // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-        // } else {
+        if (!this._nextAlarmConfig) {
+            // console.log('*** rederNapEditor; nextAlarmConfig undefined');
+            this._nextAlarmConfig = {
+                nap_duration: null,
+                next_alarm: null
+            };
+            if (this._config.next_alarm.overridden) {
+                // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
+                const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))()));
+                // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
+                const myDur = {
+                    hours: parseInt(dayDur.format('HH')),
+                    minutes: parseInt(dayDur.format('mm')),
+                    seconds: parseInt(dayDur.format('ss'))
+                };
+                // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
+                this._nextAlarmConfig.nap_duration = myDur;
+            } else this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
         // console.log('*** renderNapEditor: nextAlarmConfig: ', this._nextAlarmConfig);
-        this._nextAlarmConfig = {
-            next_alarm: structuredClone(this._config.next_alarm),
-            nap_duration: structuredClone(this._config.nap_duration)
-        };
+        // this._nextAlarmConfig = {
+        //     next_alarm: structuredClone(this._config.next_alarm),
+        //     nap_duration: structuredClone(this._config.nap_duration),
+        // }
+        }
         // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
         return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
       <div class="box">
@@ -4292,7 +4308,12 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // const preview = Helpers.getHa().shadowRoot.querySelector('hui-dialog-create-card').shadowRoot.querySelector('hui-card-picker');
         this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
         // console.log('*** firstUpdated; parentElement contains preview: ', this.parentElement?.classList.contains('preview'));
+        // console.log('*** firstUpdated; this._hass.states: ', this._hass.states);
         // console.log('*** firstUpdated; this._config ', this._config);
+        // console.log('*** firstUpdated; in dark mode: ', window.matchMedia('(prefers-color-scheme: dark)').matches);
+        // const colorScheme = document.querySelector('meta[name="color-scheme"]').content);
+        // const colorScheme: HTMLMetaElement = document.querySelector('meta[name="color-scheme"]').getAttribute('content');
+        // console.log('*** firstUpdated; in dark mode: ', colorScheme);
         // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
         if (!this._alarmController.isAlarmRinging()) {
             // when card starts up, hide cards (prevents flicker during save)
@@ -4316,12 +4337,21 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // if (_changedProperties.has('_nextAlarm')) console.log('*** Card updated(); nextAlarm changed: ', this._nextAlarm);
         const cardWidth = this.getBoundingClientRect().width;
         // console.log('*** card width: ', cardWidth);
-        if (this._koboldClockQ && this._alarmPickerQ) {
+        // if (this._koboldClockQ && this._alarmPickerQ) {
+        //   if (cardWidth < 750) {
+        //     this._koboldClockQ.classList.add('narrow');
+        //     this._alarmPickerQ.classList.add('narrow');
+        //   } else {
+        //     this._koboldClockQ.classList.remove('narrow');
+        //     this._alarmPickerQ.classList.remove('narrow');
+        //   }
+        // }
+        if (this._alarmPickerQ) {
             if (cardWidth < 750) {
-                this._koboldClockQ.classList.add('narrow');
+                this.classList.add('narrow');
                 this._alarmPickerQ.classList.add('narrow');
             } else {
-                this._koboldClockQ.classList.remove('narrow');
+                this.classList.remove('narrow');
                 this._alarmPickerQ.classList.remove('narrow');
             }
         }
@@ -4337,12 +4367,22 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             if (cardWidth === window.innerWidth) {
                 // console.log('*** kobold is in kiosk mode; card width: ' + this.offsetWidth + '; HA width: ' + Helpers.getHa().offsetWidth);
                 // hide visible line separating sidebar from main view on iOS
-                (0, $1656612fccd2685e$export$4dc2b60021baefca).getDrawer().style.borderRightStyle = 'unset';
+                if ((0, $1656612fccd2685e$export$4dc2b60021baefca).getDrawer()) (0, $1656612fccd2685e$export$4dc2b60021baefca).getDrawer().style.borderRightStyle = 'unset';
                 // prevent scrolling
                 document.querySelector('body').style.overflow = 'hidden';
                 document.querySelector('body').style.position = 'fixed';
                 document.querySelector('body').style.width = '100%';
             }
+            if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+                if (this._alarmPickerQ) {
+                    this.classList.add('dark');
+                    this._alarmPickerQ.classList.add('dark');
+                } else {
+                    this.classList.remove('dark');
+                    this._alarmPickerQ.classList.remove('dark');
+                }
+            }
+            if (this._config.cards?.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
             // // add glow to numerals when background dark
             // var cardBackgroundColor = window.getComputedStyle(Helpers.getBackground())?.getPropertyValue("background-color");
             // const matchPattern = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
@@ -4368,17 +4408,14 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             //   this._clockQ.classList.remove('glow');
             //   this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('glow') });
             // }
-            if (this._config.dark_mode) {
-                this._clockQ.classList.add('dark');
-                this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
-                    button.classList.add('dark');
-                });
-            } else {
-                this._clockQ.classList.remove('dark');
-                this._alarmButtonsQ.querySelectorAll('button').forEach((button)=>{
-                    button.classList.remove('dark');
-                });
-            }
+            // if (this._config.dark_mode) {
+            // if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+            //   this._clockQ.classList.add('dark');
+            //   this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.add('dark') });
+            // } else {
+            //   this._clockQ.classList.remove('dark');
+            //   this._alarmButtonsQ.querySelectorAll('button').forEach((button) => { button.classList.remove('dark') });
+            // }
             // let myStyle: HTMLElement;
             // if (this._clockQ) {
             //   const clockStyle = '';
@@ -4647,7 +4684,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     _toggleHideCards(event) {
         event.stopPropagation();
         // console.log('*** _toggleHideCards fired');
-        if (!this._alarmController.isAlarmRinging() && this._config.cards) {
+        // console.log('*** _toggleHideCards; cards: ', this._config.cards);
+        if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
             // if (!this._config.hide_cards_default) {
             //   // this._koboldClockQ.classList.add('fullscreen');
             //   // this._footQ.classList.add('hideFoot');
@@ -4812,7 +4850,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                                 @click=${this._showEditor}></ha-icon>
                   `}
               </div>
-              <div id="clock" @click=${!this.preview ? this._toggleHideCards : null}>TIME</div>
+              <div id="clock" @click=${this._toggleHideCards}>TIME</div>
             </div>
           </div>
         </ha-card>
@@ -4863,7 +4901,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       transition: height 240ms, opacity 240ms;
     }
 
-    #koboldClock.narrow div#koboldLogo {
+    :host(.narrow) #alarmTop div#koboldLogo {
       display: none;
     }
 
@@ -4884,7 +4922,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       height: 4vh;
       white-space: nowrap;
       align-items: center;
-      color: var(--secondary-text-color);
+      color: #696969;
     }
 
     #alarmTop div#koboldLogo {
@@ -4896,7 +4934,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center center;
-      filter: invert(1) brightness(0.41); /* match --secondary-text-color */
+      filter: invert(1) brightness(0.41); /* #696969 */
       position: absolute;
       display: block;
     }
@@ -4927,7 +4965,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       text-wrap-mode: nowrap;
       white-space: nowrap;
     }
-    #clock.dark {
+    :host(.dark) #clock {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
     /* Safari before v16 */
@@ -5084,6 +5122,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
 
     #foot {
+      background-color: var(--card-background-color);
       position: relative;
       height: 35vh;
       display: flex;
@@ -5148,7 +5187,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     .alarmButton button:hover {
       background-color: rgba(255,255,255,0.90);
     }
-    .alarmButton button.dark {
+    :host(.dark) .alarmButton button {
       text-shadow: 0 0 5px rgba(0,0,0,0.4);
       box-shadow: 0 0 5px -1px white;
     }
@@ -5190,9 +5229,14 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       filter: invert(1) brightness(0);
       display: block !important;
     }*/
+
     :host([preview]) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0);
       display: block;
+    }
+
+    :host([preview].dark) div#alarmTop > div#koboldLogo {
+      filter: invert(1) brightness(0.883);
     }
 
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {

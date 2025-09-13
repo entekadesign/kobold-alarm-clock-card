@@ -36,7 +36,7 @@ export interface CardConfig extends LovelaceCardConfig {
     alarm_duration_default: Duration;
     nap_duration: Duration;
     time_format: string;
-    dark_mode: boolean;
+    // dark_mode: boolean;
     clock_display_font: number;
     hide_cards_default: boolean;
     cards?: Array<LovelaceCardConfig>;

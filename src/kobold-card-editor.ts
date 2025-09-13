@@ -2,7 +2,7 @@ import { Helpers } from './helpers';
 import { AlarmController } from './alarm-controller';
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { state, customElement, property } from "lit/decorators.js";
-import type { CardConfig, NextAlarmConfig } from './types';
+import type { CardConfig, NextAlarmConfig, Duration } from './types';
 // HA types
 import type { HomeAssistant } from "custom-card-helpers";
 
@@ -26,11 +26,11 @@ class KoboldCardEditor extends LitElement {
             label: "Time Format",
             selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
         },
-        {
-            name: "dark_mode",
-            label: "Dark Mode",
-            selector: { boolean: {} },
-        },
+        // {
+        //     name: "dark_mode",
+        //     label: "Dark Mode",
+        //     selector: { boolean: {} },
+        // },
         {
             name: "clock_display_font",
             label: "Clock Display Font",
@@ -84,6 +84,7 @@ class KoboldCardEditor extends LitElement {
                 object: {
                     label_field: "entity",
                     multiple: true,
+                    reorder: true,
                     fields: {
                         entity: {
                             label: "Card Entity",
@@ -797,26 +798,26 @@ class KoboldCardEditor extends LitElement {
     _renderNapEditor() {
         if (!this._nextAlarmConfig) {
             // console.log('*** rederNapEditor; nextAlarmConfig undefined');
-            // this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-            // if (this._config.next_alarm.overridden) {
-            //     // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
-            //     const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-            //     // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
-            //     const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-            //     // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
-            //     this._nextAlarmConfig.nap_duration = myDur;
-            // } else {
-            //     this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-            // }
 
-            // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-            // } else {
+            this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
+            if (this._config.next_alarm.overridden) {
+                // var duration = dayjs.duration(dayjs().diff(this._config.next_alarm.date_time));
+                const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+                // console.log('*** rederNapEditor(); overridden. dayDur: ', dayDur);
+                const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+                // console.log('*** rederNapEditor(); overridden. duration: ', myDur);
+                this._nextAlarmConfig.nap_duration = myDur;
+            } else {
+                this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+            }
+            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+
             // console.log('*** renderNapEditor: nextAlarmConfig: ', this._nextAlarmConfig);
 
-            this._nextAlarmConfig = {
-                next_alarm: structuredClone(this._config.next_alarm),
-                nap_duration: structuredClone(this._config.nap_duration),
-            }
+            // this._nextAlarmConfig = {
+            //     next_alarm: structuredClone(this._config.next_alarm),
+            //     nap_duration: structuredClone(this._config.nap_duration),
+            // }
         }
 
         // console.log('*** renderNapEditor; _nextAlarmConfig: ', this._nextAlarmConfig);
