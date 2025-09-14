@@ -224,7 +224,7 @@ class AlarmPicker extends LitElement {
             --switch-checked-button-color: var(--primary-text-color);
             --switch-checked-track-color: #696969;
             --md-slider-inactive-track-color: #696969;
-            --md-slider-label-text-color: var(--card-background-color);
+            --md-slider-label-text-color: var(--ha-card-background, var(--card-background-color));
         }
 
         @media (max-width: 600px), (max-height: 600px) {

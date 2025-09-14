@@ -232,6 +232,7 @@ class KoboldAlarmClockCard extends LitElement {
     //     this._glow = false;
     //   }
     // }
+
   }
 
   // protected update(_changedProperties: PropertyValues): void {
@@ -253,6 +254,17 @@ class KoboldAlarmClockCard extends LitElement {
     // const colorScheme = document.querySelector('meta[name="color-scheme"]').content);
     // const colorScheme: HTMLMetaElement = document.querySelector('meta[name="color-scheme"]').getAttribute('content');
     // console.log('*** firstUpdated; in dark mode: ', colorScheme);
+
+
+    if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+      if (this._alarmPickerQ) {
+        this.classList.add('dark');
+        this._alarmPickerQ.classList.add('dark');
+      } else {
+        this.classList.remove('dark');
+        this._alarmPickerQ.classList.remove('dark');
+      }
+    }
 
     // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
     if (!this._alarmController.isAlarmRinging()) {
@@ -327,15 +339,15 @@ class KoboldAlarmClockCard extends LitElement {
         document.querySelector('body').style.width = '100%';
       }
 
-      if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
-        if (this._alarmPickerQ) {
-          this.classList.add('dark');
-          this._alarmPickerQ.classList.add('dark');
-        } else {
-          this.classList.remove('dark');
-          this._alarmPickerQ.classList.remove('dark');
-        }
-      }
+      // if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+      //   if (this._alarmPickerQ) {
+      //     this.classList.add('dark');
+      //     this._alarmPickerQ.classList.add('dark');
+      //   } else {
+      //     this.classList.remove('dark');
+      //     this._alarmPickerQ.classList.remove('dark');
+      //   }
+      // }
 
       if (this._config.cards?.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
 
@@ -928,6 +940,15 @@ class KoboldAlarmClockCard extends LitElement {
       }
     }*/
 
+    :host {
+      --kobold-color: #696969;
+      --kobold-color-rgb: 105,105,105;
+    }
+    :host(.dark) {
+      --ha-card-background: #000000;
+      --card-background-color: #000000;
+    }
+
     #koboldClock {
       container-type: inline-size;
       padding: 1.5rem;
@@ -961,7 +982,7 @@ class KoboldAlarmClockCard extends LitElement {
       height: 4vh;
       white-space: nowrap;
       align-items: center;
-      color: #696969;
+      color: var(--kobold-color);
     }
 
     #alarmTop div#koboldLogo {
@@ -1161,7 +1182,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     #foot {
-      background-color: var(--card-background-color);
+      background-color: var(--ha-card-background, var(--card-background-color));
       position: relative;
       height: 35vh;
       display: flex;
@@ -1191,7 +1212,7 @@ class KoboldAlarmClockCard extends LitElement {
       display: none;
       position: relative;
       z-index: 8;
-      background: var(--ha-card-background,var(--card-background-color,#fff));
+      background-color: var(--ha-card-background, var(--card-background-color));
       flex: auto;
     }
 
@@ -1214,8 +1235,9 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     .alarmButton button {
-      color: black !important;
-      background-color: white;
+      color: var(--ha-card-background, var(--card-background-color)) !important;
+      background-color: var(--kobold-color);
+      border: none;
       font-size: 4em;
       font-weight: 900;
       width: 100%;
@@ -1224,11 +1246,19 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     .alarmButton button:hover {
-      background-color: rgba(255,255,255,0.90);
+      /*background-color: rgba(255,255,255,0.90);*/
+      /*opacity: 0.6;*/
+      background-color: rgba(var(--kobold-color-rgb),0.75); /* #696969 */
     }
     :host(.dark) .alarmButton button {
+      background-color: var(--primary-text-color);
       text-shadow: 0 0 5px rgba(0,0,0,0.4);
-      box-shadow: 0 0 5px -1px white;
+      text-shadow: 0 0 5px rgb(from var(--ha-card-background, var(--card-background-color)) r g b / 0.4);
+      box-shadow: 0 0 5px -1px var(--primary-text-color);
+    }
+    :host(.dark) .alarmButton button:hover {
+      background-color: rgba(225,225,225,0.75);
+      background-color: rgb(from var(--primary-text-color) r g b / 0.75);
     }
 
 
@@ -1275,7 +1305,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     :host([preview].dark) div#alarmTop > div#koboldLogo {
-      filter: invert(1) brightness(0.883);
+      filter: invert(1) brightness(0.883); /* #e1e1e1 */
     }
 
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
