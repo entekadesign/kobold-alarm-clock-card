@@ -126,13 +126,13 @@ export class AlarmController {
     //     this._saveConfigEntry('next_alarm', keyValue);
     // }
 
-    _throttleNextAlarmReset = Helpers.throttle(() => {
-        if (this._config.debug) {
-            console.warn('*** _evaluate(); Resetting nextAlarm');
-            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
-        }
-        this.nextAlarmReset();
-    }, 1000);
+    // _throttleNextAlarmReset = Helpers.throttle(() => {
+    //     if (this._config.debug) {
+    //         console.warn('*** _evaluate(); Resetting nextAlarm');
+    //         this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
+    //     }
+    //     this.nextAlarmReset();
+    // }, 1000);
 
     nextAlarmReset(snooze = false) {
         // console.log('*** nextAlarmReset fired');
@@ -358,7 +358,14 @@ export class AlarmController {
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             // console.log('*** _evaluate; nextAlarm passed');
-            this._throttleNextAlarmReset();
+            // this._throttleNextAlarmReset();
+            Helpers.throttle(() => {
+                if (this._config.debug) {
+                    console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
+                    this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm because nextAlarm date is in the past', 'level': 'info' });
+                }
+                this.nextAlarmReset();
+            }, 1000);
         }
 
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {

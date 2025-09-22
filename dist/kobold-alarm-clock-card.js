@@ -1364,36 +1364,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             'turn_off': 'media_pause'
         };
         this._alarmActionsScript = [];
-        // snoozeConfig(snoozeDuration: Duration) {
-        //     const nextAlarmTime = dayjs().add(dayjs.duration(snoozeDuration));
-        //     const keyValue = {
-        //         overridden: true,
-        //         snooze: true,
-        //         enabled: true,
-        //         time: nextAlarmTime.format('HH:mm:ss'),
-        //         date: nextAlarmTime.format('YYYY-MM-DD'),
-        //         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
-        //     }
-        //     // console.log('*** time now: ' + dayjs().format('HH:mm:ss') + '; new nextAlarm time: ' + keyValue.time);
-        //     this._saveConfigEntry('next_alarm', keyValue);
-        // }
-        //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
-        // dismissConfig() {
-        //     const momentTomorrow = dayjs().add(1, 'day');
-        //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
-        //     const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
-        //     this._saveConfigEntry('next_alarm', keyValue);
-        // }
-        this._throttleNextAlarmReset = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle(()=>{
-            if (this._config.debug) {
-                console.warn('*** _evaluate(); Resetting nextAlarm');
-                this._hass.callService('system_log', 'write', {
-                    'message': '*** Resetting nextAlarm',
-                    'level': 'info'
-                });
-            }
-            this.nextAlarmReset();
-        }, 1000);
         this._throttleAlarmRinging = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle((state)=>{
             if (state) {
                 this._isAlarmRinging = true;
@@ -1442,6 +1412,33 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             this._alarmActionsScript = [];
         }
     }
+    // snoozeConfig(snoozeDuration: Duration) {
+    //     const nextAlarmTime = dayjs().add(dayjs.duration(snoozeDuration));
+    //     const keyValue = {
+    //         overridden: true,
+    //         snooze: true,
+    //         enabled: true,
+    //         time: nextAlarmTime.format('HH:mm:ss'),
+    //         date: nextAlarmTime.format('YYYY-MM-DD'),
+    //         date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
+    //     }
+    //     // console.log('*** time now: ' + dayjs().format('HH:mm:ss') + '; new nextAlarm time: ' + keyValue.time);
+    //     this._saveConfigEntry('next_alarm', keyValue);
+    // }
+    //Rename or combine with createNextAlarmNew? why is createnextalarmnew called here and again in set nextAlarm? move this code to editor?
+    // dismissConfig() {
+    //     const momentTomorrow = dayjs().add(1, 'day');
+    //     const alarmTomorrow = this._config[momentTomorrow.format('dd').toLowerCase()]; //create accessor?
+    //     const keyValue = AlarmController.createNextAlarmNew(alarmTomorrow);
+    //     this._saveConfigEntry('next_alarm', keyValue);
+    // }
+    // _throttleNextAlarmReset = Helpers.throttle(() => {
+    //     if (this._config.debug) {
+    //         console.warn('*** _evaluate(); Resetting nextAlarm');
+    //         this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm', 'level': 'info' });
+    //     }
+    //     this.nextAlarmReset();
+    // }, 1000);
     nextAlarmReset(snooze = false) {
         // console.log('*** nextAlarmReset fired');
         let keyValue;
@@ -1642,7 +1639,17 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         // if time now is later than alarm, reset nextAlarm (should only happen if continuous operation of Kobold is interrupted)
         // if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute').format('HH:mm:ss') > nextAlarm.time && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
         if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) // console.log('*** _evaluate; nextAlarm passed');
-        this._throttleNextAlarmReset();
+        // this._throttleNextAlarmReset();
+        (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle(()=>{
+            if (this._config.debug) {
+                console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** Resetting nextAlarm because nextAlarm date is in the past',
+                    'level': 'info'
+                });
+            }
+            this.nextAlarmReset();
+        }, 1000);
         // if (!this._config.alarms_enabled && !nextAlarm.nap) {
         //     return;
         // }
@@ -4328,13 +4335,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         // const colorScheme: HTMLMetaElement = document.querySelector('meta[name="color-scheme"]').getAttribute('content');
         // console.log('*** firstUpdated; in dark mode: ', colorScheme);
         if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
-            if (this._alarmPickerQ) {
-                this.classList.add('dark');
-                this._alarmPickerQ.classList.add('dark');
-            } else {
-                this.classList.remove('dark');
-                this._alarmPickerQ.classList.remove('dark');
-            }
+            this.classList.add('dark');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.add('dark');
+        } else {
+            this.classList.remove('dark');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('dark');
         }
         // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
         if (!this._alarmController.isAlarmRinging()) {
@@ -4368,14 +4373,12 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         //     this._alarmPickerQ.classList.remove('narrow');
         //   }
         // }
-        if (this._alarmPickerQ) {
-            if (cardWidth < 750) {
-                this.classList.add('narrow');
-                this._alarmPickerQ.classList.add('narrow');
-            } else {
-                this.classList.remove('narrow');
-                this._alarmPickerQ.classList.remove('narrow');
-            }
+        if (cardWidth < 750) {
+            this.classList.add('narrow');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
+        } else {
+            this.classList.remove('narrow');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
         }
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;

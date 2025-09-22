@@ -257,13 +257,11 @@ class KoboldAlarmClockCard extends LitElement {
 
 
     if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
-      if (this._alarmPickerQ) {
-        this.classList.add('dark');
-        this._alarmPickerQ.classList.add('dark');
-      } else {
-        this.classList.remove('dark');
-        this._alarmPickerQ.classList.remove('dark');
-      }
+      this.classList.add('dark');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.add('dark');
+    } else {
+      this.classList.remove('dark');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('dark');
     }
 
     // console.log('*** atLeastVersion: ', Helpers.atLeastVersion(this._hass.config.version, 2024, 6));
@@ -304,14 +302,12 @@ class KoboldAlarmClockCard extends LitElement {
     //     this._alarmPickerQ.classList.remove('narrow');
     //   }
     // }
-    if (this._alarmPickerQ) {
-      if (cardWidth < 750) {
-        this.classList.add('narrow');
-        this._alarmPickerQ.classList.add('narrow');
-      } else {
-        this.classList.remove('narrow');
-        this._alarmPickerQ.classList.remove('narrow');
-      }
+    if (cardWidth < 750) {
+      this.classList.add('narrow');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
+    } else {
+      this.classList.remove('narrow');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
     }
 
 
@@ -562,7 +558,7 @@ class KoboldAlarmClockCard extends LitElement {
       (force
         || this._time !== time
         // || this._ringing !== isAlarmRinging
-        // TODO: test if it is possible for these lastupdated variables to come apart now (maybe testing diff btwn last_updated for config on card and config on controller)
+        // TODO: test if it is possible for these lastupdated variables to come apart now (maybe testing diff btwn last_updated for config on card and config on controller); if not, delete last_updated from config
         // || this._controllersAlarmConfigLastUpdate !== this._config.last_updated
       )) {
       this._time = time;

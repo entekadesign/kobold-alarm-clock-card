@@ -21,15 +21,15 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
     - Set unscheduled alarm *X* minutes in future using **nap dialog**
     - Set alarm times easily using sliders directly on main view or in a dialog
 - **Integrate with HA**
-    - Set one or more HA entities to be triggered by alarm
-    - Set one or more additional HA entities to activate *X* minutes before or after alarm
+    - Set one or more HA entities to be triggered:
+        - when alarm rings
+        - *X* minutes before or after alarm
+        - when dismissing a ringing alarm, or when tapping/clicking snooze button
     - Add other HA cards to be displayed or hidden with a tap/click
 - **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
     - Set default durations of snooze and undismissed alarm
-- **Enhance reliability**
-    - Set HA entities to ping connection and to sound a LAN-accessible alarm
 
 <br>
 
@@ -39,7 +39,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 |||
 | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" alt="Settings dialog" width="100%" align="" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/nap.jpg" alt="Nap dialog" width="100%" align="" /><figcaption>**Nap dialog**</figcaption></figure> |
 |||
-| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: added HA cards, alternate font**</figcaption></figure> |
+| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: dark mode, added HA cards,<br>alternate font**</figcaption></figure> |
 |||
 
 <br>
@@ -48,8 +48,6 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 - [Home Assistant](https://www.home-assistant.io/installation/)
 - [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
-- [*HACS* integration](https://www.hacs.xyz/docs/use/download/prerequisites/)
-- [*Variables+History* integration](https://github.com/enkama/hass-variables) ("Sensor" variable type, default settings)
 
 ## Installation
 
@@ -57,7 +55,7 @@ Kobold can be installed in any of four ways:
 
 - If you have installed the [Home Assistant Community Store (HACS) integration](https://hacs.xyz/docs/use/), then search for "Kobold Alarm Clock" in HACS and click **Download**.
 
-- Install as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using the following URL and the type "Dashboard":
+- Install as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using "Dashboard" as the type and the following URL:
 
 ```bash
 https://github.com/entekadesign/kobold-alarm-clock-card.git
@@ -67,97 +65,53 @@ https://github.com/entekadesign/kobold-alarm-clock-card.git
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=entekadesign&repository=kobold-alarm-clock-card&category=dashboard)
 
-- Finally, Kobold can be installed manually by copying the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock-card/releases) to the `config` directory of your HA instance:
+- Finally, Kobold can be installed manually by copying the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock-card/releases) to the `www` directory inside the `config` directory of your HA instance:
 
 ```bash
-<config>/www/kobold-alarm-clock/kobold-alarm-clock-card.js
+<config>/www/kobold-alarm-clock-card.js
 ```
 
 ## Configuration
 
-If you installed Kobold manually, register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
+If you installed Kobold manually:
+
+1. Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
 ```
-/local/kobold-alarm-clock/kobold-alarm-clock-card.js
+/local/kobold-alarm-clock-card.js
 ```
 
-Regardless of how you installed, add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
+2. Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
 ```yaml
 - type: custom:kobold-alarm-clock-card
   alarm_entities:
-    - input_boolean.alarm_clock
+    - input_boolean.kobold_clock
 ```
 
-Kobold expects the entity ID of your input_boolean helper to be in the `alarm_entities` list. These entity IDs represent HA integrations that will activate when the alarm is activated (called "alarm ringers" in the **settings dialog**). Note that the name portion of the entity IDs of the input_boolean helper and the Variables+History sensor must match. If each is not "alarm_clock," you must add a `name` entry to the lovelace configuration to set a new name:
-
-```yaml
-- type: custom:kobold-alarm-clock-card
-  name: living_room_clock
-  alarm_entities:
-    - input_boolean.living_room_clock
-```
+## Upgrading from v1.nn
+Delete your lovelace configuration except for the minimal configuration shown in step 2 above. Kobold should immediately rebuild your configuration, at which point you may restore any settings you choose to preserve. If a setting you want to restore is available in the visual editor of the **settings dialog**, using it can help ensure that the configuration's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) structure remains valid.
 
 ## Usage
 
-Set an alarm for each day of the week in the **alarm schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle button indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, tap/click on the **CLEAR** button in the **nap dialog**.
+Set an alarm for each day of the week in the **schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle switch indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, disable the nap duration in the **nap dialog**.
 
 
 ## Optional configuration
 
+### Alarm ringer entities
+
+An *input boolean helper* entity should already be configured as one of Kobold's alarm ringer entities, but you can employ it as an [automation trigger](https://www.home-assistant.io/docs/automation/trigger/) to cause other events when an alarm rings, or you can add new alarm ringer entities using the entity selector in the **settings dialog**.
+
 ### Alarm actions
 
-You can instruct Kobold to activate an HA integration at other times than when an alarm activates. For example, to configure an input_boolean helper to activate one minute before the alarm, add an `alarm_actions` entry to your lovelace configuration:
+You can instruct Kobold to activate an HA integration at times other than when an alarm rings by adding an "Alarm Action" in the **settings dialog**. A pop-up dialog will allow you to select the entity to activate and when activation should occur: when hitting the snooze button, when dismissing a ringing alarm, or at a time before or after a ringing alarm. To choose a time one minute before the alarm rings, for example, enter "1" in the minute field of the "Offset Duration" selector, then enable the "Offset Negative" toggle switch.
 
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-  alarm_actions:
-    - entity: input_boolean.alarm_clock_action
-      when: '-00:01'
-```
-
-The value for `when` must be a string representing one of the following events: a time (in *HH:mm* format; positive values cause activation after the alarm), or a button activation ("on_snooze" for **Snooze** button, or "on_dismiss" for **Dismiss** button). Note that alarm actions are not executed for override alarms, only for scheduled alarms.
-
-### Safety configuration
-
-Enhance reliability by configuring both of the following.
-
-1. The [*Ping* integration](https://www.home-assistant.io/integrations/ping/) provides a binary_sensor that can be used to query an IP address to confirm the availability of an Internet connection. If there is no connection, Kobold will display a warning when attempting a settings change, and it will try to use a LAN-accessible alarm (if one is configured). After installing the integration and configuring a binary_sensor to ping 8.8.8.8, for example, add the `ping_entity` entry to your lovelace configuration, including the binary_sensor entity ID as the value:
-
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-  ping_entity: binary_sensor.8_8_8_8
-```
-
-2. To configure a LAN-accessible alarm, add an `alarm_entity_local` entry to your lovelace configuration, including as the value the entity ID of an alarm integration that does not require the Internet:
-
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-  ping_entity: binary_sensor.8_8_8_8
-  alarm_entity_local: input_boolean.alarm_clock_local
-```
+Note that alarm actions are not executed for override alarms, only for scheduled alarms.
 
 ### Cards display
 
-Display HA cards in an area along lower edge of main view by adding a `cards` entry to your lovelace configuration:
-
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-  cards:
-    - type: weather-forecast
-      name: NYC
-      entity: weather.forecast_home
-      show_forecast: true
-      forecast_type: hourly
-```
+Display HA cards in an area along lower edge of main view by adding a "Card to Display" in the **settings dialog**. A pop-up dialog provides an entity selector and an area to enter the card's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) configuration, which includes the card's `type`, `name`, and any settings.
 
 To customize the appearance of the cards, install Thomas Lovén's outstanding  [*Card-Mod* integration](https://github.com/thomasloven/lovelace-card-mod). If you have many cards to display in the small space available, Lovén has an integration to help with that, too: [*Auto-Entities*](https://github.com/thomasloven/lovelace-auto-entities).
 
@@ -177,18 +131,11 @@ Another feature of *Browser_Mod* is its ability to allow a browser to serve as a
 
 2. Create a template switch (HA -> Settings -> Devices -> Helpers) whose turn-on action is "Script: Turn on" targeting your script, and whose turn-off action is "Media Player: Turn off" targeting your browser's media player.
 
-Now, configure Kobold by adding the switch's entity ID to your lovelace configuration:
+Now, configure Kobold by adding the switch as an alarm ringer entity in the **settings dialog**.
 
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-    - switch.stream_wnyc
-```
+If you want an alarm ringer entity to play an audio file [hosted by the HA server](https://www.home-assistant.io/more-info/local-media/setup-media/):
 
-If you need a LAN-accessible alarm, you can use an audio file [hosted by the HA server](https://www.home-assistant.io/more-info/local-media/setup-media/):
-
-1. Create a script whose [yaml configuration](https://www.home-assistant.io/integrations/script/#configuration) is similar to the following, replacing `media_player.my_browser` with the entity ID of your browser's media player, and `alarm_sound.mp3` with the filename of your alarm sound:
+1. Create a script whose [YAML configuration](https://www.home-assistant.io/integrations/script/#configuration) is similar to the following, replacing `media_player.my_browser` with the entity ID of your browser's media player, and `alarm_sound.mp3` with the filename of your alarm sound:
 
 ```yaml
 alias: Ring Alarm Bell
@@ -213,18 +160,11 @@ mode: single
 description: ""
 ```
 
-2. Create a switch in the same way as above, this time associating it with the script just created, and add the entity ID of the switch as the value of your `alarm_entity_local` entry.
+2. Create a switch in the same way as above, this time associating it with the script just created, and add the switch as an alarm ringer entity in the **settings dialog**.
 
 ### Debug
 
-Some debugging information can be logged in the HA system log by adding a `debug` entry to your lovelace configuration:
-
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.alarm_clock
-  debug: true
-```
+Some debugging information can be logged in the HA system log by enabling "Debug Mode" in the **settings dialog**.
 
 ## Development
 
