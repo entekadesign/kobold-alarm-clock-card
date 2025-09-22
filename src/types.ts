@@ -11,7 +11,6 @@ export interface NextAlarmObject extends TimeObject {
     date: string;
     date_time: string;
     snooze?: boolean;
-    // nap?: boolean;
     overridden?: boolean;
 }
 
@@ -21,7 +20,6 @@ export interface CardConfig extends LovelaceCardConfig {
     type: string;
     name: string;
     alarm_entities?: Array<string>;
-    // alarm_actions?: Array<Record<'entity' | 'when', string>>;
     alarm_actions?: Array<AlarmActionsObject>;
     alarms_enabled: boolean;
     next_alarm: NextAlarmObject;
@@ -36,7 +34,6 @@ export interface CardConfig extends LovelaceCardConfig {
     alarm_duration_default: Duration;
     nap_duration: Duration;
     time_format: string;
-    // dark_mode: boolean;
     clock_display_font: number;
     hide_cards_default: boolean;
     cards?: Array<LovelaceCardConfig>;
@@ -58,8 +55,3 @@ export interface AlarmActionsObject {
 export interface KoboldEditor extends LitElement {
     alarmController: any;
 }
-
-// export interface RingerEntity {
-//     enabled: boolean;
-//     entity_id: string;
-// }

@@ -1,6 +1,3 @@
-// import { AlarmConfiguration } from './alarm-controller';
-// import { AlarmController } from './alarm-controller';
-
 import { LitElement, html, css } from 'lit';
 import { property, state, customElement, query } from "lit/decorators.js";
 
@@ -19,13 +16,9 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueM: string;
 
     @property({ attribute: false, reflect: false }) config: CardConfig;
-    // @property({ reflect: false }) alarmConfiguration: AlarmConfiguration;
-    // @property({ reflect: false }) alarmController: AlarmController;
     @property({ attribute: false, reflect: false }) nextAlarm: NextAlarmObject;
     @property({ attribute: false, reflect: false }) time: string;
     @property({ attribute: false, reflect: false }) disabled: boolean;
-    // @property({ attribute: false, reflect: false }) dark: boolean;
-    // @property({ reflect: false }) preview: boolean;
 
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;
     @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ: HTMLInputElement;
@@ -36,36 +29,22 @@ class AlarmPicker extends LitElement {
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
-            // let allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; }';
-            // let pickerOrOptionsDialogStyle = '';
-            // console.log('*** updated on alarm-picker; this.classList: ', this.classList);
             let myStyle: HTMLElement;
             if (this.classList.contains('dark')) {
                 if (this._alarmPickerSwitchQ.shadowRoot) {
                     myStyle = document.createElement('style');
-                    // let switchStyle = 'div.mdc-switch__track { background-color: #969696 !important; border-color: #969696 !important; }';
-                    // const switchStyle = '.mdc-switch:not(.mdc-switch--checked) div.mdc-switch__thumb { background-color: #696969; border-color: #696969; } .mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; background-color: var(--primary-text-color); border-color: var(--primary-text-color); } div.mdc-switch__track { background-color: #696969 !important; border-color: #696969 !important; }';
                     const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                     myStyle.innerHTML = switchStyle;
                     this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
                 }
             }
-            // if (this.id === 'tab-2') {
 
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                // let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
                 let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
-
-            // } else {
-            //     console.log('*** id: ', this.id);
-            // }
-            // if ((this.parentElement.parentElement.id === 'alarm-picker-dialog-content') || (this.parentElement.parentElement.parentElement.parentElement.id === 'settingsDialog')) {
-            //     pickerOrOptionsDialogStyle = ' .mdc-text-field--filled { height: 2em !important; }';
-            // }
 
             if (this._alarmTimeInputQ.shadowRoot) {
                 const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
@@ -79,30 +58,16 @@ class AlarmPicker extends LitElement {
 
     _clickHandler() {
         let timeArray: Array<string>;
-        // if (this.id === 'tab-2') {
         if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         const isEnabled = this.nextAlarm.enabled;
-        // const isOverridden = this.alarmConfiguration.nextAlarm.overridden;
         const isOverridden = this.config.next_alarm.overridden;
-        // console.log('*** isEnabled: ' + isEnabled + '; isOverridden: ' + isOverridden);
         if (isEnabled && !isOverridden || !isEnabled && !isOverridden) {
-            // console.log('*** should be set to current time: ', this.time);
-            // set sliders to current time
-            // console.log('*** format: ', this._alarmTimeFormat());
             timeArray = dayjs(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
-            // timeArray = dayjs(this.time, 'h:mm A').format('HH:mm').split(':');
-            // console.log('*** this.time: ', this.time);
-            // console.log('*** timeArray hh:mm A: ', dayjs(this.time, 'h:mm A').format('HH:mm').split(':'));
-            // console.log('*** timeArray HH:mm: ', dayjs(this.time, 'HH:mm:ss').format('HH:mm').split(':'));
         } else {
             // set sliders to nextAlarm time
             timeArray = this.nextAlarm.time.split(':');
         }
-        // console.log('*** timeArray: ', timeArray);
-        // } else {
-        //     // set sliders to nextAlarm time
-        //     timeArray = this.alarm.time.split(':');
-        // }
+
         this._displayedValueH = timeArray[0];
         this._displayedValueM = timeArray[1];
         this._alarmPickerQ.classList.add('open');
@@ -119,14 +84,12 @@ class AlarmPicker extends LitElement {
     }
 
     _alarmTimeFormat() {
-        // return (this.alarmConfiguration['timeFormat'] === '24hr' || this.id === 'napTimePicker' || this.id === 'snoozeDurationPicker' || this.id === 'alarmDurationPicker') ? 'HH:mm' : 'h:mm A';
         return (this.config.time_format === '24hr') ? 'HH:mm' : 'h:mm A';
     }
 
     _updateValue(event: Event) {
         const value = (<HTMLInputElement>event.target).value;  //Number((e.target).value);
         (<HTMLInputElement>event.target).id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
-        // console.log('*** time: ', this._displayedValueH + ':' + this._displayedValueM);
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
         if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         this._alarmPickerQ.classList.remove('open');
@@ -144,32 +107,22 @@ class AlarmPicker extends LitElement {
 
     _onTimeChanged(timeStr: string) {
         this.nextAlarm.time = dayjs(timeStr, 'HH:mm').format('HH:mm:ss');
-        // console.log('*** nextAlarm.time: ', this.nextAlarm.time);
         this.nextAlarm.enabled = true;
         // listener for this event is on #alarmpicker element, so only received when "this" used here is #alarmpicker element
         this.dispatchEvent(new CustomEvent('nextAlarm-changed', { detail: { nextAlarm: this.nextAlarm } }));
     }
 
     _toggleAlarmEnabled(event: Event) {
-        // const alarm = Object.assign({}, this.alarm);
         this.nextAlarm.enabled = (<HTMLInputElement>event.target).checked;
-        // alarm.enabled = (<HTMLInputElement>event.target).checked;
         this.requestUpdate('nextAlarm'); //necessary because lit does not mutate reactive object properties
         this.dispatchEvent(new CustomEvent('nextAlarm-changed', { detail: { nextAlarm: { time: this.nextAlarm.time, enabled: this.nextAlarm.enabled } } }));
-        // this.dispatchEvent(new CustomEvent('alarm-changed', { detail: { alarm: { time: alarm.time, enabled: alarm.enabled } } }));
     }
 
     _openSchedule() {
         this.dispatchEvent(new CustomEvent('schedule-button-clicked'));
     }
 
-    // get value() {
-    //     console.log('*** get value on alarm-picker; returning nextalarm');
-    //     return this.nextAlarm;
-    // }
-
     render() {
-        // console.log('*** nextAlarm time: ', this.nextAlarm.time);
         return html`
             <div class="alarm" id="alarmPicker">
                 ${this.getAttribute('show-icon') ? html`
@@ -232,16 +185,6 @@ class AlarmPicker extends LitElement {
                 height: 2rem;
             }
         }
-        /*@container (width < 750px) {
-            div#alarmPicker.alarm.open {
-                height: 4rem;
-            }
-            div#alarmPicker.alarm.open > .sliders {
-                margin-left: 0;
-                width: 0;
-                overflow: hidden;
-            }
-        }*/
 
         :host(.narrow) div#alarmPicker.alarm.open {
             height: 4rem;
@@ -263,15 +206,6 @@ class AlarmPicker extends LitElement {
         #alarmPicker.alarm.open {
             height: 10rem;
         }
-
-        /*div#alarmPicker .row-options.settings-picker {
-            width: 22em;
-            text-align: left;
-            transition: width 120ms;
-        }
-        #alarmPicker.alarm.open .row-options.settings-picker {
-            width: 7rem;
-        }*/
 
         #alarmTimeInput {
             width: 5.1em;
@@ -313,7 +247,7 @@ class AlarmPicker extends LitElement {
             cursor: pointer;
         }
 
-       #alarmEnabledToggleButton {
+        #alarmEnabledToggleButton {
             /*filter: invert(1);*/
             margin: 0 0.5rem;
         }

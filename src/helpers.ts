@@ -5,36 +5,6 @@ import type { LovelaceCard } from "custom-card-helpers";
 
 export class Helpers {
 
-    //move defaultconfig and domains back to controller?
-    // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
-    //     return {
-    //         name: "kobold_clock",
-    //         type: "custom:kobold-alarm-clock-card",
-    //         alarms_enabled: false,
-    //         next_alarm: { ...nextAlarm, overridden: false },
-    //         mo: { enabled: false, time: "07:00:00" },
-    //         tu: { enabled: false, time: "07:00:00" },
-    //         we: { enabled: false, time: "07:00:00" },
-    //         th: { enabled: false, time: "07:00:00" },
-    //         fr: { enabled: false, time: "07:00:00" },
-    //         sa: { enabled: false, time: "09:00:00" },
-    //         su: { enabled: false, time: "09:00:00" },
-    //         snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
-    //         alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
-    //         nap_duration: { hours: 0, minutes: 30, seconds: 0 },
-    //         time_format: "12hr",
-    //         clock_display_font: 0,
-    //         hide_cards_default: true,
-    //         debug: false,
-    //     }
-    // };
-
-    // static DOMAINS_ALARM_ENTITIES = [
-    //     "input_boolean",
-    //     "switch",
-    //     "media_player"
-    // ];
-
     static getHa = () => {
         let root: any = document.querySelector('home-assistant');
         return root;
@@ -222,21 +192,6 @@ export class Helpers {
         );
     };
 
-    // static hexToRgb(hex) {
-    //     // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    //     var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    //     hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-    //         return r + r + g + g + b + b;
-    //     });
-
-    //     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    //     return result ? {
-    //         r: parseInt(result[1], 16),
-    //         g: parseInt(result[2], 16),
-    //         b: parseInt(result[3], 16)
-    //     } : null;
-    // }
-
     static testUntilTimeout = async (f: () => boolean, timeoutMs: number) => {
         return new Promise((resolve, reject) => {
             const timeWas = new Date();
@@ -255,7 +210,6 @@ export class Helpers {
     static updateHeight(element: LovelaceCard): boolean {
         if (this._updateHeightOnNormalCard(element)) return true;
         if (this._updateHeightOnNestedCards(element)) return true;
-        // if (this._updateHeightOnMediaControlCards(element)) return true;
         return false;
     }
     static _updateHeightOnNormalCard(element: LovelaceCard) {
