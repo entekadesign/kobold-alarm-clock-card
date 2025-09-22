@@ -1,6 +1,6 @@
 <br><br>
 <div align="center">
-    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobolt Logo" width="50%" align="center" />
+    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobold Logo" width="50%" align="center" />
 </div>
 <br><br>
 
@@ -39,7 +39,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 |||
 | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" alt="Settings dialog" width="100%" align="" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/nap.jpg" alt="Nap dialog" width="100%" align="" /><figcaption>**Nap dialog**</figcaption></figure> |
 |||
-| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: dark mode, added HA cards,<br>alternate font**</figcaption></figure> |
+| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: HA dark mode, added HA cards,<br>alternate font**</figcaption></figure> |
 |||
 
 <br>
@@ -90,7 +90,7 @@ If you installed Kobold manually:
 ```
 
 ## Upgrading from v1.nn
-Delete your lovelace configuration except for the minimal configuration shown in step 2 above. Kobold should immediately rebuild your configuration, at which point you may restore any settings you choose to preserve. If a setting you want to restore is available in the visual editor of the **settings dialog**, using it can help ensure that the configuration's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) structure remains valid.
+Delete your lovelace configuration except for the minimal configuration shown in manual configuration step 2 above. Kobold should immediately rebuild your configuration, at which point you may restore any settings you choose to preserve. If a setting you want to restore is available in the visual editor of the **settings dialog**, using it can help ensure that the configuration's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) structure remains valid.
 
 ## Usage
 
