@@ -1,6 +1,6 @@
 <br><br>
-<div align="center">
-    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobold Logo" width="50%" align="center" />
+<div style="text-align: center">
+    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobold Logo" width="50%" style="text-align: center" />
 </div>
 <br><br>
 

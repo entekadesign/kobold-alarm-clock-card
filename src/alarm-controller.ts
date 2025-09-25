@@ -18,27 +18,28 @@ export class AlarmController {
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
 
-    static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
-        return {
-            name: "kobold_clock",
-            type: "custom:kobold-alarm-clock-card",
-            alarms_enabled: false,
-            next_alarm: { ...nextAlarm, overridden: false },
-            mo: { enabled: false, time: "07:00:00" },
-            tu: { enabled: false, time: "07:00:00" },
-            we: { enabled: false, time: "07:00:00" },
-            th: { enabled: false, time: "07:00:00" },
-            fr: { enabled: false, time: "07:00:00" },
-            sa: { enabled: false, time: "09:00:00" },
-            su: { enabled: false, time: "09:00:00" },
-            snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
-            alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
-            nap_duration: { hours: 0, minutes: 30, seconds: 0 },
-            time_format: "12hr",
-            clock_display_font: 0,
-            hide_cards_default: true,
-            debug: false,
-        }
+    // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
+    static defaultConfig = {
+        // return {
+        name: "kobold_clock",
+        type: "custom:kobold-alarm-clock-card",
+        alarms_enabled: false,
+        next_alarm: { ...AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }), overridden: false },
+        mo: { enabled: false, time: "07:00:00" },
+        tu: { enabled: false, time: "07:00:00" },
+        we: { enabled: false, time: "07:00:00" },
+        th: { enabled: false, time: "07:00:00" },
+        fr: { enabled: false, time: "07:00:00" },
+        sa: { enabled: false, time: "09:00:00" },
+        su: { enabled: false, time: "09:00:00" },
+        snooze_duration_default: { hours: 0, minutes: 15, seconds: 0 },
+        alarm_duration_default: { hours: 0, minutes: 30, seconds: 0 },
+        nap_duration: { hours: 0, minutes: 30, seconds: 0 },
+        time_format: "12hr",
+        clock_display_font: 0,
+        hide_cards_default: true,
+        debug: false,
+        // }
     };
 
     static DOMAINS_ALARM_ENTITIES = [
@@ -48,7 +49,6 @@ export class AlarmController {
     ];
 
     constructor(config: CardConfig, cardId?: string) {
-
         this._cardId = cardId;
         this._config = config; // TODO: make a copy here?
     }
@@ -137,7 +137,8 @@ export class AlarmController {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
-            return AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm;
+            // return AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm;
+            return AlarmController.defaultConfig.next_alarm;
         }
         return nextAlarm;
     }
@@ -157,38 +158,6 @@ export class AlarmController {
 
     set hideCardsDefault(keyValue) {
         this.configEntries = { hide_cards_default: keyValue };
-    }
-
-    async _saveConfigEntries(entries) {
-        try {
-            const lovelace = Helpers.getLovelace().lovelace;
-            const newConfig = structuredClone(lovelace.config);
-            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
-            const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-
-            if (cardConfig) {
-                Object.keys(entries).forEach(entry => {
-                    if (cardConfig[entry] !== undefined) {
-                        cardConfig[entry] = entries[entry];
-                    } else {
-                        console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
-                    };
-                });
-                cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
-
-                await lovelace.saveConfig(newConfig);
-
-                Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
-                    .then(() => {
-                        if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
-                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
-                        }
-                    }).catch(() => { }); //timed out
-            } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
-        } catch (err: any) {
-            alert(`Saving failed: ${err.message}.`);
-        }
     }
 
     isAlarmRinging() {
@@ -236,6 +205,38 @@ export class AlarmController {
                         this._runAction(action);
                     }
                 });
+        }
+    }
+
+    async _saveConfigEntries(entries) {
+        try {
+            const lovelace = Helpers.getLovelace().lovelace;
+            const newConfig = structuredClone(lovelace.config);
+            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+            const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
+            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+
+            if (cardConfig) {
+                Object.keys(entries).forEach(entry => {
+                    if (cardConfig[entry] !== undefined) {
+                        cardConfig[entry] = entries[entry];
+                    } else {
+                        console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
+                    };
+                });
+                cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+                await lovelace.saveConfig(newConfig);
+
+                Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
+                    .then(() => {
+                        if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
+                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+                        }
+                    }).catch(() => { }); //timed out
+            } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
+        } catch (err: any) {
+            alert(`Saving failed: ${err.message}.`);
         }
     }
 

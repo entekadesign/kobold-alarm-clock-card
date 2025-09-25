@@ -1,5 +1,3 @@
-import type { CardConfig } from './types';
-
 // HA types
 import type { LovelaceCard } from "custom-card-helpers";
 

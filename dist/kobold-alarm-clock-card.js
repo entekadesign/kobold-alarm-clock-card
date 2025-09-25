@@ -1061,6 +1061,7 @@ var $8cbe425b16190a93$exports = {};
 });
 
 
+// HA types
 class $1656612fccd2685e$export$4dc2b60021baefca {
     static #_ = this.getHa = ()=>{
         let root = document.querySelector('home-assistant');
@@ -1246,68 +1247,66 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
 
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($8cbe425b16190a93$exports))));
 class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
-    static #_ = this.defaultConfig = (nextAlarm = {
-        enabled: false,
-        time: "07:00:00",
-        date: "2013-09-17",
-        date_time: "2013-09-17 07:00:00"
-    })=>{
-        return {
-            name: "kobold_clock",
-            type: "custom:kobold-alarm-clock-card",
-            alarms_enabled: false,
-            next_alarm: {
-                ...nextAlarm,
-                overridden: false
-            },
-            mo: {
+    static #_ = // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
+    this.defaultConfig = {
+        // return {
+        name: "kobold_clock",
+        type: "custom:kobold-alarm-clock-card",
+        alarms_enabled: false,
+        next_alarm: {
+            ...$b2cd7c9abb677932$export$cfa71a29f5c0676d.createNextAlarm({
                 enabled: false,
                 time: "07:00:00"
-            },
-            tu: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            we: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            th: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            fr: {
-                enabled: false,
-                time: "07:00:00"
-            },
-            sa: {
-                enabled: false,
-                time: "09:00:00"
-            },
-            su: {
-                enabled: false,
-                time: "09:00:00"
-            },
-            snooze_duration_default: {
-                hours: 0,
-                minutes: 15,
-                seconds: 0
-            },
-            alarm_duration_default: {
-                hours: 0,
-                minutes: 30,
-                seconds: 0
-            },
-            nap_duration: {
-                hours: 0,
-                minutes: 30,
-                seconds: 0
-            },
-            time_format: "12hr",
-            clock_display_font: 0,
-            hide_cards_default: true,
-            debug: false
-        };
+            }),
+            overridden: false
+        },
+        mo: {
+            enabled: false,
+            time: "07:00:00"
+        },
+        tu: {
+            enabled: false,
+            time: "07:00:00"
+        },
+        we: {
+            enabled: false,
+            time: "07:00:00"
+        },
+        th: {
+            enabled: false,
+            time: "07:00:00"
+        },
+        fr: {
+            enabled: false,
+            time: "07:00:00"
+        },
+        sa: {
+            enabled: false,
+            time: "09:00:00"
+        },
+        su: {
+            enabled: false,
+            time: "09:00:00"
+        },
+        snooze_duration_default: {
+            hours: 0,
+            minutes: 15,
+            seconds: 0
+        },
+        alarm_duration_default: {
+            hours: 0,
+            minutes: 30,
+            seconds: 0
+        },
+        nap_duration: {
+            hours: 0,
+            minutes: 30,
+            seconds: 0
+        },
+        time_format: "12hr",
+        clock_display_font: 0,
+        hide_cards_default: true,
+        debug: false
     };
     static #_2 = this.DOMAINS_ALARM_ENTITIES = [
         "input_boolean",
@@ -1401,10 +1400,8 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
-            return $b2cd7c9abb677932$export$cfa71a29f5c0676d.defaultConfig($b2cd7c9abb677932$export$cfa71a29f5c0676d.createNextAlarm({
-                enabled: false,
-                time: "07:00:00"
-            })).next_alarm;
+            // return AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm;
+            return $b2cd7c9abb677932$export$cfa71a29f5c0676d.defaultConfig.next_alarm;
         }
         return nextAlarm;
     }
@@ -1420,36 +1417,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         this.configEntries = {
             hide_cards_default: keyValue
         };
-    }
-    async _saveConfigEntries(entries) {
-        try {
-            const lovelace = (0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().lovelace;
-            const newConfig = structuredClone(lovelace.config);
-            const tabGroupArry = [
-                ...(0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
-            ];
-            const viewIndex = tabGroupArry.findIndex((tab)=>{
-                return tab.hasAttribute('active');
-            });
-            const cardConfig = (0, $1656612fccd2685e$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-            if (cardConfig) {
-                Object.keys(entries).forEach((entry)=>{
-                    if (cardConfig[entry] !== undefined) cardConfig[entry] = entries[entry];
-                    else console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
-                });
-                cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
-                await lovelace.saveConfig(newConfig);
-                (0, $1656612fccd2685e$export$4dc2b60021baefca).testUntilTimeout(()=>(0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification(), 5000).then(()=>{
-                    if ((0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification().labelText.includes('dashboard was updated')) (0, $1656612fccd2685e$export$4dc2b60021baefca).fireEvent('hass-notification', {
-                        message: 'Configuration updated'
-                    }, (0, $1656612fccd2685e$export$4dc2b60021baefca).getHa());
-                }).catch(()=>{}); //timed out
-            } else throw {
-                message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
-            };
-        } catch (err) {
-            alert(`Saving failed: ${err.message}.`);
-        }
     }
     isAlarmRinging() {
         return this._isAlarmRinging;
@@ -1484,6 +1451,36 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             };
             if ((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss')) this._runAction(action);
         });
+    }
+    async _saveConfigEntries(entries) {
+        try {
+            const lovelace = (0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().lovelace;
+            const newConfig = structuredClone(lovelace.config);
+            const tabGroupArry = [
+                ...(0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
+            ];
+            const viewIndex = tabGroupArry.findIndex((tab)=>{
+                return tab.hasAttribute('active');
+            });
+            const cardConfig = (0, $1656612fccd2685e$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+            if (cardConfig) {
+                Object.keys(entries).forEach((entry)=>{
+                    if (cardConfig[entry] !== undefined) cardConfig[entry] = entries[entry];
+                    else console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
+                });
+                cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
+                await lovelace.saveConfig(newConfig);
+                (0, $1656612fccd2685e$export$4dc2b60021baefca).testUntilTimeout(()=>(0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification(), 5000).then(()=>{
+                    if ((0, $1656612fccd2685e$export$4dc2b60021baefca).getNotification().labelText.includes('dashboard was updated')) (0, $1656612fccd2685e$export$4dc2b60021baefca).fireEvent('hass-notification', {
+                        message: 'Configuration updated'
+                    }, (0, $1656612fccd2685e$export$4dc2b60021baefca).getHa());
+                }).catch(()=>{}); //timed out
+            } else throw {
+                message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
+            };
+        } catch (err) {
+            alert(`Saving failed: ${err.message}.`);
+        }
     }
     _runAction(action) {
         const myAction = {
@@ -3200,10 +3197,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         if (editorStyleTag) editorStyleTag.remove();
     }
     setConfig(config) {
-        this._config = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm({
-            enabled: false,
-            time: "07:00:00"
-        })), config);
+        this._config = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig, config);
         const configChanges = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepCompareObj(this._config, config);
         if (!configChanges) return;
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
@@ -3261,10 +3255,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('dd').toLowerCase();
         const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
-            if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm({
-                enabled: false,
-                time: "07:00:00"
-            }))[item];
+            if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig[item];
             // update nextAlarm
             if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
                 const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') < event.detail.value[item].time;
@@ -3275,10 +3266,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
                 };
             }
         });
-        this._config = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm({
-            enabled: false,
-            time: "07:00:00"
-        })), event.detail.value);
+        this._config = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig, event.detail.value);
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
         this._oldConfig = this._config;
         (0, $1656612fccd2685e$export$4dc2b60021baefca).fireEvent('config-changed', {
@@ -3288,7 +3276,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     _valueChangedNap(event) {
         event.stopPropagation();
         if (event.detail.value === undefined) {
-            this._nextAlarmConfig.nap_duration = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig().nap_duration;
+            this._nextAlarmConfig.nap_duration = (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig.nap_duration;
             this._nextAlarmConfig.next_alarm.overridden = false;
             this.requestUpdate();
             return;
@@ -3698,10 +3686,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         ];
         return {
             alarm_entities: alarmEntities,
-            ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm({
-                enabled: false,
-                time: "07:00:00"
-            }))
+            // ...AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
+            ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig
         };
     }
     // protected willUpdate(_changedProperties: PropertyValues): void {

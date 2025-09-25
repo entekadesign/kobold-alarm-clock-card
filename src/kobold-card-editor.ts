@@ -260,7 +260,7 @@ class KoboldCardEditor extends LitElement {
     }
 
     setConfig(config) {
-        this._config = Helpers.deepMerge(AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), config);
+        this._config = Helpers.deepMerge(AlarmController.defaultConfig, config);
         const configChanges = Helpers.deepCompareObj(this._config, config);
         if (!configChanges) return;
         this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -343,7 +343,7 @@ class KoboldCardEditor extends LitElement {
         Object.keys(configChanges).forEach(
             (item) => {
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
-                    event.detail.value[item] = AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" }))[item];
+                    event.detail.value[item] = AlarmController.defaultConfig[item];
                 }
                 // update nextAlarm
                 if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
@@ -357,7 +357,7 @@ class KoboldCardEditor extends LitElement {
                 }
             });
 
-        this._config = Helpers.deepMerge(AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })), event.detail.value);
+        this._config = Helpers.deepMerge(AlarmController.defaultConfig, event.detail.value);
         this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
         this._oldConfig = this._config;
         Helpers.fireEvent('config-changed', { config: this._config }, this);
@@ -366,7 +366,7 @@ class KoboldCardEditor extends LitElement {
     _valueChangedNap(event) {
         event.stopPropagation();
         if (event.detail.value === undefined) {
-            this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig().nap_duration;
+            this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig.nap_duration;
             this._nextAlarmConfig.next_alarm.overridden = false;
             this.requestUpdate();
             return;
