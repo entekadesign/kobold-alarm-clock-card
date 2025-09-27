@@ -166,7 +166,6 @@ class KoboldAlarmClockCard extends LitElement {
     const alarmEntities = [ents.includes('input_boolean.kobold_clock') ? 'input_boolean.kobold_clock' : ents[0]];
     return {
       alarm_entities: alarmEntities,
-      // ...AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
       ...AlarmController.defaultConfig,
     }
   }
@@ -527,7 +526,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   render() {
-    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
+    this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
     const isAlarmRinging = this._alarmController.isAlarmRinging();
 
     if (this._clockQ) {

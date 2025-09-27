@@ -18,9 +18,7 @@ export class AlarmController {
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
 
-    // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
     static defaultConfig = {
-        // return {
         name: "kobold_clock",
         type: "custom:kobold-alarm-clock-card",
         alarms_enabled: false,
@@ -39,7 +37,6 @@ export class AlarmController {
         clock_display_font: 0,
         hide_cards_default: true,
         debug: false,
-        // }
     };
 
     static DOMAINS_ALARM_ENTITIES = [
@@ -137,7 +134,6 @@ export class AlarmController {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
-            // return AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm;
             return AlarmController.defaultConfig.next_alarm;
         }
         return nextAlarm;

@@ -1247,9 +1247,7 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
 
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($8cbe425b16190a93$exports))));
 class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
-    static #_ = // static defaultConfig = (nextAlarm = { enabled: false, time: "07:00:00", date: "2013-09-17", date_time: "2013-09-17 07:00:00" }): CardConfig => {
-    this.defaultConfig = {
-        // return {
+    static #_ = this.defaultConfig = {
         name: "kobold_clock",
         type: "custom:kobold-alarm-clock-card",
         alarms_enabled: false,
@@ -1400,7 +1398,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
-            // return AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })).next_alarm;
             return $b2cd7c9abb677932$export$cfa71a29f5c0676d.defaultConfig.next_alarm;
         }
         return nextAlarm;
@@ -3686,7 +3683,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         ];
         return {
             alarm_entities: alarmEntities,
-            // ...AlarmController.defaultConfig(AlarmController.createNextAlarm({ enabled: false, time: "07:00:00" })),
             ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig
         };
     }
@@ -3972,7 +3968,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         this._clockQ.style.display = 'flex';
     }
     render() {
-        this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm; //TODO: why not get nextalarm from this._config.next_alarm?
+        this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;
         const isAlarmRinging = this._alarmController.isAlarmRinging();
         if (this._clockQ) {
             if (isAlarmRinging && !this._ringingBegun) {
