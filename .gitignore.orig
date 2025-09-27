@@ -1,0 +1,8 @@
+.deploy
+node_modules/
+.parcel-cache/
+<<<<<<< HEAD
+*.js.map
+=======
+dist/*.js.map
+>>>>>>> allyamlconfig

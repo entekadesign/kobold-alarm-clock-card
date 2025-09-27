@@ -285,4 +285,115 @@ export class AlarmController {
             return;
         }
     }
+<<<<<<< HEAD
+
+    _saveConfiguration(configuration: AlarmConfiguration) {
+        let actualConfiguration = configuration;
+        if (!(configuration instanceof AlarmConfiguration)) {
+            actualConfiguration = Object.assign(new AlarmConfiguration, configuration);
+            console.warn('*** _saveConfiguration(); Submitted configuration is corrupt');
+        }
+
+        // reset next alarm after being disabled and now being re-enabled
+        if (actualConfiguration.alarmsEnabled && this.controllersAlarmConfig.alarmsEnabled === false) {
+            actualConfiguration.dismiss();
+        }
+
+        const configurationWithLastUpdated = {
+            ...actualConfiguration,
+            lastUpdated: dayjs().format('YYYY-MM-DD HH:mm:ss')
+        }
+
+        const alarmClockVariableEntityName = 'sensor.' + this._config.name;
+
+        const param = {
+            entity_id: alarmClockVariableEntityName,
+            attributes: configurationWithLastUpdated,
+            replace_attributes: true
+        };
+
+        if ((this.alarmClockPingEntity && this.alarmClockPingEntity.state === 'on') || !this.alarmClockPingEntity) {
+            this._hass.callService('variable', 'update_sensor', param);
+            this._controllersAlarmConfig = Object.assign(new AlarmConfiguration, configurationWithLastUpdated);
+        } else {
+            if (this._config.debug) {
+                this._hass.callService('system_log', 'write', { 'message': '*** Save attempted while clock disconnected from Home Assistant', 'level': 'info' });
+            }
+            alert('Save failed. No connection to Home Assistant.');
+        }
+    }
+}
+
+export class AlarmConfiguration {
+
+    public alarmsEnabled: boolean = false;
+    public nextAlarm: NextAlarmObject = { enabled: false, time: '08:00', date: '', dateTime: '' };
+    public mo: TimeObject = { enabled: false, time: '07:00' };
+    public tu: TimeObject = { enabled: false, time: '07:00' };
+    public we: TimeObject = { enabled: false, time: '07:00' };
+    public th: TimeObject = { enabled: false, time: '07:00' };
+    public fr: TimeObject = { enabled: false, time: '07:00' };
+    public sa: TimeObject = { enabled: false, time: '09:00' };
+    public su: TimeObject = { enabled: false, time: '09:00' };
+    public timeFormat: string = '12hr';
+    public clockFontFace: string = '0';
+    public clockDefaultFullscreen: boolean = false;
+    public snoozeDurationDefault: TimeObject = { enabled: true, time: '00:15' };
+    public alarmDurationDefault: TimeObject = { enabled: true, time: '00:30' };
+    public napDurationDefault: TimeObject = { enabled: true, time: '00:30' };
+    public lastUpdated: string;
+
+    snooze(snoozeTime: string) {
+        const nextAlarmTime = dayjs(this.nextAlarm.time, 'HH:mm').add(dayjs.duration(Helpers.convertToMinutes(snoozeTime)));
+        this.nextAlarm = {
+            ...this.nextAlarm,
+            enabled: true,
+            snooze: true,
+            time: nextAlarmTime.format('HH:mm'),
+            dateTime: nextAlarmTime.format('YYYY-MM-DD HH:mm')
+        }
+    }
+
+    dismiss() {
+        const momentTomorrow = dayjs().add(1, 'day');
+        const alarmTomorrow = this[momentTomorrow.format('dd').toLowerCase()];
+        this.nextAlarm = AlarmConfiguration.createNextAlarm(alarmTomorrow);
+    }
+
+    static createNextAlarm(alarm: TimeObject, forToday = false): NextAlarmObject {
+        let alarmDate = dayjs();
+        if (!((alarm.time >= alarmDate.format('HH:mm')) && forToday)) {
+            alarmDate = alarmDate.add(1, 'day');
+        }
+
+        return {
+            ...alarm,
+            date: alarmDate.format('YYYY-MM-DD'),
+            dateTime: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`,
+        }
+    }
+}
+
+export class Helpers {
+    static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
+        let timerFlag = null;
+        return (...args: T) => {
+            if (timerFlag === null) {
+                fn(...args);
+                timerFlag = setTimeout(() => {
+                    timerFlag = null;
+                }, delay);
+            }
+        };
+    }
+
+    static convertToMinutes(HHMM: string): { 'minutes': number } {
+        // HHMM is a string in the format "HH:MM" (e.g., "08:30", "-08:30", "00:00", "12:00")
+        const [H, M] = HHMM.split(":").map(val => parseInt(val));
+        // https://dev.to/emnudge/identifying-negative-zero-2j1o
+        let minutes = Math.abs(H) * 60 + M; minutes *= Math.sign(1 / H || H);
+        return { 'minutes': minutes };
+    };
+=======
+>>>>>>> allyamlconfig
 }

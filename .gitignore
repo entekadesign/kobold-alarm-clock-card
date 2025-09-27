@@ -1,4 +1,4 @@
 .deploy
 node_modules/
 .parcel-cache/
-*.js.map
+dist/*.js.map

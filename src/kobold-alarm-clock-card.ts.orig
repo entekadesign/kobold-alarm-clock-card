@@ -963,5 +963,394 @@ class KoboldAlarmClockCard extends LitElement {
       display: none;
     }
   `;
+<<<<<<< HEAD
+
+  firstUpdated(changedProperties: Map<string, any>): void {
+    super.firstUpdated(changedProperties);
+
+    this._timeFormat = this._alarmConfiguration['timeFormat'];
+    this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+    this._toggleAlarmFullscreen(this._alarmConfiguration['clockDefaultFullscreen']);
+    this._updateTime();
+    this._updateLoop();
+
+    if (this._haCardQ) {
+      this._buildCard();
+    } else {
+      console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot')
+    }
+
+    if (!this._alarmController.isSafetyConfigSet()) {
+      if (this._config.debug) {
+        this._hass.callService('system_log', 'write', { 'message': '*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity', 'level': 'info' });
+      }
+      console.warn('*** Safety config not set: install (1) binary sensor entity from ping integration, and (2) LAN-accessible alarm entity');
+    }
+
+    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+  }
+
+  // updated(changedProperties: Map<string, any>): void {
+  updated(): void {
+
+    if (!this._injectStylesDone) {
+      this._injectStylesDone = true;
+
+      // hide visible line separating sidebar from main view on iOS
+      document.querySelector('home-assistant').shadowRoot.querySelector('home-assistant-main').shadowRoot.querySelector('ha-drawer').shadowRoot.querySelector('aside').style.borderRightStyle = 'unset';
+
+      // prevent scrolling
+      document.querySelector('body').style.overflow = 'hidden';
+      document.querySelector('body').style.position = 'fixed';
+      document.querySelector('body').style.width = '100%';
+
+      // inject style into mdc form fields
+      let myStyle: HTMLElement;
+
+      //  alarm-top styles
+      if (this._optionButtonsHostsQ) {
+        let optionButtonsStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); width: calc(1.5rem + 1vh); }';
+        this._optionButtonsHostsQ.forEach((optionButtonsHost) => {
+          myStyle = document.createElement('style');
+          myStyle.innerHTML = optionButtonsStyle;
+          optionButtonsHost.shadowRoot.appendChild(myStyle);
+        });
+      }
+
+      // settings dialog styles
+      if (this._switchHostsQ) {
+        let settingsDialogStyle = '.mdc-switch{ margin: auto 0 !important; }';
+        this._switchHostsQ.forEach((switchHost) => {
+          myStyle = document.createElement('style');
+          myStyle.innerHTML = settingsDialogStyle;
+          switchHost.shadowRoot.appendChild(myStyle);
+        });
+      }
+      if (this._textfieldHostsQ) {
+        let settingsDialogStyle = '.mdc-text-field--filled { height: 2em !important; }';
+        this._textfieldHostsQ.forEach((textfieldHost) => {
+          myStyle = document.createElement('style');
+          myStyle.innerHTML = settingsDialogStyle;
+          textfieldHost.shadowRoot.appendChild(myStyle);
+        });
+      }
+      if (this._formfieldHostsQ) {
+        let settingsDialogStyle = '.mdc-form-field > label { margin-left: -0.5em !important } .mdc-form-field { color: #000000 !important; gap: 0 !important }';
+        this._formfieldHostsQ.forEach((formfieldHost) => {
+          myStyle = document.createElement('style');
+          myStyle.innerHTML = settingsDialogStyle;
+          formfieldHost.shadowRoot.appendChild(myStyle);
+        });
+      }
+    }
+  }
+
+  setConfig(config: CardConfig) {
+
+    if (!config) {
+      alert('Card config incorrectly formatted or missing.');
+    }
+
+    if (!config.cards || !Array.isArray(config.cards)) {
+      console.warn('*** setConfig(); No cards available for config');
+    }
+
+    // these settings can be overridden by including them in card's yaml config
+    this._config = {
+      name: 'alarm_clock',
+      ...config
+    };
+
+    // NOTE: Some cards call setConfig() multiple times during life of card
+    if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
+  }
+
+  set hass(hass: HomeAssistant) {
+
+    this._hass = hass;
+    this._alarmController.hass = hass;
+
+    dayjs.locale(hass.language);
+
+    if (this._elements) {
+      this._elements.forEach((element) => {
+        // console.log('*** TEMP: setConfig element: ', element);
+        element.hass = hass;
+      });
+    }
+  }
+
+  getCardSize() {
+    return 3;
+  }
+
+  _buildCard() {
+    if (!this._rootQ) console.warn('*** _buildCard(); Card root (element id extraInfo) not available');
+
+    while (this._rootQ.lastChild) {
+      this._rootQ.removeChild(this._rootQ.lastChild);
+    }
+
+    const config = this._config;
+
+    if (config.cards) {
+      const elements = this._elements = [];
+      Promise.all(config.cards.map(async (card: LovelaceCardConfig) => {
+        const element = await this._createCardElement(card);
+        if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
+        elements.push(element);
+        this._rootQ.appendChild(element);
+      })).
+        catch(error => {
+          console.error('*** Error while creating card element: ', error.message);
+        }).
+        then(() => {
+          this._elements = elements;
+          this._elements.forEach((element) => {
+            HeightUpdater.updateHeight(element);
+            if (this._hass) {
+              element.hass = this._hass;
+            } else {
+              console.warn('*** _buildCard(); No hass object available for config');
+            }
+          });
+        });
+    }
+
+    if (!this._alarmController.isConfigCorrect()) {
+      alert(`Card requires two integration entities: input boolean helper and Variables+History whose entity IDs are: sensor.${config.name} and input_boolean.${config.name}`);
+    }
+  }
+
+  async _createCardElement(card: LovelaceCardConfig) {
+    let element: LovelaceCard;
+    try {
+      this._cardHelpers = await (window).loadCardHelpers();
+      element = await this._cardHelpers.createCardElement(card);
+      if (this._hass) {
+        element.hass = this._hass;
+      } else {
+        console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
+      }
+
+    } catch (error) {
+      console.warn(`*** Could not create card ${card.type}; ${error}`);
+    }
+    return element;
+  }
+
+  _updateLoop() {
+    this._updateLoopId = setTimeout(() => { this._updateTime(); this._updateLoop(); }, 1000);
+  }
+
+  _updateTime(force = false) {
+
+    this._alarmController.evaluateAlarms();
+    const fontNum = (this._alarmController.alarmClockPingEntity && this._alarmController.alarmClockPingEntity.state === 'off' || !this._alarmConfiguration['clockFontFace']) ? '0' : this._alarmConfiguration['clockFontFace'];
+    const fontFaceClass = 'fontFace' + fontNum;
+    this._clockClasses = fontNum === '0' ? { clock: true } : { clock: true, [fontFaceClass]: true };
+    const time = dayjs().format(this._alarmConfiguration['timeFormat'] === '24hr' ? 'HH:mm' : 'h:mm A');
+    const isAlarmRinging = this._alarmController.isAlarmRinging();
+
+    if (this._clockQ &&
+      (force
+        || this._time !== time
+        || this._ringing !== isAlarmRinging
+        || this._controllersAlarmConfigLastUpdate !== this._alarmConfiguration.lastUpdated)) {
+      this._time = time;
+      this._ringing = isAlarmRinging;
+      this._controllersAlarmConfigLastUpdate = this._alarmConfiguration.lastUpdated;
+
+      let timeDisplay: string;
+
+      if (this._alarmConfiguration['timeFormat'] === '24hr') {
+        timeDisplay = time;
+      } else {
+        const [timeNum, timeTxt] = time.split(' ');
+        let periodKern = '';
+        if (timeNum.slice(-1) === '1' || timeNum.slice(-1) === '7') periodKern = ' periodKern';
+        timeDisplay = timeNum + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+      }
+
+      const [timeHr, timeMn] = timeDisplay.split(':');
+      let colonKern = '';
+      if (timeHr.slice(-1) === '1') colonKern = ' colonKern';
+      timeDisplay = timeHr + '<span class="colon' + colonKern + '">:</span>' + timeMn;
+
+      this._clockQ.innerHTML = `
+        <div class="clock-display">
+          ${timeDisplay}
+        </div>
+      `;
+      const dateFormat = this._alarmConfiguration['timeFormat'] === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
+      this._dateQ.innerHTML = dayjs().format(dateFormat);
+    }
+  }
+
+  _setAlarm() {
+    const alarm: TimeObject = JSON.parse(JSON.stringify((this._napTimePickerQ).value));
+    const alarmTime = dayjs().add(dayjs.duration(Helpers.convertToMinutes(alarm.time)));
+    this._alarmController.nextAlarm = {
+      ...this._alarmController.nextAlarm,
+      enabled: true,
+      time: alarmTime.format('HH:mm'),
+      nap: true,
+      overridden: true
+    }
+  }
+
+  _areAlarmsEnabled() {
+    return this._alarmConfiguration.alarmsEnabled || !!this._alarmController.nextAlarm.nap;
+  }
+
+  _onAlarmChanged(event: CustomEvent) {
+    // this not triggered by snooze or alarm picker dialogs; only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
+    if (!event.detail.alarm.enabled) {
+      this._alarmController.nextAlarm = {
+        ...this._alarmConfiguration.nextAlarm,
+        enabled: false,
+        overridden: true
+      }
+    } else {
+      this._alarmController.nextAlarm = event.detail.alarm;
+    }
+  }
+
+  _handleAlarmButtonsClick(event: Event) {
+    this._alarmController[(<HTMLInputElement>event.target).id]();
+  }
+
+  _handleRadioValueTimeFormat(event: Event) {
+    this._timeFormat = (<HTMLInputElement>event.target).value;
+  }
+
+  _handleRadioValueClockFontFace(event: Event) {
+    this._clockFontFace = (<HTMLInputElement>event.target).value;
+  }
+
+  _handleSwitchRingerEntity(event: Event) {
+    const entityIndex = (<HTMLInputElement>event.target).id.split('-').pop();
+    this._ringerEntities[entityIndex].enabled = (<HTMLInputElement>event.target).checked;
+  }
+
+  _toggleAlarmFullscreen(force: boolean) {
+    if (!this._alarmController.isAlarmRinging()) {
+      if (this._alarmClockClasses.fullscreen || !force) {
+        this._alarmClockClasses = { fullscreen: false };
+        this._footClasses = { hideFoot: false };
+      } else {
+        this._alarmClockClasses = { fullscreen: true };
+        this._footClasses = { hideFoot: true };
+      }
+    }
+  }
+
+  _getDayOfWeek(days: number) {
+    // returns day of week in language set in set hass() method
+    return dayjs('2018-08-27').add(days, 'days').format('dddd');
+  }
+
+  saveAndCloseAlarmPicker() {
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
+      alarmsEnabled: (this._haSwitchQ).checked,
+      mo: (this._alarmPickerMoQ).value,
+      tu: (this._alarmPickerTuQ).value,
+      we: (this._alarmPickerWeQ).value,
+      th: (this._alarmPickerThQ).value,
+      fr: (this._alarmPickerFrQ).value,
+      sa: (this._alarmPickerSaQ).value,
+      su: (this._alarmPickerSuQ).value,
+    });
+
+    controllersAlarmConfig.dismiss();
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    this.closeDialog('#scheduleDialog');
+  }
+
+  saveAndCloseSettings() {
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
+      ringerEntities: JSON.stringify(this._ringerEntities),
+      timeFormat: (this._timeFormatQ).value,
+      clockFontFace: (this._clockFontFaceQ).value,
+      clockDefaultFullscreen: (this._clockDefaultFullscreenQ).checked,
+      snoozeDurationDefault: (this._snoozeDurationPickerQ).value,
+      alarmDurationDefault: (this._alarmDurationPickerQ).value,
+    });
+
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    if (this._alarmClockClasses.fullscreen !== this._clockDefaultFullscreen) this._toggleAlarmFullscreen(this._clockDefaultFullscreen);
+    this.closeDialog('#settingsDialog');
+  }
+
+  saveAndCloseNap() {
+    this._setAlarm();
+    const controllersAlarmConfig = Object.assign(new AlarmConfiguration, {
+      ...this._alarmConfiguration,
+      napDurationDefault: (this._napTimePickerQ).value,
+    });
+
+    this._alarmController.saveControllersAlarmConfig(controllersAlarmConfig);
+    this.closeDialog('#napDialog');
+  }
+
+  clearAndCloseNap() {
+    this._alarmController.nextAlarmReset();
+    this.closeDialog('#napDialog');
+  }
+
+  _showAlarmPicker() {
+    this._alarmsEnabled = this._alarmConfiguration.alarmsEnabled;
+    this._alarmPickerMo = JSON.parse(JSON.stringify(this._alarmConfiguration['mo']));
+    this._alarmPickerTu = JSON.parse(JSON.stringify(this._alarmConfiguration['tu']));
+    this._alarmPickerWe = JSON.parse(JSON.stringify(this._alarmConfiguration['we']));
+    this._alarmPickerTh = JSON.parse(JSON.stringify(this._alarmConfiguration['th']));
+    this._alarmPickerFr = JSON.parse(JSON.stringify(this._alarmConfiguration['fr']));
+    this._alarmPickerSa = JSON.parse(JSON.stringify(this._alarmConfiguration['sa']));
+    this._alarmPickerSu = JSON.parse(JSON.stringify(this._alarmConfiguration['su']));
+    this._scheduleDialogQ.show();
+    this._scheduleDialogQ.classList.add('open');
+  }
+
+  _showNapDialog() {
+    this._napTime = JSON.parse(JSON.stringify(this._alarmConfiguration['napDurationDefault']));
+    this._napDialogQ.show();
+    this._napDialogQ.classList.add('open');
+  }
+
+  _showSettingsDialog() {
+    this._timeFormat = this._alarmConfiguration['timeFormat'];
+    this._clockDefaultFullscreen = this._alarmConfiguration['clockDefaultFullscreen'];
+    this._clockFontFace = this._alarmConfiguration['clockFontFace'];
+    this._snoozeDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['snoozeDurationDefault']));
+    this._alarmDurationDefault = JSON.parse(JSON.stringify(this._alarmConfiguration['alarmDurationDefault']));
+    const alarmEntities = [];
+    const ringerEntitiesIds = this._ringerEntities.map(item => item.entity_id);
+    const ringerEntitiesConfig = this._alarmConfiguration['ringerEntities'] ? JSON.parse(this._alarmConfiguration['ringerEntities']) : [];
+
+    ringerEntitiesConfig.forEach((item: RingerEntity) => { if (ringerEntitiesIds.indexOf(item.entity_id) >= 0) alarmEntities.push(item) });
+    this._ringerEntities = alarmEntities;
+    this._settingsDialogQ.show();
+    this._settingsDialogQ.classList.add('open');
+  }
+
+  closeDialog(target: string) {
+    const dialogElement: HTMLDialogElement = this.shadowRoot.querySelector(target);
+    dialogElement.classList.remove('open');
+    setTimeout(() => { dialogElement.close() }, 120);
+  }
+
+  _toggleLogoVisibility() {
+    if (this._clockLogoQ) {
+      if (this._clockLogoQ.style.display !== 'none') {
+        this._clockLogoQ.style.display = 'none';
+      } else {
+        this._clockLogoQ.style.display = 'block';
+      }
+    }
+  }
+=======
+>>>>>>> allyamlconfig
 }
 
