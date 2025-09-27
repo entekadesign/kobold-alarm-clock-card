@@ -7,10 +7,64 @@
    viewBox="0 0 198.43749 46.302082"
    version="1.1"
    id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="kobold6-inkscape.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="2.3786088"
+     inkscape:cx="327.92278"
+     inkscape:cy="152.61021"
+     inkscape:window-width="2256"
+     inkscape:window-height="1400"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2"
+     showguides="false">
+    <sodipodi:guide
+       position="61.979869,-79.742002"
+       orientation="0,-1"
+       id="guide181"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="54.90095,-75.533982"
+       orientation="1,0"
+       id="guide183"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="120.10566,-72.269812"
+       orientation="1,0"
+       id="guide185"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="129.56037,-84.384532"
+       orientation="0,-1"
+       id="guide187"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
   <defs
      id="defs2">
+    <linearGradient
+       id="linearGradient916"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1;"
+         offset="0"
+         id="stop914" />
+    </linearGradient>
     <rect
        x="134.53242"
        y="279.99561"
@@ -19,7 +73,21 @@
        id="rect113" />
   </defs>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
      id="layer1">
+    <g
+       inkscape:groupmode="layer"
+       id="layer2"
+       inkscape:label="background">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke-width:1.00012"
+         id="rect304"
+         width="198.43748"
+         height="46.302082"
+         x="-0.11123448"
+         y="0.11123449" />
+    </g>
     <g
        aria-label="KOBOLD"
        transform="matrix(0.26458333,0,0,0.26458333,-39.821947,11.568387)"

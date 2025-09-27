@@ -1,6 +1,6 @@
 <br><br>
-<div style="text-align: center">
-    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobold Logo" width="50%" style="text-align: center" />
+<div align="center">
+    <img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/kobold-logo.svg" alt="Kobold Logo" width="50%" align="center" />
 </div>
 <br><br>
 
@@ -35,11 +35,11 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 |||
 | :---: | :---: |
-| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" alt="Main view, 24-hour" width="100%" align="" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-editing.jpg" alt="Main view, alternative font" width="100%" align="" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
+| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" alt="Main view, 24-hour" width="100%" style="border: 1px dotted grey;" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-editing.jpg" alt="Main view, alternative font" width="100%" style="border: 1px dotted grey;" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
 |||
-| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" alt="Settings dialog" width="100%" align="" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/nap.jpg" alt="Nap dialog" width="100%" align="" /><figcaption>**Nap dialog**</figcaption></figure> |
+| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" alt="Settings dialog" width="100%" style="border: 1px dotted grey;" /><figcaption>**Settings dialog**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/nap.jpg" alt="Nap dialog" width="100%" style="border: 1px dotted grey;" /><figcaption>**Nap dialog**</figcaption></figure> |
 |||
-| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" align="" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" align="" /><figcaption>**Main view: HA dark mode, added HA cards,<br>alternate font**</figcaption></figure> |
+| <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/schedule.jpg" alt="Alarm schedule dialog" width="100%" style="border: 1px dotted grey;" /><figcaption>**Alarm schedule dialog: editing alarm**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/show-cards.jpg" alt="Main view, showing cards" width="100%" style="border: 1px dotted grey;" /><figcaption>**Main view: HA dark mode, added HA cards,<br>alternate font**</figcaption></figure> |
 |||
 
 <br>
