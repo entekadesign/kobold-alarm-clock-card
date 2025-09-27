@@ -33,7 +33,6 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
-<style>tbody tr:nth-child(1) td:nth-child(1) img, tbody tr:nth-child(1) td:nth-child(2) img  { border: 1px dotted grey; }</style>
 |||
 | :---: | :---: |
 | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" alt="Main view, 24-hour" width="100%" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-editing.jpg" alt="Main view, alternative font" width="100%" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
