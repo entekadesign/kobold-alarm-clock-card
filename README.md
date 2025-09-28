@@ -71,9 +71,7 @@ https://github.com/entekadesign/kobold-alarm-clock-card.git
 <config>/www/kobold-alarm-clock-card.js
 ```
 
-## Configuration
-
-If you installed Kobold manually:
+Manual installation further requires two configuration steps:
 
 1. Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
@@ -97,7 +95,7 @@ Delete your lovelace configuration except for the minimal configuration shown in
 Set an alarm for each day of the week in the **schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle switch indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, disable the nap duration in the **nap dialog**.
 
 
-## Optional configuration
+## Settings
 
 ### Alarm ringer entities
 
