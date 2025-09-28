@@ -17,7 +17,6 @@ export class AlarmController {
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
-    private _throttleNextAlarmReset;
 
     static defaultConfig = {
         name: "kobold_clock",
@@ -49,14 +48,6 @@ export class AlarmController {
     constructor(config: CardConfig, cardId?: string) {
         this._cardId = cardId;
         this._config = config; // TODO: make a copy here?
-
-        this._throttleNextAlarmReset = Helpers.throttle(() => {
-            if (this._config.debug) {
-                console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
-                this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm because nextAlarm date is in the past', 'level': 'info' });
-            }
-            this.nextAlarmReset();
-        }, 1000);
     }
 
     set hass(hass: HomeAssistant) {
@@ -179,7 +170,7 @@ export class AlarmController {
         const dateToday = dayjs().format('YYYY-MM-DD');
 
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
-            this._throttleNextAlarmReset;
+            this._throttleNextAlarmReset();
         }
 
         if (!this.isAlarmEnabled) return;
@@ -206,6 +197,14 @@ export class AlarmController {
                 });
         }
     }
+
+    _throttleNextAlarmReset = Helpers.throttle(() => {
+        if (this._config.debug) {
+            console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
+            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm because nextAlarm date is in the past', 'level': 'info' });
+        }
+        this.nextAlarmReset();
+    }, 1000);
 
     async _saveConfigEntries(entries) {
         try {

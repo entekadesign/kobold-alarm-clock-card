@@ -1318,6 +1318,16 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
             'turn_off': 'media_pause'
         };
         this._alarmActionsScript = [];
+        this._throttleNextAlarmReset = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle(()=>{
+            if (this._config.debug) {
+                console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** Resetting nextAlarm because nextAlarm date is in the past',
+                    'level': 'info'
+                });
+            }
+            this.nextAlarmReset();
+        }, 1000);
         this._throttleAlarmRinging = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle((state)=>{
             if (state) {
                 this._isAlarmRinging = true;
@@ -1329,16 +1339,6 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         }, 1000);
         this._cardId = cardId;
         this._config = config; // TODO: make a copy here?
-        this._throttleNextAlarmReset = (0, $1656612fccd2685e$export$4dc2b60021baefca).throttle(()=>{
-            if (this._config.debug) {
-                console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
-                this._hass.callService('system_log', 'write', {
-                    'message': '*** Resetting nextAlarm because nextAlarm date is in the past',
-                    'level': 'info'
-                });
-            }
-            this.nextAlarmReset();
-        }, 1000);
     }
     set hass(hass) {
         this._hass = hass;
@@ -1434,7 +1434,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
     _evaluate() {
         const nextAlarm = this.nextAlarm;
         const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD');
-        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) this._throttleNextAlarmReset;
+        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) this._throttleNextAlarmReset();
         if (!this.isAlarmEnabled) return;
         if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
