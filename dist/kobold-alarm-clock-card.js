@@ -3196,13 +3196,16 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     }
     setConfig(config) {
         this._config = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepMerge((0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).defaultConfig, config);
+        if (!this._oldConfig) this._oldConfig = this._config;
         const configChanges = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepCompareObj(this._config, config);
+        // console.log('*** setConfig; configChanges: ', configChanges);
+        // console.log('*** setConfig: _oldConfig: ', this._oldConfig);
         if (!configChanges) return;
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('YYYY-MM-DD HH:mm:ss');
         (0, $1656612fccd2685e$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //updates lovelace.config
-        if (!this._oldConfig) this._oldConfig = this._config;
+    // if (!this._oldConfig) this._oldConfig = this._config;
     }
     firstUpdated(_changedProperties) {
         const myDialog = (0, $1656612fccd2685e$export$4dc2b60021baefca).getEditor().shadowRoot.querySelector('ha-dialog');
@@ -3249,6 +3252,9 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         event.stopPropagation();
         if (!this._config) return;
         const configChanges = (0, $1656612fccd2685e$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
+        // console.log('*** configChanges: ', configChanges);
+        // console.log('*** this._oldConfig: ', this._oldConfig);
+        // console.log('*** event.detail.value: ', event.detail.value);
         if (!configChanges) return;
         const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().add(1, 'day').format('dd').toLowerCase();
         const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('dd').toLowerCase();
@@ -3258,6 +3264,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
             if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
                 const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format('HH:mm:ss') < event.detail.value[item].time;
                 const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
+                // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
                 event.detail.value.next_alarm = {
                     ...this._config.next_alarm,
                     ...(0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
@@ -3364,7 +3371,8 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     `;
     }
     _renderSettingsEditor() {
-        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`<div class="box">
+        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
+    <div class="box">
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
@@ -3415,7 +3423,8 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
       </div>`;
     }
     _renderScheduleEditor() {
-        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`<div class="box" id="schedule">
+        return (0, $0f25a2e8805a310f$export$c0bb0b647f701bb5)`
+    <div class="box" id="schedule">
       <ha-form
         .hass=${this._hass}
         .data=${this._config}
@@ -3425,68 +3434,66 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
       ></ha-form>
     </div>`;
     }
-    static get styles() {
-        return (0, $22deac181f878bbd$export$dbf350e5966cf602)`
-          sl-tab-group {
-            margin-bottom: 16px;
-          }
+    static #_ = this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
+        sl-tab-group {
+        margin-bottom: 16px;
+        }
 
-          sl-tab {
-            flex: 1;
-          }
+        sl-tab {
+        flex: 1;
+        }
 
-          sl-tab::part(base) {
-            width: 100%;
-            justify-content: center;
-          }
+        sl-tab::part(base) {
+        width: 100%;
+        justify-content: center;
+        }
 
-          .box {
-            margin-top: 8px;
-            border: 1px solid var(--divider-color);
-            padding: 12px;
-          }
-          .box .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-            gap: 8px;
-          }
-          .gui-mode-button {
-            margin-right: auto;
-          }
+        .box {
+        margin-top: 8px;
+        border: 1px solid var(--divider-color);
+        padding: 12px;
+        }
+        .box .toolbar {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        gap: 8px;
+        }
+        .gui-mode-button {
+        margin-right: auto;
+        }
 
-          .kobold-nap-form .ha-form-grid {
-            display: grid !important;
-            /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
-            /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-            /*grid-template-columns: auto auto;*/
-            grid-template-columns: auto 50%;
-            /*grid-template-columns: calc(35% - 4px) auto;*/
-            grid-column-gap: 8px;
-            grid-row-gap: 24px;
-            justify-content: end;
-          }
+        .kobold-nap-form .ha-form-grid {
+        display: grid !important;
+        /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
+        /*grid-template-columns: repeat(2, calc(50% - 4px));*/
+        /*grid-template-columns: auto auto;*/
+        grid-template-columns: auto 50%;
+        /*grid-template-columns: calc(35% - 4px) auto;*/
+        grid-column-gap: 8px;
+        grid-row-gap: 24px;
+        justify-content: end;
+        }
 
-          .kobold-nap-form .ha-form {
-            display: block;
-          }
+        .kobold-nap-form .ha-form {
+        display: block;
+        }
 
-          .kobold-nap-form .ha-formfield {
-            justify-content: space-between;
-            align-items: var(--ha-formfield-align-items, center);
-            gap: 4px;
-            width: 100%;
-            display: flex;
-            min-height: 56px;
-            align-items: center;
-            --mdc-typography-body2-font-size: 1em;
-          }
+        .kobold-nap-form .ha-formfield {
+        justify-content: space-between;
+        align-items: var(--ha-formfield-align-items, center);
+        gap: 4px;
+        width: 100%;
+        display: flex;
+        min-height: 56px;
+        align-items: center;
+        --mdc-typography-body2-font-size: 1em;
+        }
 
-          .kobold-nap-form p {
-            margin: 0;
-          }
-        `;
-    }
+        .kobold-nap-form p {
+        margin: 0;
+        }
+    `;
 }
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $e978bded0760ae3c$export$ca000e230c0caa3e)()

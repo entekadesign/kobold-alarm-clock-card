@@ -259,13 +259,16 @@ class KoboldCardEditor extends LitElement {
         if (editorStyleTag) editorStyleTag.remove();
     }
 
-    setConfig(config) {
+    setConfig(config: CardConfig) {
         this._config = Helpers.deepMerge(AlarmController.defaultConfig, config);
+        if (!this._oldConfig) this._oldConfig = this._config;
         const configChanges = Helpers.deepCompareObj(this._config, config);
+        // console.log('*** setConfig; configChanges: ', configChanges);
+        // console.log('*** setConfig: _oldConfig: ', this._oldConfig);
         if (!configChanges) return;
         this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
         Helpers.fireEvent('config-changed', { config: this._config }, this); //updates lovelace.config
-        if (!this._oldConfig) this._oldConfig = this._config;
+        // if (!this._oldConfig) this._oldConfig = this._config;
     }
 
     protected firstUpdated(_changedProperties: PropertyValues): void {
@@ -336,6 +339,9 @@ class KoboldCardEditor extends LitElement {
         event.stopPropagation();
         if (!this._config) return;
         const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
+        // console.log('*** configChanges: ', configChanges);
+        // console.log('*** this._oldConfig: ', this._oldConfig);
+        // console.log('*** event.detail.value: ', event.detail.value);
         if (!configChanges) return;
         const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
         const dayToday = dayjs().format('dd').toLowerCase();
@@ -350,6 +356,7 @@ class KoboldCardEditor extends LitElement {
 
                     const forToday = item === dayToday && dayjs().format('HH:mm:ss') < event.detail.value[item].time;
                     const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
+                    // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
                     event.detail.value.next_alarm = {
                         ...this._config.next_alarm,
                         ...AlarmController.createNextAlarm(newAlarm, forToday),
@@ -451,7 +458,8 @@ class KoboldCardEditor extends LitElement {
     }
 
     _renderSettingsEditor() {
-        return html`<div class="box">
+        return html`
+    <div class="box">
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
@@ -497,7 +505,8 @@ class KoboldCardEditor extends LitElement {
     }
 
     _renderScheduleEditor() {
-        return html`<div class="box" id="schedule">
+        return html`
+    <div class="box" id="schedule">
       <ha-form
         .hass=${this._hass}
         .data=${this._config}
@@ -508,66 +517,64 @@ class KoboldCardEditor extends LitElement {
     </div>`;
     };
 
-    static get styles() {
-        return css`
-          sl-tab-group {
-            margin-bottom: 16px;
-          }
+    static styles = css`
+        sl-tab-group {
+        margin-bottom: 16px;
+        }
 
-          sl-tab {
-            flex: 1;
-          }
+        sl-tab {
+        flex: 1;
+        }
 
-          sl-tab::part(base) {
-            width: 100%;
-            justify-content: center;
-          }
+        sl-tab::part(base) {
+        width: 100%;
+        justify-content: center;
+        }
 
-          .box {
-            margin-top: 8px;
-            border: 1px solid var(--divider-color);
-            padding: 12px;
-          }
-          .box .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-            gap: 8px;
-          }
-          .gui-mode-button {
-            margin-right: auto;
-          }
+        .box {
+        margin-top: 8px;
+        border: 1px solid var(--divider-color);
+        padding: 12px;
+        }
+        .box .toolbar {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        gap: 8px;
+        }
+        .gui-mode-button {
+        margin-right: auto;
+        }
 
-          .kobold-nap-form .ha-form-grid {
-            display: grid !important;
-            /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
-            /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-            /*grid-template-columns: auto auto;*/
-            grid-template-columns: auto 50%;
-            /*grid-template-columns: calc(35% - 4px) auto;*/
-            grid-column-gap: 8px;
-            grid-row-gap: 24px;
-            justify-content: end;
-          }
+        .kobold-nap-form .ha-form-grid {
+        display: grid !important;
+        /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
+        /*grid-template-columns: repeat(2, calc(50% - 4px));*/
+        /*grid-template-columns: auto auto;*/
+        grid-template-columns: auto 50%;
+        /*grid-template-columns: calc(35% - 4px) auto;*/
+        grid-column-gap: 8px;
+        grid-row-gap: 24px;
+        justify-content: end;
+        }
 
-          .kobold-nap-form .ha-form {
-            display: block;
-          }
+        .kobold-nap-form .ha-form {
+        display: block;
+        }
 
-          .kobold-nap-form .ha-formfield {
-            justify-content: space-between;
-            align-items: var(--ha-formfield-align-items, center);
-            gap: 4px;
-            width: 100%;
-            display: flex;
-            min-height: 56px;
-            align-items: center;
-            --mdc-typography-body2-font-size: 1em;
-          }
+        .kobold-nap-form .ha-formfield {
+        justify-content: space-between;
+        align-items: var(--ha-formfield-align-items, center);
+        gap: 4px;
+        width: 100%;
+        display: flex;
+        min-height: 56px;
+        align-items: center;
+        --mdc-typography-body2-font-size: 1em;
+        }
 
-          .kobold-nap-form p {
-            margin: 0;
-          }
-        `;
-    }
+        .kobold-nap-form p {
+        margin: 0;
+        }
+    `;
 }
