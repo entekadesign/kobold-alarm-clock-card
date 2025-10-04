@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 @customElement('kobold-card-editor')
 class KoboldCardEditor extends LitElement {
 
-    private _configSchemaSettings = [
+    private _configSchemaSettings = (time_format_12hr?: boolean) => [
         {
             name: "alarm_entities",
             label: "Alarm Ringer Entities",
@@ -21,6 +21,12 @@ class KoboldCardEditor extends LitElement {
             name: "time_format",
             label: "Time Format",
             selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
+        },
+        {
+            name: "period_icon",
+            label: "Icon as PM Indicator",
+            selector: { boolean: {} },
+            disabled: !time_format_12hr,
         },
         {
             name: "clock_display_font",
@@ -463,7 +469,7 @@ class KoboldCardEditor extends LitElement {
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr")}
           .computeLabel=${(s) => s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>

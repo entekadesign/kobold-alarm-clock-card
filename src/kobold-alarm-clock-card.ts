@@ -1,3 +1,5 @@
+// TODO: is line-height change during preview affecting kerning?
+// TODO: replace sl-tab instances with ha-tab?
 import { AlarmController } from './alarm-controller';
 import { Helpers } from './helpers';
 import './alarm-picker';
@@ -403,14 +405,15 @@ class KoboldAlarmClockCard extends LitElement {
           timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn;
         }
       } else {
+        const periodIcon = this._config.period_icon;
         let periodKern = '';
         const [timeSdNum, timeTxt] = timeSd.split(' ');
         if (showSeconds) {
           if (timeSdNum.slice(-1) === '1' || timeSdNum.slice(-1) === '7') periodKern = ' periodKern';
-          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSdNum + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSdNum + this._periodHtml(periodKern, timeTxt, periodIcon);
         } else {
           if (timeMn.slice(-1) === '1' || timeMn.slice(-1) === '7') periodKern = ' periodKern';
-          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+          timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + this._periodHtml(periodKern, timeTxt, periodIcon);
         }
       }
 
@@ -422,6 +425,14 @@ class KoboldAlarmClockCard extends LitElement {
 
       const dateFormat = this._config.time_format === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
       this._dateQ.innerHTML = dayjs().format(dateFormat);
+    }
+  }
+
+  _periodHtml(periodKern, timeTxt, periodIcon) {
+    if (periodIcon) {
+      return '<span class="periodIcon' + periodKern + '">' + (timeTxt === 'PM' ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
+    } else {
+      return '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
     }
   }
 
@@ -690,6 +701,9 @@ class KoboldAlarmClockCard extends LitElement {
     :host(.dark) #clock {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
+    :host(.dark) #clock .periodIcon {
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+    }
     /* Safari before v16 */
     @supports not (trim-margin: block) {
       @media not all and (min-resolution: 0.001dpcm) {
@@ -698,6 +712,20 @@ class KoboldAlarmClockCard extends LitElement {
           padding-right: 0.2em;
         }
       }
+    }
+    #clock .periodIcon {
+      position: relative;
+      display: inline-flex;
+      vertical-align: bottom;
+      margin-left: -0.25em;
+      padding-left: 0.35em;
+      bottom: 0.96em;
+    }
+    #clock .periodIcon ha-icon {
+      /*position: absolute;
+      top: 0.3em;*/
+      display: inline-flex;
+      --mdc-icon-size: 0.25em;
     }
     #clock .periodName {
       position: relative;
@@ -725,7 +753,7 @@ class KoboldAlarmClockCard extends LitElement {
         letter-spacing: -0.05em;
       }
     }
-    #clock .periodName.periodKern {
+    #clock .periodName.periodKern, #clock .periodIcon.periodKern {
       margin-left: -0.3em;
     }
     #clock .colonKernL {
@@ -755,6 +783,9 @@ class KoboldAlarmClockCard extends LitElement {
       bottom: 0.43em;
       letter-spacing: -0.5em;
     }
+    #clock.fontFace1 .periodIcon {
+      bottom: 0.98em;
+    }
     /* Firefox */
     @-moz-document url-prefix() {
       #clock.fontFace1 .periodName {
@@ -779,16 +810,23 @@ class KoboldAlarmClockCard extends LitElement {
       font-style: normal;
       letter-spacing: 0;
     }
+    #clock.fontFace2 .colon {
+      padding-left: 0.04em;
+      padding-right: 0.04em;
+    }
     #clock.fontFace2 .colonKernL {
-      margin-left: -0.05em;
+      /*margin-left: -0.05em;*/
     }
     #clock.fontFace2 .colonKernR {
-      margin-right: 0;
+      margin-right: -0.08em;
     }
     #clock.fontFace2 .periodName {
       /*bottom: 1.8vh;*/
       /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
+    }
+    #clock.fontFace2 .periodIcon {
+      bottom: 1.1em;
     }
 
     #clock.fontFace3 {
@@ -803,6 +841,9 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: -0.4em;
       /*bottom: 4.5vh;*/
       bottom: 0.43em;
+    }
+    #clock.fontFace3 .periodIcon {
+      bottom: 0.86em;
     }
     /* Firefox */
     @-moz-document url-prefix() {
@@ -933,9 +974,15 @@ class KoboldAlarmClockCard extends LitElement {
       /*font-size: 12em;*/
       font-size: calc(5cqw + 5em);
     }
-    :host([preview]) #clock.seconds {
-      /*font-size: 7em;*/
+    :host([preview].dark) #clock .periodIcon {
+      filter: none;
     }
+    :host([preview]) #clock > div {
+      line-height: var(--ha-line-height-normal);
+    }
+    /*:host([preview]) #clock.seconds {
+      font-size: 7em;
+    }*/
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
       /*bottom: 0.3em;*/
@@ -946,9 +993,9 @@ class KoboldAlarmClockCard extends LitElement {
     :host([preview]) #clock.fontFace3 .periodName.periodKern {
       margin-left: 0.1em;
     }
-    :host([preview]) #clock .colon {
-      /*bottom: 0.07em;*/
-    }
+    /*:host([preview]) #clock .colon {
+      bottom: 0.07em;
+    }*/
 
     :host([preview]) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0);

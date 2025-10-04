@@ -2,6 +2,8 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
+// TODO: is line-height change during preview affecting kerning?
+// TODO: replace sl-tab instances with ha-tab?
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -1063,79 +1065,97 @@ var $8cbe425b16190a93$exports = {};
 
 // HA types
 class $1656612fccd2685e$export$4dc2b60021baefca {
-    static #_ = this.getHa = ()=>{
-        let root = document.querySelector('home-assistant');
-        return root;
-    };
-    static #_2 = this.getEditor = ()=>{
-        let root = this.getHa();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('hui-dialog-edit-card');
-        // console.log('*** getEditor(); root: ', root);
-        return root;
-    };
-    static #_3 = this.getPreview = ()=>{
-        let root = this.getHa();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('hui-dialog-edit-card');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('div.element-preview');
-        // console.log('*** getPreview(); root: ', root);
-        return root;
-    };
-    static #_4 = this.getEditorButtons = ()=>{
-        let root = this.getEditor();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('div[slot="primaryAction"]');
-        // console.log('*** getEditorButtons(); root: ', root);
-        return root;
-    };
-    static #_5 = this.getLovelace = ()=>{
-        let root = this.getHa();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('home-assistant-main');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('ha-panel-lovelace');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('hui-root');
-        // console.log('*** getLovelace(); root: ', root);
-        return root;
-    };
-    static #_6 = this.getBackground = ()=>{
-        let root = this.getLovelace();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('hui-view-background');
-        // console.log('*** getBackground(); root: ', root);
-        return root;
-    };
-    static #_7 = this.getDrawer = ()=>{
-        let root = this.getHa();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('home-assistant-main');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('ha-drawer');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('aside');
-        // console.log('*** getDrawer(); root: ', root);
-        return root;
-    };
-    static #_8 = this.getNotification = ()=>{
-        let root = this.getHa();
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('notification-manager');
-        root = root && root.shadowRoot;
-        root = root && root.querySelector('ha-toast');
-        // console.log('*** getNotification(); root: ', root);
-        return root;
-    };
-    static #_9 = this.fireEvent = (event, detail, element = this.getLovelace())=>{
-        element.dispatchEvent(new CustomEvent(event, {
-            detail: detail,
-            bubbles: true,
-            cancelable: false,
-            composed: true
-        }));
-    };
+    static{
+        this.getHa = ()=>{
+            let root = document.querySelector('home-assistant');
+            return root;
+        };
+    }
+    static{
+        this.getEditor = ()=>{
+            let root = this.getHa();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('hui-dialog-edit-card');
+            // console.log('*** getEditor(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getPreview = ()=>{
+            let root = this.getHa();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('hui-dialog-edit-card');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('div.element-preview');
+            // console.log('*** getPreview(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getEditorButtons = ()=>{
+            let root = this.getEditor();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('div[slot="primaryAction"]');
+            // console.log('*** getEditorButtons(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getLovelace = ()=>{
+            let root = this.getHa();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('home-assistant-main');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('ha-panel-lovelace');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('hui-root');
+            // console.log('*** getLovelace(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getBackground = ()=>{
+            let root = this.getLovelace();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('hui-view-background');
+            // console.log('*** getBackground(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getDrawer = ()=>{
+            let root = this.getHa();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('home-assistant-main');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('ha-drawer');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('aside');
+            // console.log('*** getDrawer(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.getNotification = ()=>{
+            let root = this.getHa();
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('notification-manager');
+            root = root && root.shadowRoot;
+            root = root && root.querySelector('ha-toast');
+            // console.log('*** getNotification(); root: ', root);
+            return root;
+        };
+    }
+    static{
+        this.fireEvent = (event, detail, element = this.getLovelace())=>{
+            element.dispatchEvent(new CustomEvent(event, {
+                detail: detail,
+                bubbles: true,
+                cancelable: false,
+                composed: true
+            }));
+        };
+    }
     static deepMerge(obj1, obj2) {
         const result = {
             ...obj1
@@ -1192,29 +1212,33 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
             }
         };
     }
-    static #_10 = // source: frontend/src/common/config/version.ts
-    // @param version (this._hass.config.version)
-    // @param major (major version number)
-    // @param minor (minor version number)
-    // @returns boolean
-    this.atLeastVersion = (version, major, minor, patch)=>{
-        const [haMajor, haMinor, haPatch] = version.split(".", 3);
-        return Number(haMajor) > major || Number(haMajor) === major && (patch === undefined ? Number(haMinor) >= minor : Number(haMinor) > minor) || patch !== undefined && Number(haMajor) === major && Number(haMinor) === minor && Number(haPatch) >= patch;
-    };
-    static #_11 = this.testUntilTimeout = async (f, timeoutMs)=>{
-        return new Promise((resolve, reject)=>{
-            const timeWas = new Date();
-            const wait = setInterval(function() {
-                if (f()) {
-                    clearInterval(wait);
-                    resolve('resolved');
-                } else if (new Date().valueOf() - timeWas.valueOf() > timeoutMs) {
-                    clearInterval(wait);
-                    reject('timed out');
-                }
-            }, 20);
-        });
-    };
+    static{
+        // source: frontend/src/common/config/version.ts
+        // @param version (this._hass.config.version)
+        // @param major (major version number)
+        // @param minor (minor version number)
+        // @returns boolean
+        this.atLeastVersion = (version, major, minor, patch)=>{
+            const [haMajor, haMinor, haPatch] = version.split(".", 3);
+            return Number(haMajor) > major || Number(haMajor) === major && (patch === undefined ? Number(haMinor) >= minor : Number(haMinor) > minor) || patch !== undefined && Number(haMajor) === major && Number(haMinor) === minor && Number(haPatch) >= patch;
+        };
+    }
+    static{
+        this.testUntilTimeout = async (f, timeoutMs)=>{
+            return new Promise((resolve, reject)=>{
+                const timeWas = new Date();
+                const wait = setInterval(function() {
+                    if (f()) {
+                        clearInterval(wait);
+                        resolve('resolved');
+                    } else if (new Date().valueOf() - timeWas.valueOf() > timeoutMs) {
+                        clearInterval(wait);
+                        reject('timed out');
+                    }
+                }, 20);
+            });
+        };
+    }
     static updateHeight(element) {
         if (this._updateHeightOnNormalCard(element)) return true;
         if (this._updateHeightOnNestedCards(element)) return true;
@@ -1247,70 +1271,75 @@ class $1656612fccd2685e$export$4dc2b60021baefca {
 
 (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($8cbe425b16190a93$exports))));
 class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
-    static #_ = this.defaultConfig = {
-        name: "kobold_clock",
-        type: "custom:kobold-alarm-clock-card",
-        alarms_enabled: false,
-        next_alarm: {
-            ...$b2cd7c9abb677932$export$cfa71a29f5c0676d.createNextAlarm({
+    static{
+        this.defaultConfig = {
+            name: "kobold_clock",
+            type: "custom:kobold-alarm-clock-card",
+            alarms_enabled: false,
+            next_alarm: {
+                ...$b2cd7c9abb677932$export$cfa71a29f5c0676d.createNextAlarm({
+                    enabled: false,
+                    time: "07:00:00"
+                }),
+                overridden: false
+            },
+            mo: {
                 enabled: false,
                 time: "07:00:00"
-            }),
-            overridden: false
-        },
-        mo: {
-            enabled: false,
-            time: "07:00:00"
-        },
-        tu: {
-            enabled: false,
-            time: "07:00:00"
-        },
-        we: {
-            enabled: false,
-            time: "07:00:00"
-        },
-        th: {
-            enabled: false,
-            time: "07:00:00"
-        },
-        fr: {
-            enabled: false,
-            time: "07:00:00"
-        },
-        sa: {
-            enabled: false,
-            time: "09:00:00"
-        },
-        su: {
-            enabled: false,
-            time: "09:00:00"
-        },
-        snooze_duration_default: {
-            hours: 0,
-            minutes: 15,
-            seconds: 0
-        },
-        alarm_duration_default: {
-            hours: 0,
-            minutes: 30,
-            seconds: 0
-        },
-        nap_duration: {
-            hours: 0,
-            minutes: 30,
-            seconds: 0
-        },
-        time_format: "12hr",
-        clock_display_font: 0,
-        hide_cards_default: true,
-        debug: false
-    };
-    static #_2 = this.DOMAINS_ALARM_ENTITIES = [
-        "input_boolean",
-        "switch",
-        "media_player"
-    ];
+            },
+            tu: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            we: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            th: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            fr: {
+                enabled: false,
+                time: "07:00:00"
+            },
+            sa: {
+                enabled: false,
+                time: "09:00:00"
+            },
+            su: {
+                enabled: false,
+                time: "09:00:00"
+            },
+            snooze_duration_default: {
+                hours: 0,
+                minutes: 15,
+                seconds: 0
+            },
+            alarm_duration_default: {
+                hours: 0,
+                minutes: 30,
+                seconds: 0
+            },
+            nap_duration: {
+                hours: 0,
+                minutes: 30,
+                seconds: 0
+            },
+            time_format: "12hr",
+            period_icon: false,
+            clock_display_font: 0,
+            hide_cards_default: true,
+            debug: false
+        };
+    }
+    static{
+        this.DOMAINS_ALARM_ENTITIES = [
+            "input_boolean",
+            "switch",
+            "media_player"
+        ];
+    }
     constructor(config, cardId){
         this._isAlarmRinging = false;
         this._mappingMediaPlayer = {
@@ -2712,7 +2741,8 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             </div>
         `;
     }
-    static #_ = this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
+    static{
+        this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
         :host {
             --primary-color: var(--primary-text-color);
             --mdc-theme-primary: var(--primary-text-color);
@@ -2802,6 +2832,7 @@ class $3ce236f40c9404d3$var$AlarmPicker extends (0, $da1fd7e2c62fd6f3$export$3f2
             display: none;
         }
     `;
+    }
 }
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $e978bded0760ae3c$export$ca000e230c0caa3e)()
@@ -2858,165 +2889,173 @@ $3ce236f40c9404d3$var$AlarmPicker = (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644
 
 class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$export$3f2f9f5909897157) {
     constructor(){
-        super(), this._configSchemaSettings = [
-            {
-                name: "alarm_entities",
-                label: "Alarm Ringer Entities",
-                selector: {
-                    entity: {
-                        multiple: true,
-                        filter: {
-                            domain: (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).DOMAINS_ALARM_ENTITIES
+        super(), this._configSchemaSettings = (time_format_12hr)=>[
+                {
+                    name: "alarm_entities",
+                    label: "Alarm Ringer Entities",
+                    selector: {
+                        entity: {
+                            multiple: true,
+                            filter: {
+                                domain: (0, $b2cd7c9abb677932$export$cfa71a29f5c0676d).DOMAINS_ALARM_ENTITIES
+                            }
                         }
                     }
-                }
-            },
-            {
-                name: "time_format",
-                label: "Time Format",
-                selector: {
-                    select: {
-                        options: [
-                            {
-                                label: "12-Hour",
-                                value: "12hr"
-                            },
-                            {
-                                label: "24-Hour",
-                                value: "24hr"
-                            }
-                        ]
-                    }
-                }
-            },
-            {
-                name: "clock_display_font",
-                label: "Clock Display Font",
-                selector: {
-                    select: {
-                        options: [
-                            {
-                                label: "System",
-                                value: 0
-                            },
-                            {
-                                label: "Noto Sans",
-                                value: 1
-                            },
-                            {
-                                label: "Oswald",
-                                value: 2
-                            },
-                            {
-                                label: "IBM Plex Sans",
-                                value: 3
-                            }
-                        ]
-                    }
-                }
-            },
-            {
-                name: "snooze_duration_default",
-                label: "Snooze Duration Default",
-                selector: {
-                    duration: {}
-                }
-            },
-            {
-                name: "alarm_duration_default",
-                label: "Alarm Duration Default",
-                selector: {
-                    duration: {}
-                }
-            },
-            {
-                name: "alarm_actions",
-                label: "Alarm Actions",
-                selector: {
-                    object: {
-                        label_field: "entity",
-                        description_field: "when",
-                        multiple: true,
-                        fields: {
-                            entity: {
-                                label: "Alarm Action Entity",
-                                selector: {
-                                    entity: {}
+                },
+                {
+                    name: "time_format",
+                    label: "Time Format",
+                    selector: {
+                        select: {
+                            options: [
+                                {
+                                    label: "12-Hour",
+                                    value: "12hr"
                                 },
-                                required: true
-                            },
-                            when: {
-                                label: "Activate Action",
-                                selector: {
-                                    select: {
-                                        options: [
-                                            {
-                                                label: "On Snooze",
-                                                value: "on_snooze"
-                                            },
-                                            {
-                                                label: "On Dismiss",
-                                                value: "on_dismiss"
-                                            },
-                                            {
-                                                label: "At Time Offset from Alarm",
-                                                value: "offset"
-                                            }
-                                        ]
+                                {
+                                    label: "24-Hour",
+                                    value: "24hr"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    name: "period_icon",
+                    label: "Icon as PM Indicator",
+                    selector: {
+                        boolean: {}
+                    },
+                    disabled: !time_format_12hr
+                },
+                {
+                    name: "clock_display_font",
+                    label: "Clock Display Font",
+                    selector: {
+                        select: {
+                            options: [
+                                {
+                                    label: "System",
+                                    value: 0
+                                },
+                                {
+                                    label: "Noto Sans",
+                                    value: 1
+                                },
+                                {
+                                    label: "Oswald",
+                                    value: 2
+                                },
+                                {
+                                    label: "IBM Plex Sans",
+                                    value: 3
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    name: "snooze_duration_default",
+                    label: "Snooze Duration Default",
+                    selector: {
+                        duration: {}
+                    }
+                },
+                {
+                    name: "alarm_duration_default",
+                    label: "Alarm Duration Default",
+                    selector: {
+                        duration: {}
+                    }
+                },
+                {
+                    name: "alarm_actions",
+                    label: "Alarm Actions",
+                    selector: {
+                        object: {
+                            label_field: "entity",
+                            description_field: "when",
+                            multiple: true,
+                            fields: {
+                                entity: {
+                                    label: "Alarm Action Entity",
+                                    selector: {
+                                        entity: {}
+                                    },
+                                    required: true
+                                },
+                                when: {
+                                    label: "Activate Action",
+                                    selector: {
+                                        select: {
+                                            options: [
+                                                {
+                                                    label: "On Snooze",
+                                                    value: "on_snooze"
+                                                },
+                                                {
+                                                    label: "On Dismiss",
+                                                    value: "on_dismiss"
+                                                },
+                                                {
+                                                    label: "At Time Offset from Alarm",
+                                                    value: "offset"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    required: true
+                                },
+                                offset: {
+                                    label: "Offset Duration",
+                                    selector: {
+                                        duration: {}
                                     }
                                 },
-                                required: true
-                            },
-                            offset: {
-                                label: "Offset Duration",
-                                selector: {
-                                    duration: {}
-                                }
-                            },
-                            negative: {
-                                label: "Offset Negative",
-                                selector: {
-                                    boolean: {}
+                                negative: {
+                                    label: "Offset Negative",
+                                    selector: {
+                                        boolean: {}
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            },
-            {
-                name: "cards",
-                label: "Cards to Display",
-                selector: {
-                    object: {
-                        label_field: "entity",
-                        multiple: true,
-                        reorder: true,
-                        fields: {
-                            entity: {
-                                label: "Card Entity",
-                                selector: {
-                                    entity: {}
+                },
+                {
+                    name: "cards",
+                    label: "Cards to Display",
+                    selector: {
+                        object: {
+                            label_field: "entity",
+                            multiple: true,
+                            reorder: true,
+                            fields: {
+                                entity: {
+                                    label: "Card Entity",
+                                    selector: {
+                                        entity: {}
+                                    },
+                                    required: true
                                 },
-                                required: true
-                            },
-                            "": {
-                                label: "Card Configuration",
-                                selector: {
-                                    object: {}
+                                "": {
+                                    label: "Card Configuration",
+                                    selector: {
+                                        object: {}
+                                    }
                                 }
                             }
                         }
                     }
+                },
+                {
+                    name: "debug",
+                    label: "Debug Mode",
+                    selector: {
+                        boolean: {}
+                    }
                 }
-            },
-            {
-                name: "debug",
-                label: "Debug Mode",
-                selector: {
-                    boolean: {}
-                }
-            }
-        ], this._configSchemaSchedule = (alarms_disabled)=>[
+            ], this._configSchemaSchedule = (alarms_disabled)=>[
                 {
                     name: "alarms_enabled",
                     label: "Alarms Schedule Enabled",
@@ -3376,7 +3415,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr")}
           .computeLabel=${(s)=>s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>
@@ -3434,7 +3473,8 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
       ></ha-form>
     </div>`;
     }
-    static #_ = this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
+    static{
+        this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
         sl-tab-group {
         margin-bottom: 16px;
         }
@@ -3494,6 +3534,7 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
         margin: 0;
         }
     `;
+    }
 }
 (0, $6dd3ba7ab41ebe11$export$29e00dfd3077644b)([
     (0, $e978bded0760ae3c$export$ca000e230c0caa3e)()
@@ -3871,14 +3912,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
                 if (showSeconds) timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSd;
                 else timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn;
             } else {
+                const periodIcon = this._config.period_icon;
                 let periodKern = '';
                 const [timeSdNum, timeTxt] = timeSd.split(' ');
                 if (showSeconds) {
                     if (timeSdNum.slice(-1) === '1' || timeSdNum.slice(-1) === '7') periodKern = ' periodKern';
-                    timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSdNum + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+                    timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="colon' + colon2Kern + '">:</span>' + timeSdNum + this._periodHtml(periodKern, timeTxt, periodIcon);
                 } else {
                     if (timeMn.slice(-1) === '1' || timeMn.slice(-1) === '7') periodKern = ' periodKern';
-                    timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
+                    timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn + this._periodHtml(periodKern, timeTxt, periodIcon);
                 }
             }
             this._clockQ.innerHTML = `
@@ -3889,6 +3931,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
             const dateFormat = this._config.time_format === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
             this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($7b2a0b4b3c09b2f0$exports)))().format(dateFormat);
         }
+    }
+    _periodHtml(periodKern, timeTxt, periodIcon) {
+        if (periodIcon) return '<span class="periodIcon' + periodKern + '">' + (timeTxt === 'PM' ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
+        else return '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
     }
     _areAlarmsEnabled() {
         return this._config.alarms_enabled || !!this._alarmController.nextAlarm.overridden;
@@ -4043,7 +4089,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         </div>
       `;
     }
-    static #_ = this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
+    static{
+        this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
 
     /* ************ */
     /* *** main *** */
@@ -4137,6 +4184,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host(.dark) #clock {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
+    :host(.dark) #clock .periodIcon {
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+    }
     /* Safari before v16 */
     @supports not (trim-margin: block) {
       @media not all and (min-resolution: 0.001dpcm) {
@@ -4145,6 +4195,20 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
           padding-right: 0.2em;
         }
       }
+    }
+    #clock .periodIcon {
+      position: relative;
+      display: inline-flex;
+      vertical-align: bottom;
+      margin-left: -0.25em;
+      padding-left: 0.35em;
+      bottom: 0.96em;
+    }
+    #clock .periodIcon ha-icon {
+      /*position: absolute;
+      top: 0.3em;*/
+      display: inline-flex;
+      --mdc-icon-size: 0.25em;
     }
     #clock .periodName {
       position: relative;
@@ -4172,7 +4236,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
         letter-spacing: -0.05em;
       }
     }
-    #clock .periodName.periodKern {
+    #clock .periodName.periodKern, #clock .periodIcon.periodKern {
       margin-left: -0.3em;
     }
     #clock .colonKernL {
@@ -4202,6 +4266,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       bottom: 0.43em;
       letter-spacing: -0.5em;
     }
+    #clock.fontFace1 .periodIcon {
+      bottom: 0.98em;
+    }
     /* Firefox */
     @-moz-document url-prefix() {
       #clock.fontFace1 .periodName {
@@ -4226,16 +4293,23 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       font-style: normal;
       letter-spacing: 0;
     }
+    #clock.fontFace2 .colon {
+      padding-left: 0.04em;
+      padding-right: 0.04em;
+    }
     #clock.fontFace2 .colonKernL {
-      margin-left: -0.05em;
+      /*margin-left: -0.05em;*/
     }
     #clock.fontFace2 .colonKernR {
-      margin-right: 0;
+      margin-right: -0.08em;
     }
     #clock.fontFace2 .periodName {
       /*bottom: 1.8vh;*/
       /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
+    }
+    #clock.fontFace2 .periodIcon {
+      bottom: 1.1em;
     }
 
     #clock.fontFace3 {
@@ -4250,6 +4324,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       letter-spacing: -0.4em;
       /*bottom: 4.5vh;*/
       bottom: 0.43em;
+    }
+    #clock.fontFace3 .periodIcon {
+      bottom: 0.86em;
     }
     /* Firefox */
     @-moz-document url-prefix() {
@@ -4380,9 +4457,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       /*font-size: 12em;*/
       font-size: calc(5cqw + 5em);
     }
-    :host([preview]) #clock.seconds {
-      /*font-size: 7em;*/
+    :host([preview].dark) #clock .periodIcon {
+      filter: none;
     }
+    :host([preview]) #clock > div {
+      line-height: var(--ha-line-height-normal);
+    }
+    /*:host([preview]) #clock.seconds {
+      font-size: 7em;
+    }*/
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
       /*bottom: 0.3em;*/
@@ -4393,9 +4476,9 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host([preview]) #clock.fontFace3 .periodName.periodKern {
       margin-left: 0.1em;
     }
-    :host([preview]) #clock .colon {
-      /*bottom: 0.07em;*/
-    }
+    /*:host([preview]) #clock .colon {
+      bottom: 0.07em;
+    }*/
 
     :host([preview]) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0);
@@ -4410,6 +4493,7 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       display: none;
     }
   `;
+    }
     constructor(...args){
         super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this.preview = false, this._connectionStatusEvent = (event)=>{
             if (event.detail === 'connected') {
