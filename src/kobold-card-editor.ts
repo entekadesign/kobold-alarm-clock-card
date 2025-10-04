@@ -525,62 +525,58 @@ class KoboldCardEditor extends LitElement {
 
     static styles = css`
         sl-tab-group {
-        margin-bottom: 16px;
+            margin-bottom: 16px;
         }
 
         sl-tab {
-        flex: 1;
+            flex: 1;
         }
 
         sl-tab::part(base) {
-        width: 100%;
-        justify-content: center;
+            width: 100%;
+            justify-content: center;
         }
 
         .box {
-        margin-top: 8px;
-        border: 1px solid var(--divider-color);
-        padding: 12px;
+            margin-top: 8px;
+            border: 1px solid var(--divider-color);
+            padding: 12px;
         }
         .box .toolbar {
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
-        gap: 8px;
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            gap: 8px;
         }
         .gui-mode-button {
-        margin-right: auto;
+            margin-right: auto;
         }
 
         .kobold-nap-form .ha-form-grid {
-        display: grid !important;
-        /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
-        /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-        /*grid-template-columns: auto auto;*/
-        grid-template-columns: auto 50%;
-        /*grid-template-columns: calc(35% - 4px) auto;*/
-        grid-column-gap: 8px;
-        grid-row-gap: 24px;
-        justify-content: end;
+            display: grid !important;
+            grid-template-columns: auto 50%;
+            grid-column-gap: 8px;
+            grid-row-gap: 24px;
+            justify-content: end;
         }
 
         .kobold-nap-form .ha-form {
-        display: block;
+            display: block;
         }
 
         .kobold-nap-form .ha-formfield {
-        justify-content: space-between;
-        align-items: var(--ha-formfield-align-items, center);
-        gap: 4px;
-        width: 100%;
-        display: flex;
-        min-height: 56px;
-        align-items: center;
-        --mdc-typography-body2-font-size: 1em;
+            justify-content: space-between;
+            align-items: var(--ha-formfield-align-items, center);
+            gap: 4px;
+            width: 100%;
+            display: flex;
+            min-height: 56px;
+            align-items: center;
+            --mdc-typography-body2-font-size: 1em;
         }
 
         .kobold-nap-form p {
-        margin: 0;
+            margin: 0;
         }
     `;
 }

@@ -211,6 +211,7 @@ export class AlarmController {
         try {
             const lovelace = Helpers.getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
+            // TODO: replace all sl-tab instances with ha-tab everywhere
             const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
             const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
             const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');

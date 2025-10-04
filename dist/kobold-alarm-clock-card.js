@@ -2,8 +2,6 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
-// TODO: is line-height change during preview affecting kerning?
-// TODO: replace sl-tab instances with ha-tab?
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -1483,6 +1481,7 @@ class $b2cd7c9abb677932$export$cfa71a29f5c0676d {
         try {
             const lovelace = (0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
+            // TODO: replace all sl-tab instances with ha-tab everywhere
             const tabGroupArry = [
                 ...(0, $1656612fccd2685e$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
             ];
@@ -3476,62 +3475,58 @@ class $d6cbb17091a7de38$var$KoboldCardEditor extends (0, $da1fd7e2c62fd6f3$expor
     static{
         this.styles = (0, $22deac181f878bbd$export$dbf350e5966cf602)`
         sl-tab-group {
-        margin-bottom: 16px;
+            margin-bottom: 16px;
         }
 
         sl-tab {
-        flex: 1;
+            flex: 1;
         }
 
         sl-tab::part(base) {
-        width: 100%;
-        justify-content: center;
+            width: 100%;
+            justify-content: center;
         }
 
         .box {
-        margin-top: 8px;
-        border: 1px solid var(--divider-color);
-        padding: 12px;
+            margin-top: 8px;
+            border: 1px solid var(--divider-color);
+            padding: 12px;
         }
         .box .toolbar {
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
-        gap: 8px;
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            gap: 8px;
         }
         .gui-mode-button {
-        margin-right: auto;
+            margin-right: auto;
         }
 
         .kobold-nap-form .ha-form-grid {
-        display: grid !important;
-        /*grid-template-columns: repeat(var(--form-grid-column-count, auto-fit), minmax(var(--form-grid-min-width, 200px), 1fr));*/
-        /*grid-template-columns: repeat(2, calc(50% - 4px));*/
-        /*grid-template-columns: auto auto;*/
-        grid-template-columns: auto 50%;
-        /*grid-template-columns: calc(35% - 4px) auto;*/
-        grid-column-gap: 8px;
-        grid-row-gap: 24px;
-        justify-content: end;
+            display: grid !important;
+            grid-template-columns: auto 50%;
+            grid-column-gap: 8px;
+            grid-row-gap: 24px;
+            justify-content: end;
         }
 
         .kobold-nap-form .ha-form {
-        display: block;
+            display: block;
         }
 
         .kobold-nap-form .ha-formfield {
-        justify-content: space-between;
-        align-items: var(--ha-formfield-align-items, center);
-        gap: 4px;
-        width: 100%;
-        display: flex;
-        min-height: 56px;
-        align-items: center;
-        --mdc-typography-body2-font-size: 1em;
+            justify-content: space-between;
+            align-items: var(--ha-formfield-align-items, center);
+            gap: 4px;
+            width: 100%;
+            display: flex;
+            min-height: 56px;
+            align-items: center;
+            --mdc-typography-body2-font-size: 1em;
         }
 
         .kobold-nap-form p {
-        margin: 0;
+            margin: 0;
         }
     `;
     }
@@ -4247,22 +4242,15 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
     #clock .colon {
       position: relative;
-      /*bottom: 3.3vh;*/
       bottom: 0.09em;
     }
 
     #clock.fontFace1 {
       font-family: 'noto_sansmedium';
-      /*font-family: 'Noto Sans', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
-      /*font-variation-settings: 'wdth' 87.5;*/
       letter-spacing: 0;
     }
     #clock.fontFace1 .periodName {
-      /*bottom: 4vh;*/
       bottom: 0.43em;
       letter-spacing: -0.5em;
     }
@@ -4286,10 +4274,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
 
     #clock.fontFace2 {
       font-family: 'oswald_regularregular';
-      /*font-family: 'Oswald', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
       letter-spacing: 0;
     }
@@ -4297,15 +4281,10 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
       padding-left: 0.04em;
       padding-right: 0.04em;
     }
-    #clock.fontFace2 .colonKernL {
-      /*margin-left: -0.05em;*/
-    }
     #clock.fontFace2 .colonKernR {
       margin-right: -0.08em;
     }
     #clock.fontFace2 .periodName {
-      /*bottom: 1.8vh;*/
-      /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
     }
     #clock.fontFace2 .periodIcon {
@@ -4314,15 +4293,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
 
     #clock.fontFace3 {
       font-family: 'ibm_plex_sansmedium';
-      /*font-family: 'IBM Plex Sans', sans-serif;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
       letter-spacing: -0.4em;
-      /*bottom: 4.5vh;*/
       bottom: 0.43em;
     }
     #clock.fontFace3 .periodIcon {
@@ -4426,8 +4401,6 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     }
 
     .alarmButton button:hover {
-      /*background-color: rgba(255,255,255,0.90);*/
-      /*opacity: 0.6;*/
       background-color: rgba(var(--kobold-color-rgb),0.75); /* #696969 */
     }
     :host(.dark) .alarmButton button {
@@ -4447,14 +4420,11 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     /* *************** */
 
     :host([preview]) #koboldClock {
-      /*height: 65vh;*/
       height: 15rem;
     }
     :host([preview]) #clock {
       text-shadow: none;
       font-size: calc(5em + 100%);
-      /*font-size: 10em;*/
-      /*font-size: 12em;*/
       font-size: calc(5cqw + 5em);
     }
     :host([preview].dark) #clock .periodIcon {
@@ -4463,12 +4433,8 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host([preview]) #clock > div {
       line-height: var(--ha-line-height-normal);
     }
-    /*:host([preview]) #clock.seconds {
-      font-size: 7em;
-    }*/
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
-      /*bottom: 0.3em;*/
     }
     :host([preview]) #clock .periodName.periodKern {
       margin-left: 0.01em;
@@ -4476,19 +4442,13 @@ class $2109a11e0895c6b1$var$KoboldAlarmClockCard extends (0, $da1fd7e2c62fd6f3$e
     :host([preview]) #clock.fontFace3 .periodName.periodKern {
       margin-left: 0.1em;
     }
-    /*:host([preview]) #clock .colon {
-      bottom: 0.07em;
-    }*/
-
     :host([preview]) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0);
       display: block;
     }
-
     :host([preview].dark) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0.883); /* #e1e1e1 */
     }
-
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
       display: none;
     }

@@ -1,5 +1,3 @@
-// TODO: is line-height change during preview affecting kerning?
-// TODO: replace sl-tab instances with ha-tab?
 import { AlarmController } from './alarm-controller';
 import { Helpers } from './helpers';
 import './alarm-picker';
@@ -428,7 +426,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  _periodHtml(periodKern, timeTxt, periodIcon) {
+  _periodHtml(periodKern: string, timeTxt: string, periodIcon: string) {
     if (periodIcon) {
       return '<span class="periodIcon' + periodKern + '">' + (timeTxt === 'PM' ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
     } else {
@@ -764,22 +762,15 @@ class KoboldAlarmClockCard extends LitElement {
     }
     #clock .colon {
       position: relative;
-      /*bottom: 3.3vh;*/
       bottom: 0.09em;
     }
 
     #clock.fontFace1 {
       font-family: 'noto_sansmedium';
-      /*font-family: 'Noto Sans', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
-      /*font-variation-settings: 'wdth' 87.5;*/
       letter-spacing: 0;
     }
     #clock.fontFace1 .periodName {
-      /*bottom: 4vh;*/
       bottom: 0.43em;
       letter-spacing: -0.5em;
     }
@@ -803,10 +794,6 @@ class KoboldAlarmClockCard extends LitElement {
 
     #clock.fontFace2 {
       font-family: 'oswald_regularregular';
-      /*font-family: 'Oswald', sans-serif;*/
-      /*font-optical-sizing: auto;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
       letter-spacing: 0;
     }
@@ -814,15 +801,10 @@ class KoboldAlarmClockCard extends LitElement {
       padding-left: 0.04em;
       padding-right: 0.04em;
     }
-    #clock.fontFace2 .colonKernL {
-      /*margin-left: -0.05em;*/
-    }
     #clock.fontFace2 .colonKernR {
       margin-right: -0.08em;
     }
     #clock.fontFace2 .periodName {
-      /*bottom: 1.8vh;*/
-      /*letter-spacing: -0.4em;*/
       letter-spacing: 0;
     }
     #clock.fontFace2 .periodIcon {
@@ -831,15 +813,11 @@ class KoboldAlarmClockCard extends LitElement {
 
     #clock.fontFace3 {
       font-family: 'ibm_plex_sansmedium';
-      /*font-family: 'IBM Plex Sans', sans-serif;*/
-      /*font-weight: 600;*/
-      /*font-weight: normal;*/
       font-style: normal;
       letter-spacing: 0;
     }
     #clock.fontFace3 .periodName {
       letter-spacing: -0.4em;
-      /*bottom: 4.5vh;*/
       bottom: 0.43em;
     }
     #clock.fontFace3 .periodIcon {
@@ -943,8 +921,6 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     .alarmButton button:hover {
-      /*background-color: rgba(255,255,255,0.90);*/
-      /*opacity: 0.6;*/
       background-color: rgba(var(--kobold-color-rgb),0.75); /* #696969 */
     }
     :host(.dark) .alarmButton button {
@@ -964,14 +940,11 @@ class KoboldAlarmClockCard extends LitElement {
     /* *************** */
 
     :host([preview]) #koboldClock {
-      /*height: 65vh;*/
       height: 15rem;
     }
     :host([preview]) #clock {
       text-shadow: none;
       font-size: calc(5em + 100%);
-      /*font-size: 10em;*/
-      /*font-size: 12em;*/
       font-size: calc(5cqw + 5em);
     }
     :host([preview].dark) #clock .periodIcon {
@@ -980,12 +953,8 @@ class KoboldAlarmClockCard extends LitElement {
     :host([preview]) #clock > div {
       line-height: var(--ha-line-height-normal);
     }
-    /*:host([preview]) #clock.seconds {
-      font-size: 7em;
-    }*/
     :host([preview]) #clock .periodName {
       margin-left: 0.3em;
-      /*bottom: 0.3em;*/
     }
     :host([preview]) #clock .periodName.periodKern {
       margin-left: 0.01em;
@@ -993,19 +962,13 @@ class KoboldAlarmClockCard extends LitElement {
     :host([preview]) #clock.fontFace3 .periodName.periodKern {
       margin-left: 0.1em;
     }
-    /*:host([preview]) #clock .colon {
-      bottom: 0.07em;
-    }*/
-
     :host([preview]) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0);
       display: block;
     }
-
     :host([preview].dark) div#alarmTop > div#koboldLogo {
       filter: invert(1) brightness(0.883); /* #e1e1e1 */
     }
-
     :host([preview]) #foot, :host([preview]) #date, :host([preview]) #alarmTop .settingsButtons, :host([preview]) #alarmTop alarm-picker, :host([preview]) .alarmpickerButton {
       display: none;
     }
