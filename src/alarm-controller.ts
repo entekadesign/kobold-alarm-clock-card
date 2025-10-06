@@ -97,14 +97,13 @@ export class AlarmController {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             }
         } else {
-            // new nextAlarm will set snooze, and overridden to default settings
             const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
             const dayToday = dayjs().format('dd').toLowerCase();
             const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
             const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
             keyValue = AlarmController.createNextAlarm(newAlarm, forToday);
         }
-        this.nextAlarm = keyValue;
+        if (!!Helpers.deepCompareObj(this.nextAlarm, keyValue)) this.nextAlarm = keyValue;
     }
 
     static createNextAlarm(alarm: TimeObject, forToday = false, overridden = false): NextAlarmObject {
@@ -138,10 +137,6 @@ export class AlarmController {
             return AlarmController.defaultConfig.next_alarm;
         }
         return nextAlarm;
-    }
-
-    get controllerConfigLastUpdated() {
-        return this._config.last_updated;
     }
 
     get isAlarmEnabled() {
@@ -212,6 +207,7 @@ export class AlarmController {
             const lovelace = Helpers.getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
             // TODO: replace all sl-tab instances with ha-tab everywhere
+            // starting HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
             const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
             const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
             const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');

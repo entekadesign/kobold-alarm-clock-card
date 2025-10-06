@@ -128,6 +128,7 @@ class KoboldAlarmClockCard extends LitElement {
         conn.subscribeEvents(() => {
           window.setTimeout(() => {
             this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+            this._alarmController.dismiss(); // in case alarm ringing at moment of restart
             window.setTimeout(() => {
               location.reload();
             }, 1000 * 2);
@@ -357,12 +358,11 @@ class KoboldAlarmClockCard extends LitElement {
     this._alarmController.evaluateAlarms();
     const fontNum = (!this._config.clock_display_font) ? '0' : this._config.clock_display_font;
     let clockClass = 'fontFace' + fontNum;
+    this._clockQ.classList.add(clockClass);
+    const periodIcon = this._config.period_icon;
+    if (periodIcon) this._clockQ.classList.add('periodIcon');
     const showSeconds = false;
-    if (showSeconds) {
-      this._clockQ.classList.add(clockClass, 'seconds');
-    } else {
-      this._clockQ.classList.add(clockClass);
-    }
+    if (showSeconds) this._clockQ.classList.add('seconds');
 
     const time = dayjs().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
     const isAlarmRinging = this._alarmController.isAlarmRinging();
@@ -370,19 +370,8 @@ class KoboldAlarmClockCard extends LitElement {
     if (this._clockQ &&
       (force
         || this._time !== time
-        // || this._ringing !== isAlarmRinging
-        // TODO: test if it is possible for these lastupdated variables to come apart now (maybe testing diff btwn last_updated for config on card and config on controller); if not, delete last_updated from config
-        // || this._controllersAlarmConfigLastUpdate !== this._config.last_updated
       )) {
       this._time = time;
-      // this._ringing = isAlarmRinging;  //TODO: do we need both these variables? seems not; leave for testing
-      // this._controllersAlarmConfigLastUpdate = this._config.last_updated;
-      if (this._alarmController.controllerConfigLastUpdated !== this._config.last_updated) {
-        //TODO: testing
-        console.log('*** updateTime; controller config and card config differ');
-        this._hass.callService('system_log', 'write', { 'message': '*** updateTime; controller config and card config differ', 'level': 'info' });
-      }
-      // console.log('*** updateTime(); last_updated: ', this._config.last_updated);
 
       let timeDisplay: string;
       // time variable includes seconds, even when showSeconds is false
@@ -403,7 +392,6 @@ class KoboldAlarmClockCard extends LitElement {
           timeDisplay = timeHr + '<span class="colon' + colon1Kern + '">:</span>' + timeMn;
         }
       } else {
-        const periodIcon = this._config.period_icon;
         let periodKern = '';
         const [timeSdNum, timeTxt] = timeSd.split(' ');
         if (showSeconds) {
@@ -699,7 +687,7 @@ class KoboldAlarmClockCard extends LitElement {
     :host(.dark) #clock {
       text-shadow: 0 0 0.04em var(--primary-text-color);
     }
-    :host(.dark) #clock .periodIcon {
+    :host(.dark) #clock span.periodIcon {
       filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
     }
     /* Safari before v16 */
@@ -711,7 +699,10 @@ class KoboldAlarmClockCard extends LitElement {
         }
       }
     }
-    #clock .periodIcon {
+    #clock.periodIcon {
+      padding-left: 0.3em;
+    }
+    #clock span.periodIcon {
       position: relative;
       display: inline-flex;
       vertical-align: bottom;
@@ -719,7 +710,7 @@ class KoboldAlarmClockCard extends LitElement {
       padding-left: 0.35em;
       bottom: 0.96em;
     }
-    #clock .periodIcon ha-icon {
+    #clock span.periodIcon ha-icon {
       /*position: absolute;
       top: 0.3em;*/
       display: inline-flex;
@@ -751,7 +742,7 @@ class KoboldAlarmClockCard extends LitElement {
         letter-spacing: -0.05em;
       }
     }
-    #clock .periodName.periodKern, #clock .periodIcon.periodKern {
+    #clock .periodName.periodKern, #clock span.periodIcon.periodKern {
       margin-left: -0.3em;
     }
     #clock .colonKernL {
@@ -774,7 +765,7 @@ class KoboldAlarmClockCard extends LitElement {
       bottom: 0.43em;
       letter-spacing: -0.5em;
     }
-    #clock.fontFace1 .periodIcon {
+    #clock.fontFace1 span.periodIcon {
       bottom: 0.98em;
     }
     /* Firefox */
@@ -807,8 +798,14 @@ class KoboldAlarmClockCard extends LitElement {
     #clock.fontFace2 .periodName {
       letter-spacing: 0;
     }
-    #clock.fontFace2 .periodIcon {
+    #clock.fontFace2 span.periodIcon {
       bottom: 1.1em;
+    }
+    /* Safari */
+    @media not all and (min-resolution: 0.001dpcm) {
+      #clock.fontFace2 span.periodIcon {
+        bottom: 1em;
+      }
     }
 
     #clock.fontFace3 {
@@ -820,7 +817,7 @@ class KoboldAlarmClockCard extends LitElement {
       letter-spacing: -0.4em;
       bottom: 0.43em;
     }
-    #clock.fontFace3 .periodIcon {
+    #clock.fontFace3 span.periodIcon {
       bottom: 0.86em;
     }
     /* Firefox */
@@ -947,7 +944,7 @@ class KoboldAlarmClockCard extends LitElement {
       font-size: calc(5em + 100%);
       font-size: calc(5cqw + 5em);
     }
-    :host([preview].dark) #clock .periodIcon {
+    :host([preview].dark) #clock span.periodIcon {
       filter: none;
     }
     :host([preview]) #clock > div {
