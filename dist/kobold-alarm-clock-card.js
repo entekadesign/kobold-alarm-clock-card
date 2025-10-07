@@ -1192,7 +1192,7 @@ class $68bfe1b558ade806$export$4dc2b60021baefca {
             }
         };
     }
-    static #_10 = // source: frontend/src/common/config/version.ts
+    static #_10 = // source: https://github.com/home-assistant/frontend/blob/dev/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)
@@ -1343,6 +1343,9 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
     }
     set hass(hass) {
         this._hass = hass;
+        // tab element replacement beginning in HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
+        // console.log('*** _saveConfigEntries; current HA version: ', this._hass.config.version);
+        $fb5336699f2a5e2d$export$cfa71a29f5c0676d.oldTabs = !(0, $68bfe1b558ade806$export$4dc2b60021baefca).atLeastVersion(this._hass.config.version, 2025, 10, 1);
         this._evaluate();
     }
     snooze() {
@@ -1451,10 +1454,8 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
         try {
             const lovelace = (0, $68bfe1b558ade806$export$4dc2b60021baefca).getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
-            // TODO: replace all sl-tab instances with ha-tab everywhere
-            // starting HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
             const tabGroupArry = [
-                ...(0, $68bfe1b558ade806$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')
+                ...(0, $68bfe1b558ade806$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll($fb5336699f2a5e2d$export$cfa71a29f5c0676d.oldTabs ? 'sl-tab-group sl-tab' : 'ha-tab-group ha-tab-group-tab')
             ];
             const viewIndex = tabGroupArry.findIndex((tab)=>{
                 return tab.hasAttribute('active');
@@ -3359,13 +3360,23 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         }}
     >
         <div class="toolbar">
-          <sl-tab-group
-            @sl-tab-show=${this._handleSwitchTab}
-          >
-            <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
-            <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
-            <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
-          </sl-tab-group>
+            ${(0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).oldTabs ? (0, $06b9b5dd66c1bf9e$export$c0bb0b647f701bb5)`
+                <sl-tab-group
+                    @sl-tab-show=${this._handleSwitchTab}
+                >
+                    <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
+                    <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
+                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
+                </sl-tab-group>
+                ` : (0, $06b9b5dd66c1bf9e$export$c0bb0b647f701bb5)`
+                <ha-tab-group
+                    @wa-tab-show=${this._handleSwitchTab}
+                >
+                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</ha-tab-group-tab>
+                </ha-tab-group>
+                `}
         </div>
         <div id="editor">
           ${[
@@ -3442,15 +3453,15 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
     </div>`;
     }
     static #_ = this.styles = (0, $0a1d0e58288a2e75$export$dbf350e5966cf602)`
-        sl-tab-group {
+        sl-tab-group, ha-tab-group {
             margin-bottom: 16px;
         }
 
-        sl-tab {
+        sl-tab, ha-tab-group-tab {
             flex: 1;
         }
 
-        sl-tab::part(base) {
+        sl-tab::part(base), ha-tab-group-tab::part(base) {
             width: 100%;
             justify-content: center;
         }

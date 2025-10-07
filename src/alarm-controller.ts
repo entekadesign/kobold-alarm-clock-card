@@ -17,6 +17,7 @@ export class AlarmController {
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
+    static oldTabs: boolean;
 
     static defaultConfig = {
         name: "kobold_clock",
@@ -53,6 +54,9 @@ export class AlarmController {
 
     set hass(hass: HomeAssistant) {
         this._hass = hass;
+        // tab element replacement beginning in HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
+        // console.log('*** _saveConfigEntries; current HA version: ', this._hass.config.version);
+        AlarmController.oldTabs = !Helpers.atLeastVersion(this._hass.config.version, 2025, 10, 1);
         this._evaluate();
     }
 
@@ -206,9 +210,7 @@ export class AlarmController {
         try {
             const lovelace = Helpers.getLovelace().lovelace;
             const newConfig = structuredClone(lovelace.config);
-            // TODO: replace all sl-tab instances with ha-tab everywhere
-            // starting HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
-            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll('sl-tab-group sl-tab')];
+            const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll(AlarmController.oldTabs ? 'sl-tab-group sl-tab' : 'ha-tab-group ha-tab-group-tab')];
             const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
             const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
 

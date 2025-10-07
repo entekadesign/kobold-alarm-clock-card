@@ -163,7 +163,7 @@ export class Helpers {
         };
     }
 
-    // source: frontend/src/common/config/version.ts
+    // source: https://github.com/home-assistant/frontend/blob/dev/src/common/config/version.ts
     // @param version (this._hass.config.version)
     // @param major (major version number)
     // @param minor (minor version number)

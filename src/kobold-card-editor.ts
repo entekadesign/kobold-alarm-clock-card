@@ -441,18 +441,30 @@ class KoboldCardEditor extends LitElement {
         if (!this._hass || !this._config) {
             return html``;
         }
+
         return html`
     <div id="kobold-card-config" class="card-config"
         @kobold-tab=${(event) => { this._selectedTab = event.detail.tab }}
     >
         <div class="toolbar">
-          <sl-tab-group
-            @sl-tab-show=${this._handleSwitchTab}
-          >
-            <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
-            <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
-            <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
-          </sl-tab-group>
+            ${AlarmController.oldTabs ? html`
+                <sl-tab-group
+                    @sl-tab-show=${this._handleSwitchTab}
+                >
+                    <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
+                    <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
+                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
+                </sl-tab-group>
+                ` : html`
+                <ha-tab-group
+                    @wa-tab-show=${this._handleSwitchTab}
+                >
+                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</ha-tab-group-tab>
+                </ha-tab-group>
+                `
+            }
         </div>
         <div id="editor">
           ${[this._renderSettingsEditor, this._renderNapEditor, this._renderScheduleEditor][
@@ -524,15 +536,15 @@ class KoboldCardEditor extends LitElement {
     };
 
     static styles = css`
-        sl-tab-group {
+        sl-tab-group, ha-tab-group {
             margin-bottom: 16px;
         }
 
-        sl-tab {
+        sl-tab, ha-tab-group-tab {
             flex: 1;
         }
 
-        sl-tab::part(base) {
+        sl-tab::part(base), ha-tab-group-tab::part(base) {
             width: 100%;
             justify-content: center;
         }
