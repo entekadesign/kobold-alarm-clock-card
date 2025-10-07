@@ -57,9 +57,9 @@ Kobold can be installed in any of four ways:
 
 - Install as an [HACS custom repository](https://hacs.xyz/docs/faq/custom_repositories/) using "Dashboard" as the type and the following URL:
 
-```bash
-https://github.com/entekadesign/kobold-alarm-clock-card.git
-```
+    ```bash
+    https://github.com/entekadesign/kobold-alarm-clock-card.git
+    ```
 
 - If you have [My Home Assistant](https://my.home-assistant.io) configured and HACS installed, just click below:
 
@@ -67,25 +67,25 @@ https://github.com/entekadesign/kobold-alarm-clock-card.git
 
 - Finally, Kobold can be installed manually by copying the [latest release of `kobold-alarm-clock-card.js`](https://codeberg.org/entekadesign/kobold-alarm-clock-card/releases) to the `www` directory inside the `config` directory of your HA instance:
 
-```bash
-<config>/www/kobold-alarm-clock-card.js
-```
+    ```bash
+    <config>/www/kobold-alarm-clock-card.js
+    ```
 
 Manual installation further requires two configuration steps:
 
 1. Register Kobold on the [resources page of your HA dashboard](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/) by adding the following as a javascript module:
 
-```
-/local/kobold-alarm-clock-card.js
-```
+    ```
+    /local/kobold-alarm-clock-card.js
+    ```
 
 2. Add the following to your dashboard's [lovelace configuration](https://www.home-assistant.io/dashboards/dashboards/#using-yaml-for-the-overview-dashboard):
 
-```yaml
-- type: custom:kobold-alarm-clock-card
-  alarm_entities:
-    - input_boolean.kobold_clock
-```
+    ```yaml
+    - type: custom:kobold-alarm-clock-card
+      alarm_entities:
+        - input_boolean.kobold_clock
+    ```
 
 ## Upgrading from v1.nn
 Delete your lovelace configuration except for the minimal configuration shown in manual configuration step 2 above. Kobold should immediately rebuild your configuration, at which point you may restore any settings you choose to preserve. If a setting you want to restore is available in the visual editor of the **settings dialog**, using it can help ensure that the configuration's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) structure remains valid.
@@ -135,28 +135,28 @@ If you want an alarm ringer entity to play an audio file [hosted by the HA serve
 
 1. Create a script whose [YAML configuration](https://www.home-assistant.io/integrations/script/#configuration) is similar to the following, replacing `media_player.my_browser` with the entity ID of your browser's media player, and `alarm_sound.mp3` with the filename of your alarm sound:
 
-```yaml
-alias: Ring Alarm Bell
-sequence:
-  - repeat:
-      until:
-        - condition: state
-          entity_id: media_player.my_browser
-          state: "off"
-      sequence:
-        - target:
-            entity_id: media_player.my_browser
-          data:
-            media_content_id: media-source://media_source/local/alarm_sound.mp3
-            media_content_type: music
-          metadata: {}
-          action: media_player.play_media
-        - wait_template: "{{ is_state( \"media_player.my_browser\", \"idle\") }}"
-          enabled: true
-icon: mdi:cast-audio
-mode: single
-description: ""
-```
+    ```yaml
+    alias: Ring Alarm Bell
+    sequence:
+      - repeat:
+          until:
+            - condition: state
+              entity_id: media_player.my_browser
+              state: "off"
+          sequence:
+            - target:
+                entity_id: media_player.my_browser
+              data:
+                media_content_id: media-source://media_source/local/alarm_sound.mp3
+                media_content_type: music
+              metadata: {}
+              action: media_player.play_media
+            - wait_template: "{{ is_state( \"media_player.my_browser\", \"idle\") }}"
+              enabled: true
+    icon: mdi:cast-audio
+    mode: single
+    description: ""
+    ```
 
 2. Create a switch in the same way as above, this time associating it with the script just created, and add the switch as an alarm ringer entity in the **settings dialog**.
 
