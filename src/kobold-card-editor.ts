@@ -277,7 +277,7 @@ class KoboldCardEditor extends LitElement {
         // if (!this._oldConfig) this._oldConfig = this._config;
     }
 
-    protected firstUpdated(_changedProperties: PropertyValues): void {
+    firstUpdated(_changedProperties: PropertyValues): void {
         const myDialog = Helpers.getEditor().shadowRoot.querySelector('ha-dialog');
         if (myDialog) {
             myDialog.addEventListener('keydown', (event) => {
@@ -311,17 +311,15 @@ class KoboldCardEditor extends LitElement {
         }
     }
 
-    protected updated(_changedProperties: PropertyValues): void {
+    updated(_changedProperties: PropertyValues): void {
         const formRootHost = this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot;
 
-        if (formRootHost) {
-            if (!formRootHost.querySelector('style#formRoot')) {
-                const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
-                let myStyle = document.createElement('style');
-                myStyle.setAttribute('id', 'formRoot');
-                myStyle.innerHTML = formStyle;
-                formRootHost.appendChild(myStyle);
-            }
+        if (formRootHost && !formRootHost.querySelector('style#formRoot')) {
+            const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
+            const myStyle = document.createElement('style');
+            myStyle.setAttribute('id', 'formRoot');
+            myStyle.innerHTML = formStyle;
+            formRootHost.appendChild(myStyle);
         }
     }
 

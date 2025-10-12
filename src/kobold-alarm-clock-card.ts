@@ -171,15 +171,15 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  // protected willUpdate(_changedProperties: PropertyValues): void {
+  // willUpdate(_changedProperties: PropertyValues): void {
   // }
 
-  // protected update(_changedProperties: PropertyValues): void {
+  // update(_changedProperties: PropertyValues): void {
   //   super.update(_changedProperties);
   //   // console.log('*** update(); changed properties: ', _changedProperties);
   // }
 
-  protected firstUpdated(_changedProperties: PropertyValues): void {
+  firstUpdated(_changedProperties: PropertyValues): void {
     this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
 
     if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
@@ -206,7 +206,7 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  protected updated(_changedProperties: PropertyValues): void {
+  updated(_changedProperties: PropertyValues): void {
     const cardWidth = this.getBoundingClientRect().width;
 
     if (cardWidth < 750) {

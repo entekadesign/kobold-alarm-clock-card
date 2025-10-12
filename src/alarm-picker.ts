@@ -30,13 +30,11 @@ class AlarmPicker extends LitElement {
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
             let myStyle: HTMLElement;
-            if (this.classList.contains('dark')) {
-                if (this._alarmPickerSwitchQ.shadowRoot) {
-                    myStyle = document.createElement('style');
-                    const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
-                    myStyle.innerHTML = switchStyle;
-                    this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
-                }
+            if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+                myStyle = document.createElement('style');
+                const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                myStyle.innerHTML = switchStyle;
+                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
 
             if (this._iconButtonQ.shadowRoot) {

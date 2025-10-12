@@ -2579,13 +2579,11 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
             let myStyle;
-            if (this.classList.contains('dark')) {
-                if (this._alarmPickerSwitchQ.shadowRoot) {
-                    myStyle = document.createElement('style');
-                    const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
-                    myStyle.innerHTML = switchStyle;
-                    this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
-                }
+            if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+                myStyle = document.createElement('style');
+                const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                myStyle.innerHTML = switchStyle;
+                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
@@ -3234,14 +3232,12 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
     }
     updated(_changedProperties) {
         const formRootHost = this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot;
-        if (formRootHost) {
-            if (!formRootHost.querySelector('style#formRoot')) {
-                const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
-                let myStyle = document.createElement('style');
-                myStyle.setAttribute('id', 'formRoot');
-                myStyle.innerHTML = formStyle;
-                formRootHost.appendChild(myStyle);
-            }
+        if (formRootHost && !formRootHost.querySelector('style#formRoot')) {
+            const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
+            const myStyle = document.createElement('style');
+            myStyle.setAttribute('id', 'formRoot');
+            myStyle.innerHTML = formStyle;
+            formRootHost.appendChild(myStyle);
         }
     }
     _handleSaveButton() {
@@ -3708,9 +3704,9 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
             ...(0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig
         };
     }
-    // protected willUpdate(_changedProperties: PropertyValues): void {
+    // willUpdate(_changedProperties: PropertyValues): void {
     // }
-    // protected update(_changedProperties: PropertyValues): void {
+    // update(_changedProperties: PropertyValues): void {
     //   super.update(_changedProperties);
     //   // console.log('*** update(); changed properties: ', _changedProperties);
     // }
