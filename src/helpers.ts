@@ -1,5 +1,7 @@
 // HA types
 import type { LovelaceCard } from "custom-card-helpers";
+// https://github.com/KipK/load-ha-components/tree/main
+import { loadHaComponents, DEFAULT_HA_COMPONENTS } from '@kipk/load-ha-components';
 
 export class Helpers {
 
@@ -231,5 +233,10 @@ export class Helpers {
             }
         }
         return false;
+    }
+
+    // https://github.com/KipK/load-ha-components/tree/main
+    static async preloadHaElements(elements: Array<string>) {
+        await loadHaComponents(elements);
     }
 }

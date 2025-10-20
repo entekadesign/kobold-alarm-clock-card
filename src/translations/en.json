@@ -1,0 +1,46 @@
+{
+  "config": {
+    "settings": "Settings",
+    "nap": "Nap",
+    "schedule": "Schedule",
+    "alarm_entities": "Alarm ringer entities",
+    "period_icon": "Icon as PM indicator",
+    "clock_display_font": "Clock display font",
+    "snooze_duration_default": "Snooze duration default",
+    "alarm_duration_default": "Alarm duration default",
+    "alarm_actions": "Alarm actions",
+    "cards": "Cards to display",
+    "debug": "Debug mode",
+    "nap_duration": "Nap duration",
+    "alarms_enabled": "Alarms Schedule Enabled",
+    "selector": {
+      "alarm_actions": {
+        "alarm_action_entity": "Alarm action entity",
+        "activate_action": "Activate action",
+        "offset_duration": "Offset duration",
+        "offset_negative": "Offset negative",
+        "selector": {
+          "activate_action": {
+            "options": {
+              "on_snooze": "On snooze",
+              "on_dismiss": "On dismiss",
+              "offset": "At time offset from alarm"
+            }
+          }
+        }
+      },
+      "cards": {
+        "card_entity": "Card entity"
+      }
+    }
+  },
+  "notification": {
+    "successfully_saved": "Successfully saved",
+    "configuration_updated": "Configuration updated"
+  },
+  "error": {
+    "config_incorrect": "Card config incorrectly formatted or missing",
+    "no_alarm_entities": "No array of alarm_entities found in card configuration. One is required for alarm",
+    "saving_failed": "Saving failed"
+  }
+}

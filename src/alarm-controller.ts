@@ -3,6 +3,7 @@ import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
 import { Helpers } from './helpers';
+import { localize } from './localize';
 
 import type { CardConfig, NextAlarmObject, TimeObject, AlarmActionsObject, Duration } from './types';
 
@@ -229,12 +230,13 @@ export class AlarmController {
                 Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
                     .then(() => {
                         if (Helpers.getNotification().labelText.includes('dashboard was updated')) {
-                            Helpers.fireEvent('hass-notification', { message: 'Configuration updated' }, Helpers.getHa());
+                            Helpers.fireEvent('hass-notification', { message: localize('notification.configuration_updated') }, Helpers.getHa());
                         }
                     }).catch(() => { }); //timed out
             } else throw { message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt' };
         } catch (err: any) {
-            alert(`Saving failed: ${err.message}.`);
+            // alert(`Saving failed: ${err.message}.`);
+            alert(`${localize('error.saving_failed')}: ${err.message}.`);
         }
     }
 

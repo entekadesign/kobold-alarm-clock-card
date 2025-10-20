@@ -55,3 +55,31 @@ export interface AlarmActionsObject {
 export interface KoboldEditor extends LitElement {
     alarmController: any;
 }
+
+export type TranslationKey =
+    | 'config.settings'
+    | 'config.nap'
+    | 'config.schedule'
+    | 'config.alarm_entities'
+    | 'config.period_icon'
+    | 'config.clock_display_font'
+    | 'config.snooze_duration_default'
+    | 'config.alarm_duration_default'
+    | 'config.alarm_actions'
+    | 'config.cards'
+    | 'config.debug'
+    | 'config.nap_duration'
+    | 'config.alarms_enabled'
+    | 'config.selector.alarm_actions.alarm_action_entity'
+    | 'config.selector.alarm_actions.activate_action'
+    | 'config.selector.alarm_actions.offset_duration'
+    | 'config.selector.alarm_actions.offset_negative'
+    | 'config.selector.alarm_actions.selector.activate_action.options.on_snooze'
+    | 'config.selector.alarm_actions.selector.activate_action.options.on_dismiss'
+    | 'config.selector.alarm_actions.selector.activate_action.options.offset'
+    | 'config.selector.cards.card_entity'
+    | 'notification.successfully_saved'
+    | 'notification.configuration_updated'
+    | 'error.config_incorrect'
+    | 'error.no_alarm_entities'
+    | 'error.saving_failed';

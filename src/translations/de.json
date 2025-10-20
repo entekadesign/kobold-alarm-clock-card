@@ -1,0 +1,46 @@
+{
+  "config": {
+    "settings": "Einstellungen",
+    "nap": "Nickerchen",
+    "schedule": "Schedule",
+    "alarm_entities": "Alarmklingel-Entitäten",
+    "period_icon": "Symbol als PM-Indikator",
+    "clock_display_font": "Schriftart der Uhranzeige",
+    "snooze_duration_default": "Standardmäßige Schlummerdauer",
+    "alarm_duration_default": "Standardmäßige Alarmdauer",
+    "alarm_actions": "Alarmaktionen",
+    "cards": "Karten zum Ausstellen",
+    "debug": "Debug-Modus",
+    "nap_duration": "Nickerchendauer",
+    "alarms_enabled": "Alarmzeitplan aktiviert",
+    "selector": {
+      "alarm_actions": {
+        "alarm_action_entity": "Alarmaktionsentität",
+        "activate_action": "Aktion aktivieren",
+        "offset_duration": "Offsetdauer",
+        "offset_negative": "Negativer Offset",
+        "selector": {
+          "activate_action": {
+            "options": {
+              "on_snooze": "Bei Schlummertaste",
+              "on_dismiss": "Bei Entlassung",
+              "offset": "Mit Zeitversatz zum Alarm"
+            }
+          }
+        }
+      },
+      "cards": {
+        "card_entity": "Kartenentität"
+      }
+    }
+  },
+  "notification": {
+    "successfully_saved": "Erfolgreich gespeichert",
+    "configuration_updated": "Konfiguration aktualisiert"
+  },
+  "error": {
+    "config_incorrect": "Kartenkonfiguration falsch formatiert oder fehlt",
+    "no_alarm_entities": "Kein Array von Alarmklingel-Entitäten in der Kartenkonfiguration gefunden. Eines ist für den Alarm erforderlich",
+    "saving_failed": "Speichern fehlgeschlagen"
+  }
+}

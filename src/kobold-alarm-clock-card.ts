@@ -2,6 +2,7 @@ import { AlarmController } from './alarm-controller';
 import { Helpers } from './helpers';
 import './alarm-picker';
 import './kobold-card-editor';
+import { localize } from './localize';
 
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { property, state, customElement, query, queryAll } from "lit/decorators.js";
@@ -13,6 +14,10 @@ myStyle.innerHTML = fontStyles;
 document.head.appendChild(myStyle);
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/de';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/es';
+import 'dayjs/locale/ru';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(customParseFormat);
@@ -252,7 +257,7 @@ class KoboldAlarmClockCard extends LitElement {
   setConfig(config: CardConfig) {
 
     if (!config) {
-      alert('Card config incorrectly formatted or missing.');
+      alert(localize('error.config_incorrect'));
     }
 
     if (!config.cards || !Array.isArray(config.cards)) {
@@ -304,7 +309,7 @@ class KoboldAlarmClockCard extends LitElement {
     if (config.alarm_entities && Array.isArray(config.alarm_entities)) {
       config.alarm_entities.forEach((item) => { if (!this._hass.states[item]) console.warn(`*** _buildCard(); Entity ${item} does not exist in HA`) });
     } else {
-      alert('No array of alarm_entities found in card configuration. One is required for alarm.');
+      alert(localize('error.no_alarm_entities'));
     }
 
     if (config.cards) {

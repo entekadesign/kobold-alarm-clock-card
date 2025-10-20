@@ -2,6 +2,403 @@
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
+
+      var $parcel$global =
+        typeof globalThis !== 'undefined'
+          ? globalThis
+          : typeof self !== 'undefined'
+          ? self
+          : typeof window !== 'undefined'
+          ? window
+          : typeof global !== 'undefined'
+          ? global
+          : {};
+  
+var $parcel$modules = {};
+var $parcel$inits = {};
+
+var parcelRequire = $parcel$global["parcelRequire94c2"];
+
+if (parcelRequire == null) {
+  parcelRequire = function(id) {
+    if (id in $parcel$modules) {
+      return $parcel$modules[id].exports;
+    }
+    if (id in $parcel$inits) {
+      var init = $parcel$inits[id];
+      delete $parcel$inits[id];
+      var module = {id: id, exports: {}};
+      $parcel$modules[id] = module;
+      init.call(module.exports, module, module.exports);
+      return module.exports;
+    }
+    var err = new Error("Cannot find module '" + id + "'");
+    err.code = 'MODULE_NOT_FOUND';
+    throw err;
+  };
+
+  parcelRequire.register = function register(id, init) {
+    $parcel$inits[id] = init;
+  };
+
+  $parcel$global["parcelRequire94c2"] = parcelRequire;
+}
+
+var parcelRegister = parcelRequire.register;
+parcelRegister("cY6J3", function(module, exports) {
+!function(t, e) {
+    module.exports = e();
+}(module.exports, function() {
+    "use strict";
+    var t = 1e3, e = 6e4, n = 36e5, r = "millisecond", i = "second", s = "minute", u = "hour", a = "day", o = "week", c = "month", f = "quarter", h = "year", d = "date", l = "Invalid Date", $ = /^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/, y = /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g, M = {
+        name: "en",
+        weekdays: "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
+        months: "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+        ordinal: function(t) {
+            var e = [
+                "th",
+                "st",
+                "nd",
+                "rd"
+            ], n = t % 100;
+            return "[" + t + (e[(n - 20) % 10] || e[n] || e[0]) + "]";
+        }
+    }, m = function(t, e, n) {
+        var r = String(t);
+        return !r || r.length >= e ? t : "" + Array(e + 1 - r.length).join(n) + t;
+    }, v = {
+        s: m,
+        z: function(t) {
+            var e = -t.utcOffset(), n = Math.abs(e), r = Math.floor(n / 60), i = n % 60;
+            return (e <= 0 ? "+" : "-") + m(r, 2, "0") + ":" + m(i, 2, "0");
+        },
+        m: function t(e, n) {
+            if (e.date() < n.date()) return -t(n, e);
+            var r = 12 * (n.year() - e.year()) + (n.month() - e.month()), i = e.clone().add(r, c), s = n - i < 0, u = e.clone().add(r + (s ? -1 : 1), c);
+            return +(-(r + (n - i) / (s ? i - u : u - i)) || 0);
+        },
+        a: function(t) {
+            return t < 0 ? Math.ceil(t) || 0 : Math.floor(t);
+        },
+        p: function(t) {
+            return ({
+                M: c,
+                y: h,
+                w: o,
+                d: a,
+                D: d,
+                h: u,
+                m: s,
+                s: i,
+                ms: r,
+                Q: f
+            })[t] || String(t || "").toLowerCase().replace(/s$/, "");
+        },
+        u: function(t) {
+            return void 0 === t;
+        }
+    }, g = "en", D = {};
+    D[g] = M;
+    var p = "$isDayjsObject", S = function(t) {
+        return t instanceof _ || !(!t || !t[p]);
+    }, w = function t(e, n, r) {
+        var i;
+        if (!e) return g;
+        if ("string" == typeof e) {
+            var s = e.toLowerCase();
+            D[s] && (i = s), n && (D[s] = n, i = s);
+            var u = e.split("-");
+            if (!i && u.length > 1) return t(u[0]);
+        } else {
+            var a = e.name;
+            D[a] = e, i = a;
+        }
+        return !r && i && (g = i), i || !r && g;
+    }, O = function(t, e) {
+        if (S(t)) return t.clone();
+        var n = "object" == typeof e ? e : {};
+        return n.date = t, n.args = arguments, new _(n);
+    }, b = v;
+    b.l = w, b.i = S, b.w = function(t, e) {
+        return O(t, {
+            locale: e.$L,
+            utc: e.$u,
+            x: e.$x,
+            $offset: e.$offset
+        });
+    };
+    var _ = function() {
+        function M(t) {
+            this.$L = w(t.locale, null, !0), this.parse(t), this.$x = this.$x || t.x || {}, this[p] = !0;
+        }
+        var m = M.prototype;
+        return m.parse = function(t) {
+            this.$d = function(t) {
+                var e = t.date, n = t.utc;
+                if (null === e) return new Date(NaN);
+                if (b.u(e)) return new Date;
+                if (e instanceof Date) return new Date(e);
+                if ("string" == typeof e && !/Z$/i.test(e)) {
+                    var r = e.match($);
+                    if (r) {
+                        var i = r[2] - 1 || 0, s = (r[7] || "0").substring(0, 3);
+                        return n ? new Date(Date.UTC(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s)) : new Date(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s);
+                    }
+                }
+                return new Date(e);
+            }(t), this.init();
+        }, m.init = function() {
+            var t = this.$d;
+            this.$y = t.getFullYear(), this.$M = t.getMonth(), this.$D = t.getDate(), this.$W = t.getDay(), this.$H = t.getHours(), this.$m = t.getMinutes(), this.$s = t.getSeconds(), this.$ms = t.getMilliseconds();
+        }, m.$utils = function() {
+            return b;
+        }, m.isValid = function() {
+            return !(this.$d.toString() === l);
+        }, m.isSame = function(t, e) {
+            var n = O(t);
+            return this.startOf(e) <= n && n <= this.endOf(e);
+        }, m.isAfter = function(t, e) {
+            return O(t) < this.startOf(e);
+        }, m.isBefore = function(t, e) {
+            return this.endOf(e) < O(t);
+        }, m.$g = function(t, e, n) {
+            return b.u(t) ? this[e] : this.set(n, t);
+        }, m.unix = function() {
+            return Math.floor(this.valueOf() / 1e3);
+        }, m.valueOf = function() {
+            return this.$d.getTime();
+        }, m.startOf = function(t, e) {
+            var n = this, r = !!b.u(e) || e, f = b.p(t), l = function(t, e) {
+                var i = b.w(n.$u ? Date.UTC(n.$y, e, t) : new Date(n.$y, e, t), n);
+                return r ? i : i.endOf(a);
+            }, $ = function(t, e) {
+                return b.w(n.toDate()[t].apply(n.toDate("s"), (r ? [
+                    0,
+                    0,
+                    0,
+                    0
+                ] : [
+                    23,
+                    59,
+                    59,
+                    999
+                ]).slice(e)), n);
+            }, y = this.$W, M = this.$M, m = this.$D, v = "set" + (this.$u ? "UTC" : "");
+            switch(f){
+                case h:
+                    return r ? l(1, 0) : l(31, 11);
+                case c:
+                    return r ? l(1, M) : l(0, M + 1);
+                case o:
+                    var g = this.$locale().weekStart || 0, D = (y < g ? y + 7 : y) - g;
+                    return l(r ? m - D : m + (6 - D), M);
+                case a:
+                case d:
+                    return $(v + "Hours", 0);
+                case u:
+                    return $(v + "Minutes", 1);
+                case s:
+                    return $(v + "Seconds", 2);
+                case i:
+                    return $(v + "Milliseconds", 3);
+                default:
+                    return this.clone();
+            }
+        }, m.endOf = function(t) {
+            return this.startOf(t, !1);
+        }, m.$set = function(t, e) {
+            var n, o = b.p(t), f = "set" + (this.$u ? "UTC" : ""), l = (n = {}, n[a] = f + "Date", n[d] = f + "Date", n[c] = f + "Month", n[h] = f + "FullYear", n[u] = f + "Hours", n[s] = f + "Minutes", n[i] = f + "Seconds", n[r] = f + "Milliseconds", n)[o], $ = o === a ? this.$D + (e - this.$W) : e;
+            if (o === c || o === h) {
+                var y = this.clone().set(d, 1);
+                y.$d[l]($), y.init(), this.$d = y.set(d, Math.min(this.$D, y.daysInMonth())).$d;
+            } else l && this.$d[l]($);
+            return this.init(), this;
+        }, m.set = function(t, e) {
+            return this.clone().$set(t, e);
+        }, m.get = function(t) {
+            return this[b.p(t)]();
+        }, m.add = function(r, f) {
+            var d, l = this;
+            r = Number(r);
+            var $ = b.p(f), y = function(t) {
+                var e = O(l);
+                return b.w(e.date(e.date() + Math.round(t * r)), l);
+            };
+            if ($ === c) return this.set(c, this.$M + r);
+            if ($ === h) return this.set(h, this.$y + r);
+            if ($ === a) return y(1);
+            if ($ === o) return y(7);
+            var M = (d = {}, d[s] = e, d[u] = n, d[i] = t, d)[$] || 1, m = this.$d.getTime() + r * M;
+            return b.w(m, this);
+        }, m.subtract = function(t, e) {
+            return this.add(-1 * t, e);
+        }, m.format = function(t) {
+            var e = this, n = this.$locale();
+            if (!this.isValid()) return n.invalidDate || l;
+            var r = t || "YYYY-MM-DDTHH:mm:ssZ", i = b.z(this), s = this.$H, u = this.$m, a = this.$M, o = n.weekdays, c = n.months, f = n.meridiem, h = function(t, n, i, s) {
+                return t && (t[n] || t(e, r)) || i[n].slice(0, s);
+            }, d = function(t) {
+                return b.s(s % 12 || 12, t, "0");
+            }, $ = f || function(t, e, n) {
+                var r = t < 12 ? "AM" : "PM";
+                return n ? r.toLowerCase() : r;
+            };
+            return r.replace(y, function(t, r) {
+                return r || function(t) {
+                    switch(t){
+                        case "YY":
+                            return String(e.$y).slice(-2);
+                        case "YYYY":
+                            return b.s(e.$y, 4, "0");
+                        case "M":
+                            return a + 1;
+                        case "MM":
+                            return b.s(a + 1, 2, "0");
+                        case "MMM":
+                            return h(n.monthsShort, a, c, 3);
+                        case "MMMM":
+                            return h(c, a);
+                        case "D":
+                            return e.$D;
+                        case "DD":
+                            return b.s(e.$D, 2, "0");
+                        case "d":
+                            return String(e.$W);
+                        case "dd":
+                            return h(n.weekdaysMin, e.$W, o, 2);
+                        case "ddd":
+                            return h(n.weekdaysShort, e.$W, o, 3);
+                        case "dddd":
+                            return o[e.$W];
+                        case "H":
+                            return String(s);
+                        case "HH":
+                            return b.s(s, 2, "0");
+                        case "h":
+                            return d(1);
+                        case "hh":
+                            return d(2);
+                        case "a":
+                            return $(s, u, !0);
+                        case "A":
+                            return $(s, u, !1);
+                        case "m":
+                            return String(u);
+                        case "mm":
+                            return b.s(u, 2, "0");
+                        case "s":
+                            return String(e.$s);
+                        case "ss":
+                            return b.s(e.$s, 2, "0");
+                        case "SSS":
+                            return b.s(e.$ms, 3, "0");
+                        case "Z":
+                            return i;
+                    }
+                    return null;
+                }(t) || i.replace(":", "");
+            });
+        }, m.utcOffset = function() {
+            return 15 * -Math.round(this.$d.getTimezoneOffset() / 15);
+        }, m.diff = function(r, d, l) {
+            var $, y = this, M = b.p(d), m = O(r), v = (m.utcOffset() - this.utcOffset()) * e, g = this - m, D = function() {
+                return b.m(y, m);
+            };
+            switch(M){
+                case h:
+                    $ = D() / 12;
+                    break;
+                case c:
+                    $ = D();
+                    break;
+                case f:
+                    $ = D() / 3;
+                    break;
+                case o:
+                    $ = (g - v) / 6048e5;
+                    break;
+                case a:
+                    $ = (g - v) / 864e5;
+                    break;
+                case u:
+                    $ = g / n;
+                    break;
+                case s:
+                    $ = g / e;
+                    break;
+                case i:
+                    $ = g / t;
+                    break;
+                default:
+                    $ = g;
+            }
+            return l ? $ : b.a($);
+        }, m.daysInMonth = function() {
+            return this.endOf(c).$D;
+        }, m.$locale = function() {
+            return D[this.$L];
+        }, m.locale = function(t, e) {
+            if (!t) return this.$L;
+            var n = this.clone(), r = w(t, e, !0);
+            return r && (n.$L = r), n;
+        }, m.clone = function() {
+            return b.w(this.$d, this);
+        }, m.toDate = function() {
+            return new Date(this.valueOf());
+        }, m.toJSON = function() {
+            return this.isValid() ? this.toISOString() : null;
+        }, m.toISOString = function() {
+            return this.$d.toISOString();
+        }, m.toString = function() {
+            return this.$d.toUTCString();
+        }, M;
+    }(), k = _.prototype;
+    return O.prototype = k, [
+        [
+            "$ms",
+            r
+        ],
+        [
+            "$s",
+            i
+        ],
+        [
+            "$m",
+            s
+        ],
+        [
+            "$H",
+            u
+        ],
+        [
+            "$W",
+            a
+        ],
+        [
+            "$M",
+            c
+        ],
+        [
+            "$y",
+            h
+        ],
+        [
+            "$D",
+            d
+        ]
+    ].forEach(function(t) {
+        k[t[1]] = function(e) {
+            return this.$g(e, t[0], t[1]);
+        };
+    }), O.extend = function(t, e) {
+        return t.$i || (t(e, _, O), t.$i = !0), O;
+    }, O.locale = w, O.isDayjs = S, O.unix = function(t) {
+        return O(1e3 * t);
+    }, O.en = D[g], O.Ls = D, O.p = {}, O;
+});
+
+});
+
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -542,359 +939,8 @@ var $94bec1997c2bf05d$export$2e2bcd8739ae039 = {
 
 
 
-var $97104e3b39c1a759$exports = {};
-!function(t, e) {
-    $97104e3b39c1a759$exports = e();
-}($97104e3b39c1a759$exports, function() {
-    "use strict";
-    var t = 1e3, e = 6e4, n = 36e5, r = "millisecond", i = "second", s = "minute", u = "hour", a = "day", o = "week", c = "month", f = "quarter", h = "year", d = "date", l = "Invalid Date", $ = /^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/, y = /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g, M = {
-        name: "en",
-        weekdays: "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
-        months: "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
-        ordinal: function(t) {
-            var e = [
-                "th",
-                "st",
-                "nd",
-                "rd"
-            ], n = t % 100;
-            return "[" + t + (e[(n - 20) % 10] || e[n] || e[0]) + "]";
-        }
-    }, m = function(t, e, n) {
-        var r = String(t);
-        return !r || r.length >= e ? t : "" + Array(e + 1 - r.length).join(n) + t;
-    }, v = {
-        s: m,
-        z: function(t) {
-            var e = -t.utcOffset(), n = Math.abs(e), r = Math.floor(n / 60), i = n % 60;
-            return (e <= 0 ? "+" : "-") + m(r, 2, "0") + ":" + m(i, 2, "0");
-        },
-        m: function t(e, n) {
-            if (e.date() < n.date()) return -t(n, e);
-            var r = 12 * (n.year() - e.year()) + (n.month() - e.month()), i = e.clone().add(r, c), s = n - i < 0, u = e.clone().add(r + (s ? -1 : 1), c);
-            return +(-(r + (n - i) / (s ? i - u : u - i)) || 0);
-        },
-        a: function(t) {
-            return t < 0 ? Math.ceil(t) || 0 : Math.floor(t);
-        },
-        p: function(t) {
-            return ({
-                M: c,
-                y: h,
-                w: o,
-                d: a,
-                D: d,
-                h: u,
-                m: s,
-                s: i,
-                ms: r,
-                Q: f
-            })[t] || String(t || "").toLowerCase().replace(/s$/, "");
-        },
-        u: function(t) {
-            return void 0 === t;
-        }
-    }, g = "en", D = {};
-    D[g] = M;
-    var p = "$isDayjsObject", S = function(t) {
-        return t instanceof _ || !(!t || !t[p]);
-    }, w = function t(e, n, r) {
-        var i;
-        if (!e) return g;
-        if ("string" == typeof e) {
-            var s = e.toLowerCase();
-            D[s] && (i = s), n && (D[s] = n, i = s);
-            var u = e.split("-");
-            if (!i && u.length > 1) return t(u[0]);
-        } else {
-            var a = e.name;
-            D[a] = e, i = a;
-        }
-        return !r && i && (g = i), i || !r && g;
-    }, O = function(t, e) {
-        if (S(t)) return t.clone();
-        var n = "object" == typeof e ? e : {};
-        return n.date = t, n.args = arguments, new _(n);
-    }, b = v;
-    b.l = w, b.i = S, b.w = function(t, e) {
-        return O(t, {
-            locale: e.$L,
-            utc: e.$u,
-            x: e.$x,
-            $offset: e.$offset
-        });
-    };
-    var _ = function() {
-        function M(t) {
-            this.$L = w(t.locale, null, !0), this.parse(t), this.$x = this.$x || t.x || {}, this[p] = !0;
-        }
-        var m = M.prototype;
-        return m.parse = function(t) {
-            this.$d = function(t) {
-                var e = t.date, n = t.utc;
-                if (null === e) return new Date(NaN);
-                if (b.u(e)) return new Date;
-                if (e instanceof Date) return new Date(e);
-                if ("string" == typeof e && !/Z$/i.test(e)) {
-                    var r = e.match($);
-                    if (r) {
-                        var i = r[2] - 1 || 0, s = (r[7] || "0").substring(0, 3);
-                        return n ? new Date(Date.UTC(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s)) : new Date(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s);
-                    }
-                }
-                return new Date(e);
-            }(t), this.init();
-        }, m.init = function() {
-            var t = this.$d;
-            this.$y = t.getFullYear(), this.$M = t.getMonth(), this.$D = t.getDate(), this.$W = t.getDay(), this.$H = t.getHours(), this.$m = t.getMinutes(), this.$s = t.getSeconds(), this.$ms = t.getMilliseconds();
-        }, m.$utils = function() {
-            return b;
-        }, m.isValid = function() {
-            return !(this.$d.toString() === l);
-        }, m.isSame = function(t, e) {
-            var n = O(t);
-            return this.startOf(e) <= n && n <= this.endOf(e);
-        }, m.isAfter = function(t, e) {
-            return O(t) < this.startOf(e);
-        }, m.isBefore = function(t, e) {
-            return this.endOf(e) < O(t);
-        }, m.$g = function(t, e, n) {
-            return b.u(t) ? this[e] : this.set(n, t);
-        }, m.unix = function() {
-            return Math.floor(this.valueOf() / 1e3);
-        }, m.valueOf = function() {
-            return this.$d.getTime();
-        }, m.startOf = function(t, e) {
-            var n = this, r = !!b.u(e) || e, f = b.p(t), l = function(t, e) {
-                var i = b.w(n.$u ? Date.UTC(n.$y, e, t) : new Date(n.$y, e, t), n);
-                return r ? i : i.endOf(a);
-            }, $ = function(t, e) {
-                return b.w(n.toDate()[t].apply(n.toDate("s"), (r ? [
-                    0,
-                    0,
-                    0,
-                    0
-                ] : [
-                    23,
-                    59,
-                    59,
-                    999
-                ]).slice(e)), n);
-            }, y = this.$W, M = this.$M, m = this.$D, v = "set" + (this.$u ? "UTC" : "");
-            switch(f){
-                case h:
-                    return r ? l(1, 0) : l(31, 11);
-                case c:
-                    return r ? l(1, M) : l(0, M + 1);
-                case o:
-                    var g = this.$locale().weekStart || 0, D = (y < g ? y + 7 : y) - g;
-                    return l(r ? m - D : m + (6 - D), M);
-                case a:
-                case d:
-                    return $(v + "Hours", 0);
-                case u:
-                    return $(v + "Minutes", 1);
-                case s:
-                    return $(v + "Seconds", 2);
-                case i:
-                    return $(v + "Milliseconds", 3);
-                default:
-                    return this.clone();
-            }
-        }, m.endOf = function(t) {
-            return this.startOf(t, !1);
-        }, m.$set = function(t, e) {
-            var n, o = b.p(t), f = "set" + (this.$u ? "UTC" : ""), l = (n = {}, n[a] = f + "Date", n[d] = f + "Date", n[c] = f + "Month", n[h] = f + "FullYear", n[u] = f + "Hours", n[s] = f + "Minutes", n[i] = f + "Seconds", n[r] = f + "Milliseconds", n)[o], $ = o === a ? this.$D + (e - this.$W) : e;
-            if (o === c || o === h) {
-                var y = this.clone().set(d, 1);
-                y.$d[l]($), y.init(), this.$d = y.set(d, Math.min(this.$D, y.daysInMonth())).$d;
-            } else l && this.$d[l]($);
-            return this.init(), this;
-        }, m.set = function(t, e) {
-            return this.clone().$set(t, e);
-        }, m.get = function(t) {
-            return this[b.p(t)]();
-        }, m.add = function(r, f) {
-            var d, l = this;
-            r = Number(r);
-            var $ = b.p(f), y = function(t) {
-                var e = O(l);
-                return b.w(e.date(e.date() + Math.round(t * r)), l);
-            };
-            if ($ === c) return this.set(c, this.$M + r);
-            if ($ === h) return this.set(h, this.$y + r);
-            if ($ === a) return y(1);
-            if ($ === o) return y(7);
-            var M = (d = {}, d[s] = e, d[u] = n, d[i] = t, d)[$] || 1, m = this.$d.getTime() + r * M;
-            return b.w(m, this);
-        }, m.subtract = function(t, e) {
-            return this.add(-1 * t, e);
-        }, m.format = function(t) {
-            var e = this, n = this.$locale();
-            if (!this.isValid()) return n.invalidDate || l;
-            var r = t || "YYYY-MM-DDTHH:mm:ssZ", i = b.z(this), s = this.$H, u = this.$m, a = this.$M, o = n.weekdays, c = n.months, f = n.meridiem, h = function(t, n, i, s) {
-                return t && (t[n] || t(e, r)) || i[n].slice(0, s);
-            }, d = function(t) {
-                return b.s(s % 12 || 12, t, "0");
-            }, $ = f || function(t, e, n) {
-                var r = t < 12 ? "AM" : "PM";
-                return n ? r.toLowerCase() : r;
-            };
-            return r.replace(y, function(t, r) {
-                return r || function(t) {
-                    switch(t){
-                        case "YY":
-                            return String(e.$y).slice(-2);
-                        case "YYYY":
-                            return b.s(e.$y, 4, "0");
-                        case "M":
-                            return a + 1;
-                        case "MM":
-                            return b.s(a + 1, 2, "0");
-                        case "MMM":
-                            return h(n.monthsShort, a, c, 3);
-                        case "MMMM":
-                            return h(c, a);
-                        case "D":
-                            return e.$D;
-                        case "DD":
-                            return b.s(e.$D, 2, "0");
-                        case "d":
-                            return String(e.$W);
-                        case "dd":
-                            return h(n.weekdaysMin, e.$W, o, 2);
-                        case "ddd":
-                            return h(n.weekdaysShort, e.$W, o, 3);
-                        case "dddd":
-                            return o[e.$W];
-                        case "H":
-                            return String(s);
-                        case "HH":
-                            return b.s(s, 2, "0");
-                        case "h":
-                            return d(1);
-                        case "hh":
-                            return d(2);
-                        case "a":
-                            return $(s, u, !0);
-                        case "A":
-                            return $(s, u, !1);
-                        case "m":
-                            return String(u);
-                        case "mm":
-                            return b.s(u, 2, "0");
-                        case "s":
-                            return String(e.$s);
-                        case "ss":
-                            return b.s(e.$s, 2, "0");
-                        case "SSS":
-                            return b.s(e.$ms, 3, "0");
-                        case "Z":
-                            return i;
-                    }
-                    return null;
-                }(t) || i.replace(":", "");
-            });
-        }, m.utcOffset = function() {
-            return 15 * -Math.round(this.$d.getTimezoneOffset() / 15);
-        }, m.diff = function(r, d, l) {
-            var $, y = this, M = b.p(d), m = O(r), v = (m.utcOffset() - this.utcOffset()) * e, g = this - m, D = function() {
-                return b.m(y, m);
-            };
-            switch(M){
-                case h:
-                    $ = D() / 12;
-                    break;
-                case c:
-                    $ = D();
-                    break;
-                case f:
-                    $ = D() / 3;
-                    break;
-                case o:
-                    $ = (g - v) / 6048e5;
-                    break;
-                case a:
-                    $ = (g - v) / 864e5;
-                    break;
-                case u:
-                    $ = g / n;
-                    break;
-                case s:
-                    $ = g / e;
-                    break;
-                case i:
-                    $ = g / t;
-                    break;
-                default:
-                    $ = g;
-            }
-            return l ? $ : b.a($);
-        }, m.daysInMonth = function() {
-            return this.endOf(c).$D;
-        }, m.$locale = function() {
-            return D[this.$L];
-        }, m.locale = function(t, e) {
-            if (!t) return this.$L;
-            var n = this.clone(), r = w(t, e, !0);
-            return r && (n.$L = r), n;
-        }, m.clone = function() {
-            return b.w(this.$d, this);
-        }, m.toDate = function() {
-            return new Date(this.valueOf());
-        }, m.toJSON = function() {
-            return this.isValid() ? this.toISOString() : null;
-        }, m.toISOString = function() {
-            return this.$d.toISOString();
-        }, m.toString = function() {
-            return this.$d.toUTCString();
-        }, M;
-    }(), k = _.prototype;
-    return O.prototype = k, [
-        [
-            "$ms",
-            r
-        ],
-        [
-            "$s",
-            i
-        ],
-        [
-            "$m",
-            s
-        ],
-        [
-            "$H",
-            u
-        ],
-        [
-            "$W",
-            a
-        ],
-        [
-            "$M",
-            c
-        ],
-        [
-            "$y",
-            h
-        ],
-        [
-            "$D",
-            d
-        ]
-    ].forEach(function(t) {
-        k[t[1]] = function(e) {
-            return this.$g(e, t[0], t[1]);
-        };
-    }), O.extend = function(t, e) {
-        return t.$i || (t(e, _, O), t.$i = !0), O;
-    }, O.locale = w, O.isDayjs = S, O.unix = function(t) {
-        return O(1e3 * t);
-    }, O.en = D[g], O.Ls = D, O.p = {}, O;
-});
 
-
+var $cY6J3 = parcelRequire("cY6J3");
 var $f0dac4bd3cbe46c0$exports = {};
 !function(t, s) {
     $f0dac4bd3cbe46c0$exports = s();
@@ -1062,6 +1108,127 @@ var $f0dac4bd3cbe46c0$exports = {};
 
 
 // HA types
+/**
+ * Utility function to asynchronously load Home Assistant form components
+ * if they are not already registered in the custom elements registry.
+ *
+ * @param components - Optional array of component names to load. If not provided, defaults to a predefined list.
+ * @returns Promise that resolves when all required components are loaded
+ */ // Define the default list of required components
+const $ec3d08574593a0a4$var$DEFAULT_HA_COMPONENTS = [
+    'ha-form',
+    'ha-icon',
+    'ha-icon-button',
+    'ha-selector',
+    'ha-textfield',
+    'ha-icon-picker',
+    'ha-icon-button',
+    'ha-entity-picker',
+    'ha-select',
+    'ha-dialog',
+    'ha-sortable',
+    'ha-svg-icon',
+    'ha-alert',
+    'ha-button',
+    'ha-color-picker',
+    'ha-badge',
+    'ha-sankey-chart',
+    'mwc-button'
+];
+const $ec3d08574593a0a4$export$5b9848928059ec76 = async (components)=>{
+    // Use provided components or default to the predefined list
+    const componentsToLoad = components || $ec3d08574593a0a4$var$DEFAULT_HA_COMPONENTS;
+    try {
+        // Check if all required custom elements are already defined
+        if (componentsToLoad.every((component)=>customElements.get(component))) return;
+        // Wait for the partial-panel-resolver to be defined with timeout
+        await Promise.race([
+            customElements.whenDefined('partial-panel-resolver'),
+            new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timeout waiting for partial-panel-resolver')), 10000))
+        ]);
+        // Create and configure the panel resolver with proper typing
+        const ppr = document.createElement('partial-panel-resolver');
+        // Check if the element was created successfully
+        if (!ppr) throw new Error('Failed to create partial-panel-resolver element');
+        ppr.hass = {
+            panels: [
+                {
+                    url_path: 'tmp',
+                    component_name: 'config'
+                }
+            ]
+        };
+        // Check if _updateRoutes method exists
+        if (typeof ppr._updateRoutes !== 'function') throw new Error('partial-panel-resolver does not have _updateRoutes method');
+        ppr._updateRoutes();
+        // Check if routes were created
+        if (!ppr.routerOptions?.routes?.tmp?.load) throw new Error('Failed to create tmp route in partial-panel-resolver');
+        // Load the temporary route with timeout
+        await Promise.race([
+            ppr.routerOptions.routes.tmp.load(),
+            new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timeout loading tmp route')), 10000))
+        ]);
+        // Wait for the config panel to be defined with timeout
+        await Promise.race([
+            customElements.whenDefined('ha-panel-config'),
+            new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timeout waiting for ha-panel-config')), 10000))
+        ]);
+        // Create the config panel and load automation components with proper typing
+        const cpr = document.createElement('ha-panel-config');
+        // Check if the element was created successfully
+        if (!cpr) throw new Error('Failed to create ha-panel-config element');
+        // Check if automation route exists
+        if (!cpr.routerOptions?.routes?.automation?.load) throw new Error('ha-panel-config does not have automation route');
+        // Load automation components with timeout
+        await Promise.race([
+            cpr.routerOptions.routes.automation.load(),
+            new Promise((_, reject)=>setTimeout(()=>reject(new Error('Timeout loading automation components')), 10000))
+        ]);
+        // Final verification that components were loaded
+        const missingComponents = componentsToLoad.filter((component)=>!customElements.get(component));
+        if (missingComponents.length > 0) throw new Error(`Failed to load components: ${missingComponents.join(', ')}`);
+    } catch (error) {
+        // Log the error but don't throw to prevent breaking the card
+        console.error('Error loading Home Assistant form components:', error);
+        // Attempt to use a fallback approach if available
+        try {
+            // Try to load components directly from Home Assistant frontend if available
+            if (window.customElements && window.customElements.get('home-assistant')) {
+                console.log('Attempting fallback loading method for HA components');
+                // This is a fallback approach that might work in some environments
+                const event = new CustomEvent('ha-request-load-components', {
+                    detail: {
+                        components: componentsToLoad
+                    },
+                    bubbles: true,
+                    composed: true
+                });
+                document.dispatchEvent(event);
+            }
+        } catch (fallbackError) {
+            console.error('Fallback loading method failed:', fallbackError);
+        }
+    }
+};
+
+
+const $99419b6ca02cfc00$export$7e942a124a34547f = [
+    'ha-form',
+    'ha-icon',
+    'ha-icon-button',
+    'ha-selector',
+    'ha-textfield',
+    'ha-icon-picker',
+    'ha-entity-picker',
+    'ha-select',
+    'ha-dialog',
+    'ha-sortable',
+    'ha-svg-icon',
+    'ha-alert',
+    'mwc-button'
+];
+
+
 class $68bfe1b558ade806$export$4dc2b60021baefca {
     static #_ = this.getHa = ()=>{
         let root = document.querySelector('home-assistant');
@@ -1242,10 +1409,47 @@ class $68bfe1b558ade806$export$4dc2b60021baefca {
         }
         return false;
     }
+    // https://github.com/KipK/load-ha-components/tree/main
+    static async preloadHaElements(elements) {
+        await (0, $ec3d08574593a0a4$export$5b9848928059ec76)(elements);
+    }
 }
 
 
-(0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($f0dac4bd3cbe46c0$exports))));
+// localization code adapted from
+// https://github.com/custom-cards/boilerplate-card/blob/master/src/localize/localize.ts
+var $bd173c3e1c9f15b8$exports = {};
+$bd173c3e1c9f15b8$exports = JSON.parse("{\"config\":{\"settings\":\"Settings\",\"nap\":\"Nap\",\"schedule\":\"Schedule\",\"alarm_entities\":\"Alarm ringer entities\",\"period_icon\":\"Icon as PM indicator\",\"clock_display_font\":\"Clock display font\",\"snooze_duration_default\":\"Snooze duration default\",\"alarm_duration_default\":\"Alarm duration default\",\"alarm_actions\":\"Alarm actions\",\"cards\":\"Cards to display\",\"debug\":\"Debug mode\",\"nap_duration\":\"Nap duration\",\"alarms_enabled\":\"Alarms Schedule Enabled\",\"selector\":{\"alarm_actions\":{\"alarm_action_entity\":\"Alarm action entity\",\"activate_action\":\"Activate action\",\"offset_duration\":\"Offset duration\",\"offset_negative\":\"Offset negative\",\"selector\":{\"activate_action\":{\"options\":{\"on_snooze\":\"On snooze\",\"on_dismiss\":\"On dismiss\",\"offset\":\"At time offset from alarm\"}}}},\"cards\":{\"card_entity\":\"Card entity\"}}},\"notification\":{\"successfully_saved\":\"Successfully saved\",\"configuration_updated\":\"Configuration updated\"},\"error\":{\"config_incorrect\":\"Card config incorrectly formatted or missing\",\"no_alarm_entities\":\"No array of alarm_entities found in card configuration. One is required for alarm\",\"saving_failed\":\"Saving failed\"}}");
+
+
+var $b24e5e18e91d6ff2$exports = {};
+$b24e5e18e91d6ff2$exports = JSON.parse('{"config":{"settings":"Einstellungen","nap":"Nickerchen","schedule":"Schedule","alarm_entities":"Alarmklingel-Entit\xe4ten","period_icon":"Symbol als PM-Indikator","clock_display_font":"Schriftart der Uhranzeige","snooze_duration_default":"Standardm\xe4\xdfige Schlummerdauer","alarm_duration_default":"Standardm\xe4\xdfige Alarmdauer","alarm_actions":"Alarmaktionen","cards":"Karten zum Ausstellen","debug":"Debug-Modus","nap_duration":"Nickerchendauer","alarms_enabled":"Alarmzeitplan aktiviert","selector":{"alarm_actions":{"alarm_action_entity":"Alarmaktionsentit\xe4t","activate_action":"Aktion aktivieren","offset_duration":"Offsetdauer","offset_negative":"Negativer Offset","selector":{"activate_action":{"options":{"on_snooze":"Bei Schlummertaste","on_dismiss":"Bei Entlassung","offset":"Mit Zeitversatz zum Alarm"}}}},"cards":{"card_entity":"Kartenentit\xe4t"}}},"notification":{"successfully_saved":"Erfolgreich gespeichert","configuration_updated":"Konfiguration aktualisiert"},"error":{"config_incorrect":"Kartenkonfiguration falsch formatiert oder fehlt","no_alarm_entities":"Kein Array von Alarmklingel-Entit\xe4ten in der Kartenkonfiguration gefunden. Eines ist f\xfcr den Alarm erforderlich","saving_failed":"Speichern fehlgeschlagen"}}');
+
+
+// import * as fr from './translations/fr.json';
+// import * as es from './translations/es.json';
+// import * as ru from './translations/ru.json';
+// Import other languages as needed above this line and in order
+// Define supported languages
+const $0d236eb4fae5a7e1$var$languages = {
+    en: $bd173c3e1c9f15b8$exports,
+    de: $b24e5e18e91d6ff2$exports
+};
+function $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63(string, search = '', replace = '') {
+    const lang = (localStorage.getItem('selectedLanguage') || 'en').replace(/['"]+/g, '').replace('-', '_');
+    let translated;
+    try {
+        translated = string.split('.').reduce((o, i)=>o[i], $0d236eb4fae5a7e1$var$languages[lang]);
+    } catch (e) {
+        translated = string.split('.').reduce((o, i)=>o[i], $0d236eb4fae5a7e1$var$languages['en']);
+    }
+    if (translated === undefined) translated = string.split('.').reduce((o, i)=>o[i], $0d236eb4fae5a7e1$var$languages['en']);
+    if (search !== '' && replace !== '') translated = translated.replace(search, replace);
+    return translated;
+}
+
+
+(0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).extend((0, (/*@__PURE__*/$parcel$interopDefault($f0dac4bd3cbe46c0$exports))));
 class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
     static #_ = this.defaultConfig = {
         name: "kobold_clock",
@@ -1370,7 +1574,7 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
     nextAlarmReset(snooze = false) {
         let keyValue;
         if (snooze) {
-            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).duration(this._config.snooze_duration_default));
+            const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().add((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).duration(this._config.snooze_duration_default));
             keyValue = {
                 overridden: true,
                 snooze: true,
@@ -1380,16 +1584,16 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
                 date_time: nextAlarmTime.format('YYYY-MM-DD HH:mm:ss')
             };
         } else {
-            const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().add(1, 'day').format('dd').toLowerCase();
-            const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('dd').toLowerCase();
-            const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss') < this._config[dayToday].time;
+            const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().add(1, 'day').format('dd').toLowerCase();
+            const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('dd').toLowerCase();
+            const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < this._config[dayToday].time;
             const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
             keyValue = $fb5336699f2a5e2d$export$cfa71a29f5c0676d.createNextAlarm(newAlarm, forToday);
         }
         if (!!(0, $68bfe1b558ade806$export$4dc2b60021baefca).deepCompareObj(this.nextAlarm, keyValue)) this.nextAlarm = keyValue;
     }
     static createNextAlarm(alarm, forToday = false, overridden = false) {
-        let alarmDate = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))();
+        let alarmDate = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))();
         if (!(alarm.time >= alarmDate.format('HH:mm:ss') && forToday)) alarmDate = alarmDate.add(1, 'day');
         let data = {
             ...alarm,
@@ -1433,13 +1637,13 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
     }
     _evaluate() {
         const nextAlarm = this.nextAlarm;
-        const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('YYYY-MM-DD');
-        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) this._throttleNextAlarmReset();
+        const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('YYYY-MM-DD');
+        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) this._throttleNextAlarmReset();
         if (!this.isAlarmEnabled) return;
-        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
+        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
         {
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss')) this.dismiss();
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss')) this.dismiss();
         } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
             let myDuration = structuredClone(action.offset);
             if (action.negative && action.offset) myDuration = {
@@ -1447,7 +1651,7 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
                 minutes: myDuration.minutes *= -1,
                 seconds: myDuration.seconds *= -1
             };
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss')) this._runAction(action);
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss')) this._runAction(action);
         });
     }
     async _saveConfigEntries(entries) {
@@ -1466,18 +1670,19 @@ class $fb5336699f2a5e2d$export$cfa71a29f5c0676d {
                     if (cardConfig[entry] !== undefined) cardConfig[entry] = entries[entry];
                     else console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
                 });
-                cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('YYYY-MM-DD HH:mm:ss');
+                cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('YYYY-MM-DD HH:mm:ss');
                 await lovelace.saveConfig(newConfig);
                 (0, $68bfe1b558ade806$export$4dc2b60021baefca).testUntilTimeout(()=>(0, $68bfe1b558ade806$export$4dc2b60021baefca).getNotification(), 5000).then(()=>{
                     if ((0, $68bfe1b558ade806$export$4dc2b60021baefca).getNotification().labelText.includes('dashboard was updated')) (0, $68bfe1b558ade806$export$4dc2b60021baefca).fireEvent('hass-notification', {
-                        message: 'Configuration updated'
+                        message: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('notification.configuration_updated')
                     }, (0, $68bfe1b558ade806$export$4dc2b60021baefca).getHa());
                 }).catch(()=>{}); //timed out
             } else throw {
                 message: 'Unable to find Kobold card in lovelace configuration or kobold card config is corrupt'
             };
         } catch (err) {
-            alert(`Saving failed: ${err.message}.`);
+            // alert(`Saving failed: ${err.message}.`);
+            alert(`${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('error.saving_failed')}: ${err.message}.`);
         }
     }
     _runAction(action) {
@@ -2325,6 +2530,7 @@ function $1b8ed381f29f4e20$export$dcd0d083aa86c355(r) {
 
 
 
+var $cY6J3 = parcelRequire("cY6J3");
 var $364fb5016eecfce2$exports = {};
 !function(e, t) {
     $364fb5016eecfce2$exports = t();
@@ -2572,7 +2778,7 @@ var $364fb5016eecfce2$exports = {};
 });
 
 
-(0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($364fb5016eecfce2$exports))));
+(0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).extend((0, (/*@__PURE__*/$parcel$interopDefault($364fb5016eecfce2$exports))));
 class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2f9f5909897157) {
     updated() {
         if (!this._injectStylesDone) {
@@ -2605,7 +2811,7 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         const isEnabled = this.nextAlarm.enabled;
         const isOverridden = this.config.next_alarm.overridden;
-        if (isEnabled && !isOverridden || !isEnabled && !isOverridden) timeArray = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
+        if (isEnabled && !isOverridden || !isEnabled && !isOverridden) timeArray = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
         else // set sliders to nextAlarm time
         timeArray = this.nextAlarm.time.split(':');
         this._displayedValueH = timeArray[0];
@@ -2640,7 +2846,7 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         return 'mdi:alarm';
     }
     _onTimeChanged(timeStr) {
-        this.nextAlarm.time = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(timeStr, 'HH:mm').format('HH:mm:ss');
+        this.nextAlarm.time = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(timeStr, 'HH:mm').format('HH:mm:ss');
         this.nextAlarm.enabled = true;
         // listener for this event is on #alarmpicker element, so only received when "this" used here is #alarmpicker element
         this.dispatchEvent(new CustomEvent('nextAlarm-changed', {
@@ -2697,7 +2903,7 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
                         pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
                         maxlength="8"
                         ?disabled=${this.disabled}
-                        .value=${!this.nextAlarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
+                        .value=${!this.nextAlarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
                         ?overridden=${this.config?.next_alarm.overridden}
                         @click=${this._clickHandler}
                         readonly
@@ -2854,12 +3060,16 @@ $55b77d8a756202b5$var$AlarmPicker = (0, $94bec1997c2bf05d$export$29e00dfd3077644
 
 
 
+
+var $cY6J3 = parcelRequire("cY6J3");
 class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$export$3f2f9f5909897157) {
     constructor(){
         super(), this._configSchemaSettings = (time_format_12hr)=>[
                 {
                     name: "alarm_entities",
-                    label: "Alarm Ringer Entities",
+                    // label: "Alarm Ringer Entities",
+                    // label: localize(this._hass, 'config.alarm_entities'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_entities'),
                     selector: {
                         entity: {
                             multiple: true,
@@ -2869,35 +3079,57 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         }
                     }
                 },
+                // {
+                //     name: "time_format",
+                //     label: "Time Format",
+                //     selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
+                // },
+                // {
+                //     name: "period_icon",
+                //     label: "Icon as PM Indicator",
+                //     selector: { boolean: {} },
+                //     disabled: !time_format_12hr,
+                // },
                 {
-                    name: "time_format",
-                    label: "Time Format",
-                    selector: {
-                        select: {
-                            options: [
-                                {
-                                    label: "12-Hour",
-                                    value: "12hr"
-                                },
-                                {
-                                    label: "24-Hour",
-                                    value: "24hr"
+                    type: "grid",
+                    name: "",
+                    schema: [
+                        {
+                            name: "time_format",
+                            // label: "Time Format",
+                            label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_format'),
+                            selector: {
+                                select: {
+                                    options: [
+                                        {
+                                            label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_formats.12'),
+                                            value: "12hr"
+                                        },
+                                        {
+                                            label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_formats.24'),
+                                            value: "24hr"
+                                        }
+                                    ]
                                 }
-                            ]
+                            }
+                        },
+                        {
+                            name: "period_icon",
+                            // label: "Icon as PM Indicator",
+                            // label: localize(this._hass, 'config.period_icon'),
+                            label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.period_icon'),
+                            selector: {
+                                boolean: {}
+                            },
+                            disabled: !time_format_12hr
                         }
-                    }
-                },
-                {
-                    name: "period_icon",
-                    label: "Icon as PM Indicator",
-                    selector: {
-                        boolean: {}
-                    },
-                    disabled: !time_format_12hr
+                    ]
                 },
                 {
                     name: "clock_display_font",
-                    label: "Clock Display Font",
+                    // label: "Clock Display Font",
+                    // label: localize(this._hass, 'config.clock_display_font'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.clock_display_font'),
                     selector: {
                         select: {
                             options: [
@@ -2921,23 +3153,45 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         }
                     }
                 },
+                // {
+                //     name: "snooze_duration_default",
+                //     label: "Snooze Duration Default",
+                //     selector: { duration: {} },
+                // },
+                // {
+                //     name: "alarm_duration_default",
+                //     label: "Alarm Duration Default",
+                //     selector: { duration: {} },
+                // },
                 {
-                    name: "snooze_duration_default",
-                    label: "Snooze Duration Default",
-                    selector: {
-                        duration: {}
-                    }
-                },
-                {
-                    name: "alarm_duration_default",
-                    label: "Alarm Duration Default",
-                    selector: {
-                        duration: {}
-                    }
+                    type: "grid",
+                    name: "",
+                    schema: [
+                        {
+                            name: "snooze_duration_default",
+                            // label: "Snooze Duration Default",
+                            // label: localize(this._hass, 'config.snooze_duration_default'),
+                            label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.snooze_duration_default'),
+                            selector: {
+                                duration: {}
+                            }
+                        },
+                        {
+                            name: "alarm_duration_default",
+                            // label: "Alarm Duration Default",
+                            // label: localize(this._hass, 'config.alarm_duration_default'),
+                            label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_duration_default'),
+                            selector: {
+                                duration: {}
+                            }
+                        }
+                    ]
                 },
                 {
                     name: "alarm_actions",
-                    label: "Alarm Actions",
+                    // label: "Alarm Actions",
+                    // label: localize(this._hass, 'config.alarm_actions'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_actions'),
                     selector: {
                         object: {
                             label_field: "entity",
@@ -2945,27 +3199,33 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                             multiple: true,
                             fields: {
                                 entity: {
-                                    label: "Alarm Action Entity",
+                                    // label: "Alarm Action Entity",
+                                    // label: localize(this._hass, 'config.selector.alarm_actions.alarm_action_entity'),
+                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.alarm_action_entity'),
                                     selector: {
                                         entity: {}
                                     },
                                     required: true
                                 },
                                 when: {
-                                    label: "Activate Action",
+                                    // label: "Activate Action",
+                                    // label: localize(this._hass, 'config.selector.alarm_actions.activate_action'),
+                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.activate_action'),
+                                    // selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "At Time Offset from Alarm", value: "offset" }] } },
+                                    // selector: { select: { options: [{ label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_snooze'), value: "on_snooze" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_dismiss'), value: "on_dismiss" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.offset'), value: "offset" }] } },
                                     selector: {
                                         select: {
                                             options: [
                                                 {
-                                                    label: "On Snooze",
+                                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.selector.activate_action.options.on_snooze'),
                                                     value: "on_snooze"
                                                 },
                                                 {
-                                                    label: "On Dismiss",
+                                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.selector.activate_action.options.on_dismiss'),
                                                     value: "on_dismiss"
                                                 },
                                                 {
-                                                    label: "At Time Offset from Alarm",
+                                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.selector.activate_action.options.offset'),
                                                     value: "offset"
                                                 }
                                             ]
@@ -2974,13 +3234,17 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                                     required: true
                                 },
                                 offset: {
-                                    label: "Offset Duration",
+                                    // label: "Offset Duration",
+                                    // label: localize(this._hass, 'config.selector.alarm_actions.offset_duration'),
+                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.offset_duration'),
                                     selector: {
                                         duration: {}
                                     }
                                 },
                                 negative: {
-                                    label: "Offset Negative",
+                                    // label: "Offset Negative",
+                                    // label: localize(this._hass, 'config.selector.alarm_actions.offset_negative'),
+                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.offset_negative'),
                                     selector: {
                                         boolean: {}
                                     }
@@ -2991,7 +3255,9 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "cards",
-                    label: "Cards to Display",
+                    // label: "Cards to Display",
+                    // label: localize(this._hass, 'config.cards'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.cards'),
                     selector: {
                         object: {
                             label_field: "entity",
@@ -2999,14 +3265,16 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                             reorder: true,
                             fields: {
                                 entity: {
-                                    label: "Card Entity",
+                                    // label: "Card Entity",
+                                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.cards.card_entity'),
                                     selector: {
                                         entity: {}
                                     },
                                     required: true
                                 },
                                 "": {
-                                    label: "Card Configuration",
+                                    // label: "Card Configuration",
+                                    label: this._hass.localize('ui.panel.lovelace.editor.edit_card.header'),
                                     selector: {
                                         object: {}
                                     }
@@ -3017,7 +3285,9 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "debug",
-                    label: "Debug Mode",
+                    // label: "Debug Mode",
+                    // label: localize(this._hass, 'config.debug'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.debug'),
                     selector: {
                         boolean: {}
                     }
@@ -3025,7 +3295,9 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
             ], this._configSchemaSchedule = (alarms_disabled)=>[
                 {
                     name: "alarms_enabled",
-                    label: "Alarms Schedule Enabled",
+                    // label: "Alarms Schedule Enabled",
+                    // label: localize(this._hass, 'config.alarms_enabled'),
+                    label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarms_enabled'),
                     selector: {
                         boolean: {}
                     }
@@ -3207,7 +3479,7 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         // console.log('*** setConfig; configChanges: ', configChanges);
         // console.log('*** setConfig: _oldConfig: ', this._oldConfig);
         if (!configChanges) return;
-        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('YYYY-MM-DD HH:mm:ss');
         (0, $68bfe1b558ade806$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //updates lovelace.config
@@ -3249,8 +3521,8 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         }
     }
     _getDayOfWeek(days) {
-        // returns day of week in language set in set hass() method of card
-        return (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))('2018-08-27').add(days, 'days').format('dddd');
+        // returns day of week in language set in hass.lanaguage
+        return (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))('2018-08-27').add(days, 'days').format('dddd');
     }
     _valueChanged(event) {
         event.stopPropagation();
@@ -3260,13 +3532,13 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         // console.log('*** this._oldConfig: ', this._oldConfig);
         // console.log('*** event.detail.value: ', event.detail.value);
         if (!configChanges) return;
-        const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().add(1, 'day').format('dd').toLowerCase();
-        const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('dd').toLowerCase();
+        const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().add(1, 'day').format('dd').toLowerCase();
+        const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
             if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig[item];
             // update nextAlarm
             if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
-                const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss') < event.detail.value[item].time;
+                const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < event.detail.value[item].time;
                 const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
                 // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
                 event.detail.value.next_alarm = {
@@ -3276,7 +3548,7 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
             }
         });
         this._config = (0, $68bfe1b558ade806$export$4dc2b60021baefca).deepMerge((0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig, event.detail.value);
-        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('YYYY-MM-DD HH:mm:ss');
+        this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('YYYY-MM-DD HH:mm:ss');
         this._oldConfig = this._config;
         (0, $68bfe1b558ade806$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
@@ -3299,16 +3571,16 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         try {
             let nextAlarm;
             if (nextAlarmConfig.next_alarm.overridden) {
-                const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().add((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).duration(nextAlarmConfig.nap_duration));
+                const nextAlarmTime = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().add((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).duration(nextAlarmConfig.nap_duration));
                 nextAlarm = (0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).createNextAlarm({
                     enabled: true,
                     time: nextAlarmTime.format('HH:mm:ss')
                 }, true, true);
             } else {
                 //overridden is switched to false: nextAlarmReset
-                const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().add(1, 'day').format('dd').toLowerCase();
-                const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('dd').toLowerCase();
-                const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format('HH:mm:ss') < this._config[dayToday].time;
+                const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().add(1, 'day').format('dd').toLowerCase();
+                const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('dd').toLowerCase();
+                const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < this._config[dayToday].time;
                 const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
                 nextAlarm = (0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday);
             }
@@ -3319,15 +3591,16 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
             // Override HA refresh dashboard notification
             window.setTimeout(()=>{
                 (0, $68bfe1b558ade806$export$4dc2b60021baefca).fireEvent('hass-notification', {
-                    message: 'Successfully saved'
+                    message: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('notification.successfully_saved')
                 }, (0, $68bfe1b558ade806$export$4dc2b60021baefca).getHa());
             }, 50);
         } catch (err) {
-            alert(`Saving failed: ${err.message}.`);
+            // alert(`Saving failed: ${err.message}.`);
+            alert(`${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('error.saving_failed')}: ${err.message}.`);
             // Override HA successful save notification
             window.setTimeout(()=>{
                 (0, $68bfe1b558ade806$export$4dc2b60021baefca).fireEvent('hass-notification', {
-                    message: 'Saving failed'
+                    message: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('error.saving_failed')
                 }, (0, $68bfe1b558ade806$export$4dc2b60021baefca).getHa());
             }, 50);
         }
@@ -3360,17 +3633,17 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 <sl-tab-group
                     @sl-tab-show=${this._handleSwitchTab}
                 >
-                    <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</sl-tab>
-                    <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</sl-tab>
-                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</sl-tab>
+                    <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.settings')}</sl-tab>
+                    <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.nap')}<</sl-tab>
+                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.schedule')}</sl-tab>
                 </sl-tab-group>
                 ` : (0, $06b9b5dd66c1bf9e$export$c0bb0b647f701bb5)`
                 <ha-tab-group
                     @wa-tab-show=${this._handleSwitchTab}
                 >
-                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>Settings</ha-tab-group-tab>
-                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>Nap</ha-tab-group-tab>
-                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>Schedule</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.settings')}</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.nap')}</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.schedule')}</ha-tab-group-tab>
                 </ha-tab-group>
                 `}
         </div>
@@ -3397,13 +3670,16 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
     </div>`;
     }
     _renderNapEditor() {
+        (0, $68bfe1b558ade806$export$4dc2b60021baefca).preloadHaElements([
+            'ha-duration-input'
+        ]);
         if (!this._nextAlarmConfig) {
             this._nextAlarmConfig = {
                 nap_duration: null,
                 next_alarm: null
             };
             if (this._config.next_alarm.overridden) {
-                const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).duration((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))()));
+                const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).duration((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))()));
                 const myDur = {
                     hours: parseInt(dayDur.format('HH')),
                     minutes: parseInt(dayDur.format('mm')),
@@ -3419,7 +3695,7 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
           <div class="ha-form-grid">
             <div class="ha-form">
               <div class="ha-formfield">
-                <span><p>Nap Duration</p></span>
+                <span><p>${(0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.nap_duration')}</p></span>
                 <ha-switch ?checked=${this._nextAlarmConfig.next_alarm.overridden} @change=${()=>{
             this._nextAlarmConfig.next_alarm.overridden = !this._nextAlarmConfig.next_alarm.overridden;
             this.requestUpdate();
@@ -3427,10 +3703,10 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
               </div>
             </div>
             <div class="ha-form">
-              <ha-duration-input
-                .data=${this._nextAlarmConfig.nap_duration}
-                @value-changed=${this._valueChangedNap}
-              ></ha-duration-input>
+                <ha-duration-input
+                    .data=${this._nextAlarmConfig.nap_duration}
+                    @value-changed=${this._valueChangedNap}
+                ></ha-duration-input>
             </div>
           </div>
         </div>
@@ -3529,6 +3805,274 @@ $48c150b433756fc8$var$KoboldCardEditor = (0, $94bec1997c2bf05d$export$29e00dfd30
 
 
 
+
+
+
+var $cY6J3 = parcelRequire("cY6J3");
+var $d62c6ac7ad770bbe$exports = {};
+
+!function(e, n) {
+    $d62c6ac7ad770bbe$exports = n((parcelRequire("cY6J3")));
+}($d62c6ac7ad770bbe$exports, function(e) {
+    "use strict";
+    function n(e) {
+        return e && "object" == typeof e && "default" in e ? e : {
+            default: e
+        };
+    }
+    var t = n(e), a = {
+        s: "ein paar Sekunden",
+        m: [
+            "eine Minute",
+            "einer Minute"
+        ],
+        mm: "%d Minuten",
+        h: [
+            "eine Stunde",
+            "einer Stunde"
+        ],
+        hh: "%d Stunden",
+        d: [
+            "ein Tag",
+            "einem Tag"
+        ],
+        dd: [
+            "%d Tage",
+            "%d Tagen"
+        ],
+        M: [
+            "ein Monat",
+            "einem Monat"
+        ],
+        MM: [
+            "%d Monate",
+            "%d Monaten"
+        ],
+        y: [
+            "ein Jahr",
+            "einem Jahr"
+        ],
+        yy: [
+            "%d Jahre",
+            "%d Jahren"
+        ]
+    };
+    function i(e, n, t) {
+        var i = a[t];
+        return Array.isArray(i) && (i = i[n ? 0 : 1]), i.replace("%d", e);
+    }
+    var r = {
+        name: "de",
+        weekdays: "Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag".split("_"),
+        weekdaysShort: "So._Mo._Di._Mi._Do._Fr._Sa.".split("_"),
+        weekdaysMin: "So_Mo_Di_Mi_Do_Fr_Sa".split("_"),
+        months: "Januar_Februar_M\xe4rz_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember".split("_"),
+        monthsShort: "Jan._Feb._M\xe4rz_Apr._Mai_Juni_Juli_Aug._Sept._Okt._Nov._Dez.".split("_"),
+        ordinal: function(e) {
+            return e + ".";
+        },
+        weekStart: 1,
+        yearStart: 4,
+        formats: {
+            LTS: "HH:mm:ss",
+            LT: "HH:mm",
+            L: "DD.MM.YYYY",
+            LL: "D. MMMM YYYY",
+            LLL: "D. MMMM YYYY HH:mm",
+            LLLL: "dddd, D. MMMM YYYY HH:mm"
+        },
+        relativeTime: {
+            future: "in %s",
+            past: "vor %s",
+            s: i,
+            m: i,
+            mm: i,
+            h: i,
+            hh: i,
+            d: i,
+            dd: i,
+            M: i,
+            MM: i,
+            y: i,
+            yy: i
+        }
+    };
+    return t.default.locale(r, null, !0), r;
+});
+
+
+var $a9cff24065b41a6c$exports = {};
+
+!function(e, n) {
+    $a9cff24065b41a6c$exports = n((parcelRequire("cY6J3")));
+}($a9cff24065b41a6c$exports, function(e) {
+    "use strict";
+    function n(e) {
+        return e && "object" == typeof e && "default" in e ? e : {
+            default: e
+        };
+    }
+    var t = n(e), i = {
+        name: "fr",
+        weekdays: "dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi".split("_"),
+        weekdaysShort: "dim._lun._mar._mer._jeu._ven._sam.".split("_"),
+        weekdaysMin: "di_lu_ma_me_je_ve_sa".split("_"),
+        months: "janvier_f\xe9vrier_mars_avril_mai_juin_juillet_ao\xfbt_septembre_octobre_novembre_d\xe9cembre".split("_"),
+        monthsShort: "janv._f\xe9vr._mars_avr._mai_juin_juil._ao\xfbt_sept._oct._nov._d\xe9c.".split("_"),
+        weekStart: 1,
+        yearStart: 4,
+        formats: {
+            LT: "HH:mm",
+            LTS: "HH:mm:ss",
+            L: "DD/MM/YYYY",
+            LL: "D MMMM YYYY",
+            LLL: "D MMMM YYYY HH:mm",
+            LLLL: "dddd D MMMM YYYY HH:mm"
+        },
+        relativeTime: {
+            future: "dans %s",
+            past: "il y a %s",
+            s: "quelques secondes",
+            m: "une minute",
+            mm: "%d minutes",
+            h: "une heure",
+            hh: "%d heures",
+            d: "un jour",
+            dd: "%d jours",
+            M: "un mois",
+            MM: "%d mois",
+            y: "un an",
+            yy: "%d ans"
+        },
+        ordinal: function(e) {
+            return "" + e + (1 === e ? "er" : "");
+        }
+    };
+    return t.default.locale(i, null, !0), i;
+});
+
+
+var $997450ae6b51b420$exports = {};
+
+!function(e, o) {
+    $997450ae6b51b420$exports = o((parcelRequire("cY6J3")));
+}($997450ae6b51b420$exports, function(e) {
+    "use strict";
+    function o(e) {
+        return e && "object" == typeof e && "default" in e ? e : {
+            default: e
+        };
+    }
+    var s = o(e), d = {
+        name: "es",
+        monthsShort: "ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic".split("_"),
+        weekdays: "domingo_lunes_martes_mi\xe9rcoles_jueves_viernes_s\xe1bado".split("_"),
+        weekdaysShort: "dom._lun._mar._mi\xe9._jue._vie._s\xe1b.".split("_"),
+        weekdaysMin: "do_lu_ma_mi_ju_vi_s\xe1".split("_"),
+        months: "enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre".split("_"),
+        weekStart: 1,
+        formats: {
+            LT: "H:mm",
+            LTS: "H:mm:ss",
+            L: "DD/MM/YYYY",
+            LL: "D [de] MMMM [de] YYYY",
+            LLL: "D [de] MMMM [de] YYYY H:mm",
+            LLLL: "dddd, D [de] MMMM [de] YYYY H:mm"
+        },
+        relativeTime: {
+            future: "en %s",
+            past: "hace %s",
+            s: "unos segundos",
+            m: "un minuto",
+            mm: "%d minutos",
+            h: "una hora",
+            hh: "%d horas",
+            d: "un d\xeda",
+            dd: "%d d\xedas",
+            M: "un mes",
+            MM: "%d meses",
+            y: "un a\xf1o",
+            yy: "%d a\xf1os"
+        },
+        ordinal: function(e) {
+            return e + "\xba";
+        }
+    };
+    return s.default.locale(d, null, !0), d;
+});
+
+
+var $97d1fdb3a0a3e1ae$exports = {};
+
+!function(_, t) {
+    $97d1fdb3a0a3e1ae$exports = t((parcelRequire("cY6J3")));
+}($97d1fdb3a0a3e1ae$exports, function(_) {
+    "use strict";
+    function t(_) {
+        return _ && "object" == typeof _ && "default" in _ ? _ : {
+            default: _
+        };
+    }
+    var e = t(_), n = "\u044F\u043D\u0432\u0430\u0440\u044F_\u0444\u0435\u0432\u0440\u0430\u043B\u044F_\u043C\u0430\u0440\u0442\u0430_\u0430\u043F\u0440\u0435\u043B\u044F_\u043C\u0430\u044F_\u0438\u044E\u043D\u044F_\u0438\u044E\u043B\u044F_\u0430\u0432\u0433\u0443\u0441\u0442\u0430_\u0441\u0435\u043D\u0442\u044F\u0431\u0440\u044F_\u043E\u043A\u0442\u044F\u0431\u0440\u044F_\u043D\u043E\u044F\u0431\u0440\u044F_\u0434\u0435\u043A\u0430\u0431\u0440\u044F".split("_"), s = "\u044F\u043D\u0432\u0430\u0440\u044C_\u0444\u0435\u0432\u0440\u0430\u043B\u044C_\u043C\u0430\u0440\u0442_\u0430\u043F\u0440\u0435\u043B\u044C_\u043C\u0430\u0439_\u0438\u044E\u043D\u044C_\u0438\u044E\u043B\u044C_\u0430\u0432\u0433\u0443\u0441\u0442_\u0441\u0435\u043D\u0442\u044F\u0431\u0440\u044C_\u043E\u043A\u0442\u044F\u0431\u0440\u044C_\u043D\u043E\u044F\u0431\u0440\u044C_\u0434\u0435\u043A\u0430\u0431\u0440\u044C".split("_"), r = "\u044F\u043D\u0432._\u0444\u0435\u0432\u0440._\u043C\u0430\u0440._\u0430\u043F\u0440._\u043C\u0430\u044F_\u0438\u044E\u043D\u044F_\u0438\u044E\u043B\u044F_\u0430\u0432\u0433._\u0441\u0435\u043D\u0442._\u043E\u043A\u0442._\u043D\u043E\u044F\u0431._\u0434\u0435\u043A.".split("_"), o = "\u044F\u043D\u0432._\u0444\u0435\u0432\u0440._\u043C\u0430\u0440\u0442_\u0430\u043F\u0440._\u043C\u0430\u0439_\u0438\u044E\u043D\u044C_\u0438\u044E\u043B\u044C_\u0430\u0432\u0433._\u0441\u0435\u043D\u0442._\u043E\u043A\u0442._\u043D\u043E\u044F\u0431._\u0434\u0435\u043A.".split("_"), i = /D[oD]?(\[[^[\]]*\]|\s)+MMMM?/;
+    function d(_, t, e) {
+        var n, s;
+        return "m" === e ? t ? "\u043C\u0438\u043D\u0443\u0442\u0430" : "\u043C\u0438\u043D\u0443\u0442\u0443" : _ + " " + (n = +_, s = ({
+            mm: t ? "\u043C\u0438\u043D\u0443\u0442\u0430_\u043C\u0438\u043D\u0443\u0442\u044B_\u043C\u0438\u043D\u0443\u0442" : "\u043C\u0438\u043D\u0443\u0442\u0443_\u043C\u0438\u043D\u0443\u0442\u044B_\u043C\u0438\u043D\u0443\u0442",
+            hh: "\u0447\u0430\u0441_\u0447\u0430\u0441\u0430_\u0447\u0430\u0441\u043E\u0432",
+            dd: "\u0434\u0435\u043D\u044C_\u0434\u043D\u044F_\u0434\u043D\u0435\u0439",
+            MM: "\u043C\u0435\u0441\u044F\u0446_\u043C\u0435\u0441\u044F\u0446\u0430_\u043C\u0435\u0441\u044F\u0446\u0435\u0432",
+            yy: "\u0433\u043E\u0434_\u0433\u043E\u0434\u0430_\u043B\u0435\u0442"
+        })[e].split("_"), n % 10 == 1 && n % 100 != 11 ? s[0] : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? s[1] : s[2]);
+    }
+    var u = function(_, t) {
+        return i.test(t) ? n[_.month()] : s[_.month()];
+    };
+    u.s = s, u.f = n;
+    var a = function(_, t) {
+        return i.test(t) ? r[_.month()] : o[_.month()];
+    };
+    a.s = o, a.f = r;
+    var m = {
+        name: "ru",
+        weekdays: "\u0432\u043E\u0441\u043A\u0440\u0435\u0441\u0435\u043D\u044C\u0435_\u043F\u043E\u043D\u0435\u0434\u0435\u043B\u044C\u043D\u0438\u043A_\u0432\u0442\u043E\u0440\u043D\u0438\u043A_\u0441\u0440\u0435\u0434\u0430_\u0447\u0435\u0442\u0432\u0435\u0440\u0433_\u043F\u044F\u0442\u043D\u0438\u0446\u0430_\u0441\u0443\u0431\u0431\u043E\u0442\u0430".split("_"),
+        weekdaysShort: "\u0432\u0441\u043A_\u043F\u043D\u0434_\u0432\u0442\u0440_\u0441\u0440\u0434_\u0447\u0442\u0432_\u043F\u0442\u043D_\u0441\u0431\u0442".split("_"),
+        weekdaysMin: "\u0432\u0441_\u043F\u043D_\u0432\u0442_\u0441\u0440_\u0447\u0442_\u043F\u0442_\u0441\u0431".split("_"),
+        months: u,
+        monthsShort: a,
+        weekStart: 1,
+        yearStart: 4,
+        formats: {
+            LT: "H:mm",
+            LTS: "H:mm:ss",
+            L: "DD.MM.YYYY",
+            LL: "D MMMM YYYY \u0433.",
+            LLL: "D MMMM YYYY \u0433., H:mm",
+            LLLL: "dddd, D MMMM YYYY \u0433., H:mm"
+        },
+        relativeTime: {
+            future: "\u0447\u0435\u0440\u0435\u0437 %s",
+            past: "%s \u043D\u0430\u0437\u0430\u0434",
+            s: "\u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0441\u0435\u043A\u0443\u043D\u0434",
+            m: d,
+            mm: d,
+            h: "\u0447\u0430\u0441",
+            hh: d,
+            d: "\u0434\u0435\u043D\u044C",
+            dd: d,
+            M: "\u043C\u0435\u0441\u044F\u0446",
+            MM: d,
+            y: "\u0433\u043E\u0434",
+            yy: d
+        },
+        ordinal: function(_) {
+            return _;
+        },
+        meridiem: function(_) {
+            return _ < 4 ? "\u043D\u043E\u0447\u0438" : _ < 12 ? "\u0443\u0442\u0440\u0430" : _ < 17 ? "\u0434\u043D\u044F" : "\u0432\u0435\u0447\u0435\u0440\u0430";
+        }
+    };
+    return e.default.locale(m, null, !0), m;
+});
 
 
 
@@ -3644,8 +4188,8 @@ const $2e66b84a6df852d7$var$fontStyles = '@font-face { font-family: "noto_sansme
 let $2e66b84a6df852d7$var$myStyle = document.createElement('style');
 $2e66b84a6df852d7$var$myStyle.innerHTML = $2e66b84a6df852d7$var$fontStyles;
 document.head.appendChild($2e66b84a6df852d7$var$myStyle);
-(0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($364fb5016eecfce2$exports))));
-(0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).extend((0, (/*@__PURE__*/$parcel$interopDefault($d9398702d0d18b80$exports))));
+(0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).extend((0, (/*@__PURE__*/$parcel$interopDefault($364fb5016eecfce2$exports))));
+(0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).extend((0, (/*@__PURE__*/$parcel$interopDefault($d9398702d0d18b80$exports))));
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "kobold-alarm-clock-card",
@@ -3765,7 +4309,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
         }
     }
     setConfig(config) {
-        if (!config) alert('Card config incorrectly formatted or missing.');
+        if (!config) alert((0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('error.config_incorrect'));
         if (!config.cards || !Array.isArray(config.cards)) {
             if (config.debug) {
                 this._hass.callService('system_log', 'write', {
@@ -3791,7 +4335,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     set hass(hass) {
         this._hass = hass;
         this._alarmController.hass = hass;
-        (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports))).locale(hass.language);
+        (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3))).locale(hass.language);
         if (this._elements) this._elements.forEach((element)=>{
             element.hass = hass;
         });
@@ -3806,7 +4350,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
         if (config.alarm_entities && Array.isArray(config.alarm_entities)) config.alarm_entities.forEach((item)=>{
             if (!this._hass.states[item]) console.warn(`*** _buildCard(); Entity ${item} does not exist in HA`);
         });
-        else alert('No array of alarm_entities found in card configuration. One is required for alarm.');
+        else alert((0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('error.no_alarm_entities'));
         if (config.cards) {
             const elements = this._elements = [];
             Promise.all(config.cards.map(async (card)=>{
@@ -3853,7 +4397,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
         if (periodIcon) this._clockQ.classList.add('periodIcon');
         const showSeconds = false;
         if (showSeconds) this._clockQ.classList.add('seconds');
-        const time = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
+        const time = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format(this._config.time_format === '24hr' ? 'HH:mm:ss' : 'h:mm:ss A');
         const isAlarmRinging = this._alarmController.isAlarmRinging();
         if (this._clockQ && (force || this._time !== time)) {
             this._time = time;
@@ -3888,7 +4432,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
         </div>
       `;
             const dateFormat = this._config.time_format === '24hr' ? 'dddd, D MMMM' : 'dddd, MMMM D';
-            this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($97104e3b39c1a759$exports)))().format(dateFormat);
+            this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format(dateFormat);
         }
     }
     _periodHtml(periodKern, timeTxt, periodIcon) {
