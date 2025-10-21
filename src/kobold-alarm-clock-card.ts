@@ -185,6 +185,7 @@ class KoboldAlarmClockCard extends LitElement {
   // }
 
   firstUpdated(_changedProperties: PropertyValues): void {
+
     this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
 
     if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
@@ -421,7 +422,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   _periodHtml(periodKern: string, timeTxt: string, periodIcon: string) {
     if (periodIcon) {
-      return '<span class="periodIcon' + periodKern + '">' + (timeTxt === 'PM' ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
+      return '<span class="periodIcon' + periodKern + '">' + (timeTxt === dayjs('2018-08-27 23:00:00').format('A') ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
     } else {
       return '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
     }

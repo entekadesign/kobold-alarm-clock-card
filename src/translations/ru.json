@@ -1,0 +1,46 @@
+{
+  "config": {
+    "settings": "Настройки",
+    "nap": "Сон",
+    "schedule": "Расписание",
+    "alarm_entities": "Сущности звонка будильника",
+    "period_icon": "Значок как индикатор PM",
+    "clock_display_font": "Шрифт отображения часов",
+    "snooze_duration_default": "Длительность повтора по умолчанию",
+    "alarm_duration_default": "Длительность будильника по умолчанию",
+    "alarm_actions": "Действия по тревоге",
+    "cards": "Карты для отображения",
+    "debug": "Режим отладки",
+    "nap_duration": "Продолжительность дневного сна",
+    "alarms_enabled": "Расписание будильников включено",
+    "selector": {
+      "alarm_actions": {
+        "alarm_action_entity": "Объект действия тревоги",
+        "activate_action": "Активировать действие",
+        "offset_duration": "Длительность смещения",
+        "offset_negative": "Смещение отрицательное",
+        "selector": {
+          "activate_action": {
+            "options": {
+              "on_snooze": "На повторе",
+              "on_dismiss": "При увольнении",
+              "offset": "По смещению времени от будильника"
+            }
+          }
+        }
+      },
+      "cards": {
+        "card_entity": "Карта сущности"
+      }
+    }
+  },
+  "notification": {
+    "successfully_saved": "Успешно сохранено",
+    "configuration_updated": "Конфигурация обновлена"
+  },
+  "error": {
+    "config_incorrect": "Конфигурация карты неправильно отформатирована или отсутствует",
+    "no_alarm_entities": "Массив сущностей тревог не найден в конфигурации карты. Для тревоги требуется один массив",
+    "saving_failed": "Сохранение не удалось"
+  }
+}

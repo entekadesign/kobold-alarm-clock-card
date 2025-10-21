@@ -1,0 +1,46 @@
+{
+  "config": {
+    "settings": "Ajustes",
+    "nap": "Siesta",
+    "schedule": "Cronograma",
+    "alarm_entities": "Entidades de alarma",
+    "period_icon": "Icono como indicador de PM",
+    "clock_display_font": "Fuente de visualización del reloj",
+    "snooze_duration_default": "Duración de la repetición predeterminada",
+    "alarm_duration_default": "Duración de la alarma predeterminada",
+    "alarm_actions": "Acciones de alarma",
+    "cards": "Tarjetas para exhibir",
+    "debug": "Modo de depuración",
+    "nap_duration": "Duración de la siesta",
+    "alarms_enabled": "Programación de alarmas habilitada",
+    "selector": {
+      "alarm_actions": {
+        "alarm_action_entity": "Entidad de acción de alarma",
+        "activate_action": "Activar acción",
+        "offset_duration": "Duración del desplazamiento",
+        "offset_negative": "Desplazamiento negativo",
+        "selector": {
+          "activate_action": {
+            "options": {
+              "on_snooze": "En modo de repetición",
+              "on_dismiss": "Al despedir",
+              "offset": "En el desplazamiento horario de la alarma"
+            }
+          }
+        }
+      },
+      "cards": {
+        "card_entity": "Entidad de tarjeta"
+      }
+    }
+  },
+  "notification": {
+    "successfully_saved": "Guardado exitosamente",
+    "configuration_updated": "Configuración actualizada"
+  },
+  "error": {
+    "config_incorrect": "La configuración de la tarjeta está formateada incorrectamente o falta",
+    "no_alarm_entities": "No se encontró ninguna matriz de entidades de alarma en la configuración de la tarjeta. Se requiere una para la alarma",
+    "saving_failed": "Error al guardar"
+  }
+}

@@ -5,18 +5,18 @@ import type { TranslationKey } from './types';
 
 import * as en from './translations/en.json';
 import * as de from './translations/de.json';
-// import * as fr from './translations/fr.json';
-// import * as es from './translations/es.json';
-// import * as ru from './translations/ru.json';
+import * as fr from './translations/fr.json';
+import * as es from './translations/es.json';
+import * as ru from './translations/ru.json';
 // Import other languages as needed above this line and in order
 
 // Define supported languages
 const languages: Record<string, any> = {
     en: en,
     de: de,
-    // fr: fr,
-    // es: es,
-    // ru: ru,
+    fr: fr,
+    es: es,
+    ru: ru,
     // Add more languages here in order
 };
 

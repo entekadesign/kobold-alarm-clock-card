@@ -1,0 +1,46 @@
+{
+  "config": {
+    "settings": "Paramètres",
+    "nap": "Somme",
+    "schedule": "Calendrier",
+    "alarm_entities": "Entités de sonnerie d'alarme",
+    "period_icon": "Icône comme indicateur PM",
+    "clock_display_font": "Police d'affichage de l'horloge",
+    "snooze_duration_default": "Police d'affichage de l'horloge",
+    "alarm_duration_default": "Durée de l'alarme par défaut",
+    "alarm_actions": "Actions d'alarme",
+    "cards": "Cartes à afficher",
+    "debug": "Mode débogage",
+    "nap_duration": "Durée de la sieste",
+    "alarms_enabled": "Programmation des alarmes activée",
+    "selector": {
+      "alarm_actions": {
+        "alarm_action_entity": "Entité d'action d'alarme",
+        "activate_action": "Activer l'action",
+        "offset_duration": "Durée du décalage",
+        "offset_negative": "Décalage négatif",
+        "selector": {
+          "activate_action": {
+            "options": {
+              "on_snooze": "En mode veille",
+              "on_dismiss": "En cas de licenciement",
+              "offset": "Au décalage horaire de l'alarme"
+            }
+          }
+        }
+      },
+      "cards": {
+        "card_entity": "Entité de carte"
+      }
+    }
+  },
+  "notification": {
+    "successfully_saved": "Enregistré avec succès",
+    "configuration_updated": "Configuration mise à jour"
+  },
+  "error": {
+    "config_incorrect": "Configuration de la carte mal formatée ou manquante",
+    "no_alarm_entities": "Aucun tableau d'entités d'alarme n'a été trouvé dans la configuration de la carte. Un tableau est requis pour l'alarme",
+    "saving_failed": "L'enregistrement a échoué"
+  }
+}
