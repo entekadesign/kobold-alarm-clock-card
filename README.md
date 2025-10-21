@@ -30,6 +30,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
     - Set 12-hour or 24-hour time display format
     - Set time display font to system or any of three presets
     - Set default duration of snooze or undismissed alarm
+    - Set HA's language and view Kobold in that language
 
 <br>
 
@@ -94,6 +95,9 @@ Delete your lovelace configuration except for the minimal configuration shown in
 
 Set an alarm for each day of the week in the **schedule dialog**. The next alarm time will be displayed at the upper right corner of the main view. A toggle switch indicates whether the next alarm is enabled. To override the scheduled alarm, tap/click on the next alarm display or enter a value in the **nap dialog**. A dotted border around next alarm time indicates that the scheduled alarm is overridden. To clear the override and return to the scheduled alarm, disable the nap duration in the **nap dialog**.
 
+## Localization
+
+If your HA instance's preferred language is German, French, Spanish, or Russian, Kobold should automatically present its main view, menus and messages in that language. Unfortunately, most of the translation was not done by a native speaker, so if you would like to help improve the available translations, or to add a new language, please [send me a note](mailto:marco@entekadesign.com).
 
 ## Settings
 
