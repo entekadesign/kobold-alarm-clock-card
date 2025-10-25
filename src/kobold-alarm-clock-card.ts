@@ -717,8 +717,6 @@ class KoboldAlarmClockCard extends LitElement {
       bottom: 0.96em;
     }
     #clock span.periodIcon ha-icon {
-      /*position: absolute;
-      top: 0.3em;*/
       display: inline-flex;
       --mdc-icon-size: 0.25em;
     }

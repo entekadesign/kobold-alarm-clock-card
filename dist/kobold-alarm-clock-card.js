@@ -2989,13 +2989,22 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         }
 
         .alarm > .sliders {
+            z-index: 1;
             display: flex;
             flex-flow: column nowrap;
             justify-content: center;
             overflow: hidden;
             transition: width 120ms;
             width: 0;
-            padding-top: 6rem; backdrop-filter: blur(10px);
+            padding-top: 2.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .alarm > .sliders ha-slider:nth-child(1) {
+            padding: 0 0.5rem 0 0.5rem;
+        }
+        .alarm > .sliders ha-slider:nth-child(2) {
+            padding: 2rem 0.5rem 1rem 0.5rem;
         }
 
         @keyframes delay-overflow {
@@ -3007,7 +3016,6 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         }
 
         #alarmEnabledToggleButton {
-            /*filter: invert(1);*/
             margin: 0 0.5rem;
         }
         :host(:not(.narrow)) #alarmEnabledToggleButton {
@@ -4722,8 +4730,6 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
       bottom: 0.96em;
     }
     #clock span.periodIcon ha-icon {
-      /*position: absolute;
-      top: 0.3em;*/
       display: inline-flex;
       --mdc-icon-size: 0.25em;
     }

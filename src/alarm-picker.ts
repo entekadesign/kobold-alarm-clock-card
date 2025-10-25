@@ -228,13 +228,22 @@ class AlarmPicker extends LitElement {
         }
 
         .alarm > .sliders {
+            z-index: 1;
             display: flex;
             flex-flow: column nowrap;
             justify-content: center;
             overflow: hidden;
             transition: width 120ms;
             width: 0;
-            padding-top: 6rem; backdrop-filter: blur(10px);
+            padding-top: 2.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .alarm > .sliders ha-slider:nth-child(1) {
+            padding: 0 0.5rem 0 0.5rem;
+        }
+        .alarm > .sliders ha-slider:nth-child(2) {
+            padding: 2rem 0.5rem 1rem 0.5rem;
         }
 
         @keyframes delay-overflow {
@@ -246,7 +255,6 @@ class AlarmPicker extends LitElement {
         }
 
         #alarmEnabledToggleButton {
-            /*filter: invert(1);*/
             margin: 0 0.5rem;
         }
         :host(:not(.narrow)) #alarmEnabledToggleButton {
