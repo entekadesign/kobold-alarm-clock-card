@@ -2805,15 +2805,14 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
             }
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                let iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
+                const iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
                 myStyle.innerHTML = iconStyle;
                 this._iconButtonQ.shadowRoot.appendChild(myStyle);
             }
             if (this._alarmTimeInputQ.shadowRoot) {
-                const allStyle = '.mdc-text-field--filled { padding: 0 !important; } .mdc-text-field__input { font-size: inherit !important; text-align: center; }';
-                const pickerStyle = ' .mdc-text-field__input { color: #696969 !important; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; }';
                 myStyle = document.createElement('style');
-                myStyle.innerHTML = allStyle + pickerStyle;
+                const pickerStyle = ' .mdc-text-field__input { color: #696969 !important; font-size: inherit !important; text-align: center; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; padding: 0 !important; }';
+                myStyle.innerHTML = pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
             }
         }
@@ -2823,7 +2822,8 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         const isEnabled = this.nextAlarm.enabled;
         const isOverridden = this.config.next_alarm.overridden;
-        if (isEnabled && !isOverridden || !isEnabled && !isOverridden) timeArray = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
+        // if (isEnabled && !isOverridden || !isEnabled && !isOverridden) {
+        if (!isOverridden) timeArray = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
         else // set sliders to nextAlarm time
         timeArray = this.nextAlarm.time.split(':');
         this._displayedValueH = timeArray[0];
@@ -2846,6 +2846,7 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
     }
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
+        // console.log('*** updateValue; target: ', <HTMLInputElement>event.target);
         event.target.id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
         if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
@@ -2972,7 +2973,6 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         }
 
         #alarmTimeInput {
-            /*filter: invert(1);*/
             margin: 0 0.5em;
         }
 
@@ -2996,7 +2996,7 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
             overflow: hidden;
             transition: width 120ms;
             width: 0;
-            padding-top: 2.25rem;
+            padding-top: 6rem;
             backdrop-filter: blur(10px);
         }
 
@@ -3087,8 +3087,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         super(), this._configSchemaSettings = (time_format_12hr)=>[
                 {
                     name: "alarm_entities",
-                    // label: "Alarm Ringer Entities",
-                    // label: localize(this._hass, 'config.alarm_entities'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_entities'),
                     selector: {
                         entity: {
@@ -3099,24 +3097,12 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         }
                     }
                 },
-                // {
-                //     name: "time_format",
-                //     label: "Time Format",
-                //     selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
-                // },
-                // {
-                //     name: "period_icon",
-                //     label: "Icon as PM Indicator",
-                //     selector: { boolean: {} },
-                //     disabled: !time_format_12hr,
-                // },
                 {
                     type: "grid",
                     name: "",
                     schema: [
                         {
                             name: "time_format",
-                            // label: "Time Format",
                             label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_format'),
                             selector: {
                                 select: {
@@ -3135,8 +3121,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         },
                         {
                             name: "period_icon",
-                            // label: "Icon as PM Indicator",
-                            // label: localize(this._hass, 'config.period_icon'),
                             label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.period_icon'),
                             selector: {
                                 boolean: {}
@@ -3147,8 +3131,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "clock_display_font",
-                    // label: "Clock Display Font",
-                    // label: localize(this._hass, 'config.clock_display_font'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.clock_display_font'),
                     selector: {
                         select: {
@@ -3173,24 +3155,12 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         }
                     }
                 },
-                // {
-                //     name: "snooze_duration_default",
-                //     label: "Snooze Duration Default",
-                //     selector: { duration: {} },
-                // },
-                // {
-                //     name: "alarm_duration_default",
-                //     label: "Alarm Duration Default",
-                //     selector: { duration: {} },
-                // },
                 {
                     type: "grid",
                     name: "",
                     schema: [
                         {
                             name: "snooze_duration_default",
-                            // label: "Snooze Duration Default",
-                            // label: localize(this._hass, 'config.snooze_duration_default'),
                             label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.snooze_duration_default'),
                             selector: {
                                 duration: {}
@@ -3198,8 +3168,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                         },
                         {
                             name: "alarm_duration_default",
-                            // label: "Alarm Duration Default",
-                            // label: localize(this._hass, 'config.alarm_duration_default'),
                             label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_duration_default'),
                             selector: {
                                 duration: {}
@@ -3209,8 +3177,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "alarm_actions",
-                    // label: "Alarm Actions",
-                    // label: localize(this._hass, 'config.alarm_actions'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarm_actions'),
                     selector: {
                         object: {
@@ -3219,8 +3185,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                             multiple: true,
                             fields: {
                                 entity: {
-                                    // label: "Alarm Action Entity",
-                                    // label: localize(this._hass, 'config.selector.alarm_actions.alarm_action_entity'),
                                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.alarm_action_entity'),
                                     selector: {
                                         entity: {}
@@ -3228,11 +3192,7 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                                     required: true
                                 },
                                 when: {
-                                    // label: "Activate Action",
-                                    // label: localize(this._hass, 'config.selector.alarm_actions.activate_action'),
                                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.activate_action'),
-                                    // selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "At Time Offset from Alarm", value: "offset" }] } },
-                                    // selector: { select: { options: [{ label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_snooze'), value: "on_snooze" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_dismiss'), value: "on_dismiss" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.offset'), value: "offset" }] } },
                                     selector: {
                                         select: {
                                             options: [
@@ -3254,16 +3214,12 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                                     required: true
                                 },
                                 offset: {
-                                    // label: "Offset Duration",
-                                    // label: localize(this._hass, 'config.selector.alarm_actions.offset_duration'),
                                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.offset_duration'),
                                     selector: {
                                         duration: {}
                                     }
                                 },
                                 negative: {
-                                    // label: "Offset Negative",
-                                    // label: localize(this._hass, 'config.selector.alarm_actions.offset_negative'),
                                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.alarm_actions.offset_negative'),
                                     selector: {
                                         boolean: {}
@@ -3275,8 +3231,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "cards",
-                    // label: "Cards to Display",
-                    // label: localize(this._hass, 'config.cards'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.cards'),
                     selector: {
                         object: {
@@ -3285,7 +3239,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                             reorder: true,
                             fields: {
                                 entity: {
-                                    // label: "Card Entity",
                                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.selector.cards.card_entity'),
                                     selector: {
                                         entity: {}
@@ -3293,7 +3246,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                                     required: true
                                 },
                                 "": {
-                                    // label: "Card Configuration",
                                     label: this._hass.localize('ui.panel.lovelace.editor.edit_card.header'),
                                     selector: {
                                         object: {}
@@ -3305,8 +3257,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
                 },
                 {
                     name: "debug",
-                    // label: "Debug Mode",
-                    // label: localize(this._hass, 'config.debug'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.debug'),
                     selector: {
                         boolean: {}
@@ -3315,8 +3265,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
             ], this._configSchemaSchedule = (alarms_disabled)=>[
                 {
                     name: "alarms_enabled",
-                    // label: "Alarms Schedule Enabled",
-                    // label: localize(this._hass, 'config.alarms_enabled'),
                     label: (0, $0d236eb4fae5a7e1$export$b3bd0bc58e36cd63)('config.alarms_enabled'),
                     selector: {
                         boolean: {}
@@ -3556,15 +3504,18 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
             if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig[item];
-            // update nextAlarm
-            if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
-                const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < event.detail.value[item].time;
-                const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
-                // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
-                event.detail.value.next_alarm = {
-                    ...this._config.next_alarm,
-                    ...(0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
-                };
+            // update nextAlarm //TODO: refactor the logic in this block
+            if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
+                const interveningAlarm = item === dayTomorrow && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < this._oldConfig[dayToday].time;
+                if (!interveningAlarm) {
+                    const forToday = item === dayToday && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < event.detail.value[item].time;
+                    const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
+                    // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
+                    event.detail.value.next_alarm = {
+                        ...this._config.next_alarm,
+                        ...(0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
+                    };
+                }
             }
         });
         this._config = (0, $68bfe1b558ade806$export$4dc2b60021baefca).deepMerge((0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig, event.detail.value);

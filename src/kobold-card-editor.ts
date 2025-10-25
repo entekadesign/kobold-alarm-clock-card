@@ -16,36 +16,20 @@ class KoboldCardEditor extends LitElement {
     private _configSchemaSettings = (time_format_12hr?: boolean) => [
         {
             name: "alarm_entities",
-            // label: "Alarm Ringer Entities",
-            // label: localize(this._hass, 'config.alarm_entities'),
             label: localize('config.alarm_entities'),
             selector: { entity: { multiple: true, filter: { domain: AlarmController.DOMAINS_ALARM_ENTITIES } } },
         },
-        // {
-        //     name: "time_format",
-        //     label: "Time Format",
-        //     selector: { select: { options: [{ label: "12-Hour", value: "12hr" }, { label: "24-Hour", value: "24hr" }] } },
-        // },
-        // {
-        //     name: "period_icon",
-        //     label: "Icon as PM Indicator",
-        //     selector: { boolean: {} },
-        //     disabled: !time_format_12hr,
-        // },
         {
             type: "grid",
             name: "",
             schema: [
                 {
                     name: "time_format",
-                    // label: "Time Format",
                     label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_format'),
                     selector: { select: { options: [{ label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_formats.12'), value: "12hr" }, { label: this._hass.localize('ui.panel.lovelace.editor.card.clock.time_formats.24'), value: "24hr" }] } },
                 },
                 {
                     name: "period_icon",
-                    // label: "Icon as PM Indicator",
-                    // label: localize(this._hass, 'config.period_icon'),
                     label: localize('config.period_icon'),
                     selector: { boolean: {} },
                     disabled: !time_format_12hr,
@@ -54,36 +38,20 @@ class KoboldCardEditor extends LitElement {
         },
         {
             name: "clock_display_font",
-            // label: "Clock Display Font",
-            // label: localize(this._hass, 'config.clock_display_font'),
             label: localize('config.clock_display_font'),
             selector: { select: { options: [{ label: "System", value: 0 }, { label: "Noto Sans", value: 1 }, { label: "Oswald", value: 2 }, { label: "IBM Plex Sans", value: 3 }] } },
         },
-        // {
-        //     name: "snooze_duration_default",
-        //     label: "Snooze Duration Default",
-        //     selector: { duration: {} },
-        // },
-        // {
-        //     name: "alarm_duration_default",
-        //     label: "Alarm Duration Default",
-        //     selector: { duration: {} },
-        // },
         {
             type: "grid",
             name: "",
             schema: [
                 {
                     name: "snooze_duration_default",
-                    // label: "Snooze Duration Default",
-                    // label: localize(this._hass, 'config.snooze_duration_default'),
                     label: localize('config.snooze_duration_default'),
                     selector: { duration: {} },
                 },
                 {
                     name: "alarm_duration_default",
-                    // label: "Alarm Duration Default",
-                    // label: localize(this._hass, 'config.alarm_duration_default'),
                     label: localize('config.alarm_duration_default'),
                     selector: { duration: {} },
                 },
@@ -91,8 +59,6 @@ class KoboldCardEditor extends LitElement {
         },
         {
             name: "alarm_actions",
-            // label: "Alarm Actions",
-            // label: localize(this._hass, 'config.alarm_actions'),
             label: localize('config.alarm_actions'),
             selector: {
                 object: {
@@ -101,30 +67,20 @@ class KoboldCardEditor extends LitElement {
                     multiple: true,
                     fields: {
                         entity: {
-                            // label: "Alarm Action Entity",
-                            // label: localize(this._hass, 'config.selector.alarm_actions.alarm_action_entity'),
                             label: localize('config.selector.alarm_actions.alarm_action_entity'),
                             selector: { entity: {} },
                             required: true,
                         },
                         when: {
-                            // label: "Activate Action",
-                            // label: localize(this._hass, 'config.selector.alarm_actions.activate_action'),
                             label: localize('config.selector.alarm_actions.activate_action'),
-                            // selector: { select: { options: [{ label: "On Snooze", value: "on_snooze" }, { label: "On Dismiss", value: "on_dismiss" }, { label: "At Time Offset from Alarm", value: "offset" }] } },
-                            // selector: { select: { options: [{ label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_snooze'), value: "on_snooze" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.on_dismiss'), value: "on_dismiss" }, { label: localize(this._hass, 'config.selector.alarm_actions.selector.activate_action.options.offset'), value: "offset" }] } },
                             selector: { select: { options: [{ label: localize('config.selector.alarm_actions.selector.activate_action.options.on_snooze'), value: "on_snooze" }, { label: localize('config.selector.alarm_actions.selector.activate_action.options.on_dismiss'), value: "on_dismiss" }, { label: localize('config.selector.alarm_actions.selector.activate_action.options.offset'), value: "offset" }] } },
                             required: true,
                         },
                         offset: {
-                            // label: "Offset Duration",
-                            // label: localize(this._hass, 'config.selector.alarm_actions.offset_duration'),
                             label: localize('config.selector.alarm_actions.offset_duration'),
                             selector: { duration: {} },
                         },
                         negative: {
-                            // label: "Offset Negative",
-                            // label: localize(this._hass, 'config.selector.alarm_actions.offset_negative'),
                             label: localize('config.selector.alarm_actions.offset_negative'),
                             selector: { boolean: {} },
                         },
@@ -134,8 +90,6 @@ class KoboldCardEditor extends LitElement {
         },
         {
             name: "cards",
-            // label: "Cards to Display",
-            // label: localize(this._hass, 'config.cards'),
             label: localize('config.cards'),
             selector: {
                 object: {
@@ -144,13 +98,11 @@ class KoboldCardEditor extends LitElement {
                     reorder: true,
                     fields: {
                         entity: {
-                            // label: "Card Entity",
                             label: localize('config.selector.cards.card_entity'),
                             selector: { entity: {} },
                             required: true,
                         },
                         "": {
-                            // label: "Card Configuration",
                             label: this._hass.localize('ui.panel.lovelace.editor.edit_card.header'),
                             selector: { object: {} },
                         }
@@ -160,8 +112,6 @@ class KoboldCardEditor extends LitElement {
         },
         {
             name: "debug",
-            // label: "Debug Mode",
-            // label: localize(this._hass, 'config.debug'),
             label: localize('config.debug'),
             selector: { boolean: {} },
         },
@@ -170,8 +120,6 @@ class KoboldCardEditor extends LitElement {
     private _configSchemaSchedule = (alarms_disabled?: boolean) => [
         {
             name: "alarms_enabled",
-            // label: "Alarms Schedule Enabled",
-            // label: localize(this._hass, 'config.alarms_enabled'),
             label: localize('config.alarms_enabled'),
             selector: { boolean: {} },
         },
@@ -421,15 +369,19 @@ class KoboldCardEditor extends LitElement {
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
                     event.detail.value[item] = AlarmController.defaultConfig[item];
                 }
-                // update nextAlarm
-                if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled' || item === 'next_alarm') {
+                // update nextAlarm //TODO: refactor the logic in this block
+                if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
 
-                    const forToday = item === dayToday && dayjs().format('HH:mm:ss') < event.detail.value[item].time;
-                    const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
-                    // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
-                    event.detail.value.next_alarm = {
-                        ...this._config.next_alarm,
-                        ...AlarmController.createNextAlarm(newAlarm, forToday),
+                    const interveningAlarm = item === dayTomorrow && dayjs().format('HH:mm:ss') < this._oldConfig[dayToday].time;
+
+                    if (!interveningAlarm) {
+                        const forToday = item === dayToday && dayjs().format('HH:mm:ss') < event.detail.value[item].time;
+                        const newAlarm = forToday ? event.detail.value[dayToday] : event.detail.value[dayTomorrow];
+                        // console.log('*** item: ' + item + '; newAlarm: ' + JSON.stringify(newAlarm));
+                        event.detail.value.next_alarm = {
+                            ...this._config.next_alarm,
+                            ...AlarmController.createNextAlarm(newAlarm, forToday),
+                        }
                     }
                 }
             });
