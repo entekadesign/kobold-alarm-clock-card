@@ -549,6 +549,7 @@ class KoboldAlarmClockCard extends LitElement {
       }
     }
 
+    // TODO: remove .hass property from alarm-picker
     return html`
         <ha-card>
           <div>
@@ -568,6 +569,7 @@ class KoboldAlarmClockCard extends LitElement {
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
+                        .hass=${this._hass}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}

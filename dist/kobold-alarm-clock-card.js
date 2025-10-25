@@ -2797,6 +2797,15 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
             this._injectStylesDone = true;
             // inject style into mdc text field, switch, icon
             let myStyle;
+            if (this._alarmPickerSlidersQ) {
+                // fix Safari calc() bug
+                const sliderStyle = '#thumb { scale: 1.5; left: -webkit-calc(var(--position) - var(--thumb-width) / 2); } #indicator { right: -webkit-calc(100% - max(var(--start), var(--end))); left: min(var(--start), var(--end)); }';
+                this._alarmPickerSlidersQ.forEach((sliderHost)=>{
+                    myStyle = document.createElement('style');
+                    myStyle.innerHTML = sliderStyle;
+                    sliderHost.shadowRoot.appendChild(myStyle);
+                });
+            }
             if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
                 const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
@@ -2846,7 +2855,11 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
     }
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
-        // console.log('*** updateValue; target: ', <HTMLInputElement>event.target);
+        // const target = <HTMLInputElement>event.target;
+        // console.log('*** updateValue; target: ', target);
+        // const newVal = JSON.stringify(target, censor(target));
+        // console.log('*** updateValue; target: ', newVal);
+        // this.hass.callService('system_log', 'write', { 'message': '*** alarm-picker updateValue; value: ' + value, 'level': 'info' });
         event.target.id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
         if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
@@ -3057,6 +3070,9 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
         reflect: false
     })
 ], $55b77d8a756202b5$var$AlarmPicker.prototype, "disabled", void 0);
+(0, $94bec1997c2bf05d$export$29e00dfd3077644b)([
+    (0, $1b8ed381f29f4e20$export$dcd0d083aa86c355)('div#alarmPicker.alarm ha-slider')
+], $55b77d8a756202b5$var$AlarmPicker.prototype, "_alarmPickerSlidersQ", void 0);
 (0, $94bec1997c2bf05d$export$29e00dfd3077644b)([
     (0, $c26381514039aff3$export$2fa187e846a241c4)('div#alarmPicker.alarm ha-switch')
 ], $55b77d8a756202b5$var$AlarmPicker.prototype, "_alarmPickerSwitchQ", void 0);
@@ -3504,7 +3520,6 @@ class $48c150b433756fc8$var$KoboldCardEditor extends (0, $8e623fec6553c8a3$expor
         const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
             if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $fb5336699f2a5e2d$export$cfa71a29f5c0676d).defaultConfig[item];
-            // update nextAlarm //TODO: refactor the logic in this block
             if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
                 const interveningAlarm = item === dayTomorrow && (0, (/*@__PURE__*/$parcel$interopDefault($cY6J3)))().format('HH:mm:ss') < this._oldConfig[dayToday].time;
                 if (!interveningAlarm) {
@@ -4514,6 +4529,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                 this._footQ.classList.add('hideFoot');
             }
         }
+        // TODO: remove .hass property from alarm-picker
         return (0, $06b9b5dd66c1bf9e$export$c0bb0b647f701bb5)`
         <ha-card>
           <div>
@@ -4533,6 +4549,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
+                        .hass=${this._hass}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}

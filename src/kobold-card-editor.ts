@@ -369,7 +369,6 @@ class KoboldCardEditor extends LitElement {
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
                     event.detail.value[item] = AlarmController.defaultConfig[item];
                 }
-                // update nextAlarm //TODO: refactor the logic in this block
                 if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
 
                     const interveningAlarm = item === dayTomorrow && dayjs().format('HH:mm:ss') < this._oldConfig[dayToday].time;
