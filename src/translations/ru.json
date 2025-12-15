@@ -36,7 +36,8 @@
   },
   "notification": {
     "successfully_saved": "Успешно сохранено",
-    "configuration_updated": "Конфигурация обновлена"
+    "configuration_updated": "Конфигурация обновлена",
+    "connection_lost": "Соединение потеряно"
   },
   "error": {
     "config_incorrect": "Конфигурация карты неправильно отформатирована или отсутствует",

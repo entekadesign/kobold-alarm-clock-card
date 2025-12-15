@@ -80,6 +80,7 @@ export type TranslationKey =
     | 'config.selector.cards.card_entity'
     | 'notification.successfully_saved'
     | 'notification.configuration_updated'
+    | 'notification.connection_lost'
     | 'error.config_incorrect'
     | 'error.no_alarm_entities'
     | 'error.saving_failed';

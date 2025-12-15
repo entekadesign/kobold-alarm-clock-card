@@ -36,7 +36,8 @@
   },
   "notification": {
     "successfully_saved": "Guardado exitosamente",
-    "configuration_updated": "Configuración actualizada"
+    "configuration_updated": "Configuración actualizada",
+    "connection_lost": "Se perdió la conexión"
   },
   "error": {
     "config_incorrect": "La configuración de la tarjeta está formateada incorrectamente o falta",

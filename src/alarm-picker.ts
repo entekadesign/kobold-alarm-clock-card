@@ -15,8 +15,6 @@ class AlarmPicker extends LitElement {
     @state() private _displayedValueH: string;
     @state() private _displayedValueM: string;
 
-    // @property({ attribute: false, reflect: false }) hass: any; // DELETEME
-
     @property({ attribute: false, reflect: false }) config: CardConfig;
     @property({ attribute: false, reflect: false }) nextAlarm: NextAlarmObject;
     @property({ attribute: false, reflect: false }) time: string;
@@ -35,12 +33,12 @@ class AlarmPicker extends LitElement {
             let myStyle: HTMLElement;
 
             if (this._alarmPickerSlidersQ) {
-                // fix Safari calc() bug
+                // fix legacy Safari calc(), other bugs
                 const sliderStyle = '#thumb { scale: 1.5; left: -webkit-calc(var(--position) - var(--thumb-width) / 2); } #indicator { right: -webkit-calc(100% - max(var(--start), var(--end))); left: min(var(--start), var(--end)); }';
-                this._alarmPickerSlidersQ.forEach((sliderHost) => {
+                this._alarmPickerSlidersQ.forEach((slidersHost) => {
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = sliderStyle;
-                    sliderHost.shadowRoot.appendChild(myStyle);
+                    slidersHost.shadowRoot.appendChild(myStyle);
                 });
             }
 
@@ -102,11 +100,6 @@ class AlarmPicker extends LitElement {
 
     _updateValue(event: Event) {
         const value = (<HTMLInputElement>event.target).value;  //Number((e.target).value);
-        // const target = <HTMLInputElement>event.target;
-        // console.log('*** updateValue; target: ', target);
-        // const newVal = JSON.stringify(target, censor(target));
-        // console.log('*** updateValue; target: ', newVal);
-        // this.hass.callService('system_log', 'write', { 'message': '*** alarm-picker updateValue; value: ' + value, 'level': 'info' });
         (<HTMLInputElement>event.target).id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
         if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));

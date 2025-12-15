@@ -30,7 +30,8 @@ import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-car
 
 declare global {
   interface Window {
-    hassConnection?: Promise<any>;
+    hassConnection?: Promise<{ auth: any; conn: any }>;
+    hassConnectionReady?: (hassConnection: Window["hassConnection"]) => void;
     loadCardHelpers(): Promise<void>;
     customCards: Array<any>;
     setMyEditMode(parameter?: boolean): void;
@@ -116,20 +117,26 @@ class KoboldAlarmClockCard extends LitElement {
     Helpers.getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
   }
 
-  _connectionStatusEvent = (event: CustomEvent) => {
+  _connectionStatusEvent = async (event: CustomEvent) => {
     if (event.detail === 'connected') {
-      if (this._config.debug) {
-        this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
-        console.warn('*** Recovering from disconnect');
-      };
 
-      // If temporarily disconnected, reload browser after 90-second delay
-      // window.setTimeout(() => {
-      //   location.reload();
-      // }, 1000 * 90);
+      // if (this._config.debug) {
+      this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
+      console.warn('*** Recovering from disconnect');
+      // };
+
+      //TODO: another thing to try: just refresh browser now; don't wait for restart event
+
+      if (window.hassConnectionReady) {
+        this._hass.callService('system_log', 'write', { 'message': '*** App was somehow loaded before core', 'level': 'info' });
+      }
 
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
+        this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
+        conn.subscribeEvents(() => {
+          this._hass.callService('system_log', 'write', { 'message': '*** Received HA start event', 'level': 'info' });
+        }, 'homeassistant_start');
         conn.subscribeEvents(() => {
           window.setTimeout(() => {
             this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
@@ -137,7 +144,7 @@ class KoboldAlarmClockCard extends LitElement {
             window.setTimeout(() => {
               location.reload();
             }, 1000 * 2);
-          }, 1000 * 60);
+          }, 1000 * 5);
         }, 'homeassistant_started');
       });
     }
@@ -549,7 +556,6 @@ class KoboldAlarmClockCard extends LitElement {
       }
     }
 
-    // TODO: remove .hass property from alarm-picker
     return html`
         <ha-card>
           <div>
@@ -569,7 +575,6 @@ class KoboldAlarmClockCard extends LitElement {
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
-                        .hass=${this._hass}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}

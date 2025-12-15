@@ -36,7 +36,8 @@
   },
   "notification": {
     "successfully_saved": "Erfolgreich gespeichert",
-    "configuration_updated": "Konfiguration aktualisiert"
+    "configuration_updated": "Konfiguration aktualisiert",
+    "connection_lost": "Verbindung unterbrochen"
   },
   "error": {
     "config_incorrect": "Kartenkonfiguration falsch formatiert oder fehlt",

@@ -939,7 +939,6 @@ var $94bec1997c2bf05d$export$2e2bcd8739ae039 = {
 
 
 
-
 var $cY6J3 = parcelRequire("cY6J3");
 var $f0dac4bd3cbe46c0$exports = {};
 !function(t, s) {
@@ -1419,11 +1418,11 @@ class $68bfe1b558ade806$export$4dc2b60021baefca {
 // localization code adapted from
 // https://github.com/custom-cards/boilerplate-card/blob/master/src/localize/localize.ts
 var $bd173c3e1c9f15b8$exports = {};
-$bd173c3e1c9f15b8$exports = JSON.parse("{\"config\":{\"settings\":\"Settings\",\"nap\":\"Nap\",\"schedule\":\"Schedule\",\"alarm_entities\":\"Alarm ringer entities\",\"period_icon\":\"Icon as PM indicator\",\"clock_display_font\":\"Clock display font\",\"snooze_duration_default\":\"Snooze duration default\",\"alarm_duration_default\":\"Alarm duration default\",\"alarm_actions\":\"Alarm actions\",\"cards\":\"Cards to display\",\"debug\":\"Debug mode\",\"nap_duration\":\"Nap duration\",\"alarms_enabled\":\"Alarms Schedule Enabled\",\"selector\":{\"alarm_actions\":{\"alarm_action_entity\":\"Alarm action entity\",\"activate_action\":\"Activate action\",\"offset_duration\":\"Offset duration\",\"offset_negative\":\"Offset negative\",\"selector\":{\"activate_action\":{\"options\":{\"on_snooze\":\"On snooze\",\"on_dismiss\":\"On dismiss\",\"offset\":\"At time offset from alarm\"}}}},\"cards\":{\"card_entity\":\"Card entity\"}}},\"notification\":{\"successfully_saved\":\"Successfully saved\",\"configuration_updated\":\"Configuration updated\"},\"error\":{\"config_incorrect\":\"Card config incorrectly formatted or missing\",\"no_alarm_entities\":\"No array of alarm_entities found in card configuration. One is required for alarm\",\"saving_failed\":\"Saving failed\"}}");
+$bd173c3e1c9f15b8$exports = JSON.parse("{\"config\":{\"settings\":\"Settings\",\"nap\":\"Nap\",\"schedule\":\"Schedule\",\"alarm_entities\":\"Alarm ringer entities\",\"period_icon\":\"Icon as PM indicator\",\"clock_display_font\":\"Clock display font\",\"snooze_duration_default\":\"Snooze duration default\",\"alarm_duration_default\":\"Alarm duration default\",\"alarm_actions\":\"Alarm actions\",\"cards\":\"Cards to display\",\"debug\":\"Debug mode\",\"nap_duration\":\"Nap duration\",\"alarms_enabled\":\"Alarms Schedule Enabled\",\"selector\":{\"alarm_actions\":{\"alarm_action_entity\":\"Alarm action entity\",\"activate_action\":\"Activate action\",\"offset_duration\":\"Offset duration\",\"offset_negative\":\"Offset negative\",\"selector\":{\"activate_action\":{\"options\":{\"on_snooze\":\"On snooze\",\"on_dismiss\":\"On dismiss\",\"offset\":\"At time offset from alarm\"}}}},\"cards\":{\"card_entity\":\"Card entity\"}}},\"notification\":{\"successfully_saved\":\"Successfully saved\",\"configuration_updated\":\"Configuration updated\",\"connection_lost\":\"Connection lost\"},\"error\":{\"config_incorrect\":\"Card config incorrectly formatted or missing\",\"no_alarm_entities\":\"No array of alarm_entities found in card configuration. One is required for alarm\",\"saving_failed\":\"Saving failed\"}}");
 
 
 var $b24e5e18e91d6ff2$exports = {};
-$b24e5e18e91d6ff2$exports = JSON.parse('{"config":{"settings":"Einstellungen","nap":"Nickerchen","schedule":"Schedule","alarm_entities":"Alarmklingel-Entit\xe4ten","period_icon":"Symbol als PM-Indikator","clock_display_font":"Schriftart der Uhranzeige","snooze_duration_default":"Standardm\xe4\xdfige Schlummerdauer","alarm_duration_default":"Standardm\xe4\xdfige Alarmdauer","alarm_actions":"Alarmaktionen","cards":"Karten zum Ausstellen","debug":"Debug-Modus","nap_duration":"Nickerchendauer","alarms_enabled":"Alarmzeitplan aktiviert","selector":{"alarm_actions":{"alarm_action_entity":"Alarmaktionsentit\xe4t","activate_action":"Aktion aktivieren","offset_duration":"Offsetdauer","offset_negative":"Negativer Offset","selector":{"activate_action":{"options":{"on_snooze":"Bei Schlummertaste","on_dismiss":"Bei Entlassung","offset":"Mit Zeitversatz zum Alarm"}}}},"cards":{"card_entity":"Kartenentit\xe4t"}}},"notification":{"successfully_saved":"Erfolgreich gespeichert","configuration_updated":"Konfiguration aktualisiert"},"error":{"config_incorrect":"Kartenkonfiguration falsch formatiert oder fehlt","no_alarm_entities":"Kein Array von Alarmklingel-Entit\xe4ten in der Kartenkonfiguration gefunden. Eines ist f\xfcr den Alarm erforderlich","saving_failed":"Speichern fehlgeschlagen"}}');
+$b24e5e18e91d6ff2$exports = JSON.parse('{"config":{"settings":"Einstellungen","nap":"Nickerchen","schedule":"Schedule","alarm_entities":"Alarmklingel-Entit\xe4ten","period_icon":"Symbol als PM-Indikator","clock_display_font":"Schriftart der Uhranzeige","snooze_duration_default":"Standardm\xe4\xdfige Schlummerdauer","alarm_duration_default":"Standardm\xe4\xdfige Alarmdauer","alarm_actions":"Alarmaktionen","cards":"Karten zum Ausstellen","debug":"Debug-Modus","nap_duration":"Nickerchendauer","alarms_enabled":"Alarmzeitplan aktiviert","selector":{"alarm_actions":{"alarm_action_entity":"Alarmaktionsentit\xe4t","activate_action":"Aktion aktivieren","offset_duration":"Offsetdauer","offset_negative":"Negativer Offset","selector":{"activate_action":{"options":{"on_snooze":"Bei Schlummertaste","on_dismiss":"Bei Entlassung","offset":"Mit Zeitversatz zum Alarm"}}}},"cards":{"card_entity":"Kartenentit\xe4t"}}},"notification":{"successfully_saved":"Erfolgreich gespeichert","configuration_updated":"Konfiguration aktualisiert","connection_lost":"Verbindung unterbrochen"},"error":{"config_incorrect":"Kartenkonfiguration falsch formatiert oder fehlt","no_alarm_entities":"Kein Array von Alarmklingel-Entit\xe4ten in der Kartenkonfiguration gefunden. Eines ist f\xfcr den Alarm erforderlich","saving_failed":"Speichern fehlgeschlagen"}}');
 
 
 var $9957de52a27797dc$exports = {};
@@ -1431,11 +1430,11 @@ $9957de52a27797dc$exports = JSON.parse('{"config":{"settings":"Param\xe8tres","n
 
 
 var $93e1d423f809bb60$exports = {};
-$93e1d423f809bb60$exports = JSON.parse('{"config":{"settings":"Ajustes","nap":"Siesta","schedule":"Cronograma","alarm_entities":"Entidades de alarma","period_icon":"Icono como indicador de PM","clock_display_font":"Fuente de visualizaci\xf3n del reloj","snooze_duration_default":"Duraci\xf3n de la repetici\xf3n predeterminada","alarm_duration_default":"Duraci\xf3n de la alarma predeterminada","alarm_actions":"Acciones de alarma","cards":"Tarjetas para exhibir","debug":"Modo de depuraci\xf3n","nap_duration":"Duraci\xf3n de la siesta","alarms_enabled":"Programaci\xf3n de alarmas habilitada","selector":{"alarm_actions":{"alarm_action_entity":"Entidad de acci\xf3n de alarma","activate_action":"Activar acci\xf3n","offset_duration":"Duraci\xf3n del desplazamiento","offset_negative":"Desplazamiento negativo","selector":{"activate_action":{"options":{"on_snooze":"En modo de repetici\xf3n","on_dismiss":"Al despedir","offset":"En el desplazamiento horario de la alarma"}}}},"cards":{"card_entity":"Entidad de tarjeta"}}},"notification":{"successfully_saved":"Guardado exitosamente","configuration_updated":"Configuraci\xf3n actualizada"},"error":{"config_incorrect":"La configuraci\xf3n de la tarjeta est\xe1 formateada incorrectamente o falta","no_alarm_entities":"No se encontr\xf3 ninguna matriz de entidades de alarma en la configuraci\xf3n de la tarjeta. Se requiere una para la alarma","saving_failed":"Error al guardar"}}');
+$93e1d423f809bb60$exports = JSON.parse('{"config":{"settings":"Ajustes","nap":"Siesta","schedule":"Cronograma","alarm_entities":"Entidades de alarma","period_icon":"Icono como indicador de PM","clock_display_font":"Fuente de visualizaci\xf3n del reloj","snooze_duration_default":"Duraci\xf3n de la repetici\xf3n predeterminada","alarm_duration_default":"Duraci\xf3n de la alarma predeterminada","alarm_actions":"Acciones de alarma","cards":"Tarjetas para exhibir","debug":"Modo de depuraci\xf3n","nap_duration":"Duraci\xf3n de la siesta","alarms_enabled":"Programaci\xf3n de alarmas habilitada","selector":{"alarm_actions":{"alarm_action_entity":"Entidad de acci\xf3n de alarma","activate_action":"Activar acci\xf3n","offset_duration":"Duraci\xf3n del desplazamiento","offset_negative":"Desplazamiento negativo","selector":{"activate_action":{"options":{"on_snooze":"En modo de repetici\xf3n","on_dismiss":"Al despedir","offset":"En el desplazamiento horario de la alarma"}}}},"cards":{"card_entity":"Entidad de tarjeta"}}},"notification":{"successfully_saved":"Guardado exitosamente","configuration_updated":"Configuraci\xf3n actualizada","connection_lost":"Se perdi\xf3 la conexi\xf3n"},"error":{"config_incorrect":"La configuraci\xf3n de la tarjeta est\xe1 formateada incorrectamente o falta","no_alarm_entities":"No se encontr\xf3 ninguna matriz de entidades de alarma en la configuraci\xf3n de la tarjeta. Se requiere una para la alarma","saving_failed":"Error al guardar"}}');
 
 
 var $b88ef6fc6127bf75$exports = {};
-$b88ef6fc6127bf75$exports = JSON.parse('{"config":{"settings":"\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438","nap":"\u0421\u043E\u043D","schedule":"\u0420\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u0435","alarm_entities":"\u0421\u0443\u0449\u043D\u043E\u0441\u0442\u0438 \u0437\u0432\u043E\u043D\u043A\u0430 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430","period_icon":"\u0417\u043D\u0430\u0447\u043E\u043A \u043A\u0430\u043A \u0438\u043D\u0434\u0438\u043A\u0430\u0442\u043E\u0440 PM","clock_display_font":"\u0428\u0440\u0438\u0444\u0442 \u043E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u0447\u0430\u0441\u043E\u0432","snooze_duration_default":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E","alarm_duration_default":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430 \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E","alarm_actions":"\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u043F\u043E \u0442\u0440\u0435\u0432\u043E\u0433\u0435","cards":"\u041A\u0430\u0440\u0442\u044B \u0434\u043B\u044F \u043E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F","debug":"\u0420\u0435\u0436\u0438\u043C \u043E\u0442\u043B\u0430\u0434\u043A\u0438","nap_duration":"\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0434\u043D\u0435\u0432\u043D\u043E\u0433\u043E \u0441\u043D\u0430","alarms_enabled":"\u0420\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u043E\u0432 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E","selector":{"alarm_actions":{"alarm_action_entity":"\u041E\u0431\u044A\u0435\u043A\u0442 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0442\u0440\u0435\u0432\u043E\u0433\u0438","activate_action":"\u0410\u043A\u0442\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435","offset_duration":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u044F","offset_negative":"\u0421\u043C\u0435\u0449\u0435\u043D\u0438\u0435 \u043E\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435","selector":{"activate_action":{"options":{"on_snooze":"\u041D\u0430 \u043F\u043E\u0432\u0442\u043E\u0440\u0435","on_dismiss":"\u041F\u0440\u0438 \u0443\u0432\u043E\u043B\u044C\u043D\u0435\u043D\u0438\u0438","offset":"\u041F\u043E \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u044E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u043E\u0442 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430"}}}},"cards":{"card_entity":"\u041A\u0430\u0440\u0442\u0430 \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u0438"}}},"notification":{"successfully_saved":"\u0423\u0441\u043F\u0435\u0448\u043D\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E","configuration_updated":"\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0430"},"error":{"config_incorrect":"\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F \u043A\u0430\u0440\u0442\u044B \u043D\u0435\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043E\u0442\u0444\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0430 \u0438\u043B\u0438 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442","no_alarm_entities":"\u041C\u0430\u0441\u0441\u0438\u0432 \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u0435\u0439 \u0442\u0440\u0435\u0432\u043E\u0433 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438 \u043A\u0430\u0440\u0442\u044B. \u0414\u043B\u044F \u0442\u0440\u0435\u0432\u043E\u0433\u0438 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0434\u0438\u043D \u043C\u0430\u0441\u0441\u0438\u0432","saving_failed":"\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C"}}');
+$b88ef6fc6127bf75$exports = JSON.parse('{"config":{"settings":"\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438","nap":"\u0421\u043E\u043D","schedule":"\u0420\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u0435","alarm_entities":"\u0421\u0443\u0449\u043D\u043E\u0441\u0442\u0438 \u0437\u0432\u043E\u043D\u043A\u0430 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430","period_icon":"\u0417\u043D\u0430\u0447\u043E\u043A \u043A\u0430\u043A \u0438\u043D\u0434\u0438\u043A\u0430\u0442\u043E\u0440 PM","clock_display_font":"\u0428\u0440\u0438\u0444\u0442 \u043E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u0447\u0430\u0441\u043E\u0432","snooze_duration_default":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E","alarm_duration_default":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430 \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E","alarm_actions":"\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u043F\u043E \u0442\u0440\u0435\u0432\u043E\u0433\u0435","cards":"\u041A\u0430\u0440\u0442\u044B \u0434\u043B\u044F \u043E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F","debug":"\u0420\u0435\u0436\u0438\u043C \u043E\u0442\u043B\u0430\u0434\u043A\u0438","nap_duration":"\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0434\u043D\u0435\u0432\u043D\u043E\u0433\u043E \u0441\u043D\u0430","alarms_enabled":"\u0420\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u043E\u0432 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E","selector":{"alarm_actions":{"alarm_action_entity":"\u041E\u0431\u044A\u0435\u043A\u0442 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0442\u0440\u0435\u0432\u043E\u0433\u0438","activate_action":"\u0410\u043A\u0442\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435","offset_duration":"\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u044F","offset_negative":"\u0421\u043C\u0435\u0449\u0435\u043D\u0438\u0435 \u043E\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435","selector":{"activate_action":{"options":{"on_snooze":"\u041D\u0430 \u043F\u043E\u0432\u0442\u043E\u0440\u0435","on_dismiss":"\u041F\u0440\u0438 \u0443\u0432\u043E\u043B\u044C\u043D\u0435\u043D\u0438\u0438","offset":"\u041F\u043E \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u044E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u043E\u0442 \u0431\u0443\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0430"}}}},"cards":{"card_entity":"\u041A\u0430\u0440\u0442\u0430 \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u0438"}}},"notification":{"successfully_saved":"\u0423\u0441\u043F\u0435\u0448\u043D\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E","configuration_updated":"\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0430","connection_lost":"\u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u043E"},"error":{"config_incorrect":"\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F \u043A\u0430\u0440\u0442\u044B \u043D\u0435\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043E\u0442\u0444\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0430 \u0438\u043B\u0438 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442","no_alarm_entities":"\u041C\u0430\u0441\u0441\u0438\u0432 \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u0435\u0439 \u0442\u0440\u0435\u0432\u043E\u0433 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438 \u043A\u0430\u0440\u0442\u044B. \u0414\u043B\u044F \u0442\u0440\u0435\u0432\u043E\u0433\u0438 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0434\u0438\u043D \u043C\u0430\u0441\u0441\u0438\u0432","saving_failed":"\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C"}}');
 
 
 // Import other languages as needed above this line and in order
@@ -2798,12 +2797,12 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
             // inject style into mdc text field, switch, icon
             let myStyle;
             if (this._alarmPickerSlidersQ) {
-                // fix Safari calc() bug
+                // fix legacy Safari calc(), other bugs
                 const sliderStyle = '#thumb { scale: 1.5; left: -webkit-calc(var(--position) - var(--thumb-width) / 2); } #indicator { right: -webkit-calc(100% - max(var(--start), var(--end))); left: min(var(--start), var(--end)); }';
-                this._alarmPickerSlidersQ.forEach((sliderHost)=>{
+                this._alarmPickerSlidersQ.forEach((slidersHost)=>{
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = sliderStyle;
-                    sliderHost.shadowRoot.appendChild(myStyle);
+                    slidersHost.shadowRoot.appendChild(myStyle);
                 });
             }
             if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
@@ -2855,11 +2854,6 @@ class $55b77d8a756202b5$var$AlarmPicker extends (0, $8e623fec6553c8a3$export$3f2
     }
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
-        // const target = <HTMLInputElement>event.target;
-        // console.log('*** updateValue; target: ', target);
-        // const newVal = JSON.stringify(target, censor(target));
-        // console.log('*** updateValue; target: ', newVal);
-        // this.hass.callService('system_log', 'write', { 'message': '*** alarm-picker updateValue; value: ' + value, 'level': 'info' });
         event.target.id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
         this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
         if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
@@ -4529,7 +4523,6 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                 this._footQ.classList.add('hideFoot');
             }
         }
-        // TODO: remove .hass property from alarm-picker
         return (0, $06b9b5dd66c1bf9e$export$c0bb0b647f701bb5)`
         <ha-card>
           <div>
@@ -4549,7 +4542,6 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                         .nextAlarm=${this._nextAlarm}
                         .config=${this._config}
                         .time=${this._time}
-                        .hass=${this._hass}
                         @schedule-button-clicked=${this._showEditor}
                         @nextAlarm-changed=${this._onAlarmChanged}
                         @toggle-logo-visibility=${this._toggleLogoVisibility}
@@ -4956,21 +4948,32 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     }
   `;
     constructor(...args){
-        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this.preview = false, this._connectionStatusEvent = (event)=>{
+        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this.preview = false, this._connectionStatusEvent = async (event)=>{
             if (event.detail === 'connected') {
-                if (this._config.debug) {
-                    this._hass.callService('system_log', 'write', {
-                        'message': '*** Recovering from disconnect',
-                        'level': 'info'
-                    });
-                    console.warn('*** Recovering from disconnect');
-                }
-                // If temporarily disconnected, reload browser after 90-second delay
-                // window.setTimeout(() => {
-                //   location.reload();
-                // }, 1000 * 90);
+                // if (this._config.debug) {
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** Recovering from disconnect',
+                    'level': 'info'
+                });
+                console.warn('*** Recovering from disconnect');
+                // };
+                //TODO: another thing to try: just refresh browser now; don't wait for restart event
+                if (window.hassConnectionReady) this._hass.callService('system_log', 'write', {
+                    'message': '*** App was somehow loaded before core',
+                    'level': 'info'
+                });
                 // If HA restarts, reload browser
                 window.hassConnection.then(({ conn: conn })=>{
+                    this._hass.callService('system_log', 'write', {
+                        'message': '*** Awaiting HA started event',
+                        'level': 'info'
+                    });
+                    conn.subscribeEvents(()=>{
+                        this._hass.callService('system_log', 'write', {
+                            'message': '*** Received HA start event',
+                            'level': 'info'
+                        });
+                    }, 'homeassistant_start');
                     conn.subscribeEvents(()=>{
                         window.setTimeout(()=>{
                             this._hass.callService('system_log', 'write', {
@@ -4981,7 +4984,13 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                             window.setTimeout(()=>{
                                 location.reload();
                             }, 2000);
-                        }, 60000);
+                        }, 5000);
+                        window.setTimeout(()=>{
+                            this._hass.callService('system_log', 'write', {
+                                'message': '*** Sarted event received 2 minutes ago',
+                                'level': 'info'
+                            });
+                        }, 120000);
                     }, 'homeassistant_started');
                 });
             }

@@ -36,7 +36,8 @@
   },
   "notification": {
     "successfully_saved": "Successfully saved",
-    "configuration_updated": "Configuration updated"
+    "configuration_updated": "Configuration updated",
+    "connection_lost": "Connection lost"
   },
   "error": {
     "config_incorrect": "Card config incorrectly formatted or missing",
