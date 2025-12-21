@@ -31,7 +31,6 @@ import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-car
 declare global {
   interface Window {
     hassConnection?: Promise<{ auth: any; conn: any }>;
-    hassConnectionReady?: (hassConnection: Window["hassConnection"]) => void;
     loadCardHelpers(): Promise<void>;
     customCards: Array<any>;
     setMyEditMode(parameter?: boolean): void;
@@ -88,10 +87,10 @@ class KoboldAlarmClockCard extends LitElement {
 
     this._updateLoop();
 
-    if (this._config.debug) {
-      this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
-      console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
-    };
+    // if (this._config.debug) {
+    this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
+    console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
+    // };
 
     // recover from disconnect, e.g., HA restart
     window.addEventListener('connection-status', this._connectionStatusEvent);
@@ -127,25 +126,20 @@ class KoboldAlarmClockCard extends LitElement {
 
       //TODO: another thing to try: just refresh browser now; don't wait for restart event
 
-      if (window.hassConnectionReady) {
-        this._hass.callService('system_log', 'write', { 'message': '*** App was somehow loaded before core', 'level': 'info' });
-      }
-
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
         this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
-        conn.subscribeEvents(() => {
-          this._hass.callService('system_log', 'write', { 'message': '*** Received HA start event', 'level': 'info' });
-        }, 'homeassistant_start');
-        conn.subscribeEvents(() => {
-          window.setTimeout(() => {
-            this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
-            this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+        window.setTimeout(() => {
+          conn.subscribeEvents(() => {
             window.setTimeout(() => {
-              location.reload();
-            }, 1000 * 2);
-          }, 1000 * 5);
-        }, 'homeassistant_started');
+              this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+              this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+              window.setTimeout(() => {
+                location.reload();
+              }, 1000 * 2);
+            }, 1000 * 5);
+          }, 'homeassistant_started');
+        }, 1000 * 30);
       });
     }
   }

@@ -939,6 +939,7 @@ var $94bec1997c2bf05d$export$2e2bcd8739ae039 = {
 
 
 
+
 var $cY6J3 = parcelRequire("cY6J3");
 var $f0dac4bd3cbe46c0$exports = {};
 !function(t, s) {
@@ -3084,6 +3085,8 @@ $55b77d8a756202b5$var$AlarmPicker = (0, $94bec1997c2bf05d$export$29e00dfd3077644
 ], $55b77d8a756202b5$var$AlarmPicker);
 
 
+// node module dependencies:
+// https://github.com/KipK/load-ha-components/tree/main
 
 
 
@@ -4182,13 +4185,13 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     connectedCallback() {
         super.connectedCallback();
         this._updateLoop();
-        if (this._config.debug) {
-            this._hass.callService('system_log', 'write', {
-                'message': '*** connectedCallback(); _cardID: ' + this._cardId,
-                'level': 'info'
-            });
-            console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
-        }
+        // if (this._config.debug) {
+        this._hass.callService('system_log', 'write', {
+            'message': '*** connectedCallback(); _cardID: ' + this._cardId,
+            'level': 'info'
+        });
+        console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
+        // };
         // recover from disconnect, e.g., HA restart
         window.addEventListener('connection-status', this._connectionStatusEvent);
         (0, $68bfe1b558ade806$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
@@ -4958,40 +4961,26 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                 console.warn('*** Recovering from disconnect');
                 // };
                 //TODO: another thing to try: just refresh browser now; don't wait for restart event
-                if (window.hassConnectionReady) this._hass.callService('system_log', 'write', {
-                    'message': '*** App was somehow loaded before core',
-                    'level': 'info'
-                });
                 // If HA restarts, reload browser
                 window.hassConnection.then(({ conn: conn })=>{
                     this._hass.callService('system_log', 'write', {
                         'message': '*** Awaiting HA started event',
                         'level': 'info'
                     });
-                    conn.subscribeEvents(()=>{
-                        this._hass.callService('system_log', 'write', {
-                            'message': '*** Received HA start event',
-                            'level': 'info'
-                        });
-                    }, 'homeassistant_start');
-                    conn.subscribeEvents(()=>{
-                        window.setTimeout(()=>{
-                            this._hass.callService('system_log', 'write', {
-                                'message': '*** HA Restarted. Refreshing browser',
-                                'level': 'info'
-                            });
-                            this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                    window.setTimeout(()=>{
+                        conn.subscribeEvents(()=>{
                             window.setTimeout(()=>{
-                                location.reload();
-                            }, 2000);
-                        }, 5000);
-                        window.setTimeout(()=>{
-                            this._hass.callService('system_log', 'write', {
-                                'message': '*** Sarted event received 2 minutes ago',
-                                'level': 'info'
-                            });
-                        }, 120000);
-                    }, 'homeassistant_started');
+                                this._hass.callService('system_log', 'write', {
+                                    'message': '*** HA Restarted. Refreshing browser',
+                                    'level': 'info'
+                                });
+                                this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                                window.setTimeout(()=>{
+                                    location.reload();
+                                }, 2000);
+                            }, 5000);
+                        }, 'homeassistant_started');
+                    }, 30000);
                 });
             }
         }, this._dialogClosedEvent = (event)=>{

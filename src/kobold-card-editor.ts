@@ -1,3 +1,6 @@
+// node module dependencies:
+// https://github.com/KipK/load-ha-components/tree/main
+
 import { Helpers } from './helpers';
 import { AlarmController } from './alarm-controller';
 import { LitElement, html, css, PropertyValues } from 'lit';
