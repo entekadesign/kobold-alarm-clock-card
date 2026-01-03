@@ -113,7 +113,7 @@ Note that alarm actions are not executed for override alarms, only for scheduled
 
 ### Cards display
 
-Display HA cards in an area along lower edge of main view by adding a "Card to Display" in the **settings dialog**. A pop-up dialog provides an entity selector and an area to enter the card's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) configuration, which includes the card's `type`, `name`, and any settings.
+Display HA cards in an area along lower edge of main view by adding a "Card to Display" in the **settings dialog**. A pop-up dialog provides an entity selector and an area to enter the card's [YAML](https://www.home-assistant.io/docs/configuration/yaml/) configuration, which must include the card's `type`, but which can also include any other settings, such as the usually optional `name`.
 
 To customize the appearance of the cards, install Thomas Lovén's outstanding  [*Card-Mod* integration](https://github.com/thomasloven/lovelace-card-mod). If you have many cards to display in the small space available, Lovén has an integration to help with that, too: [*Auto-Entities*](https://github.com/thomasloven/lovelace-auto-entities).
 

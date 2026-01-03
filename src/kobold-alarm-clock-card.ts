@@ -41,6 +41,10 @@ declare global {
   interface HuiCardOptions extends LitElement {
     path: [number, number] | [number, number, number];
   }
+  interface HuiCardEditMode extends LitElement {
+    path: [number, number] | [number, number, number];
+  }
+
 }
 
 window.customCards = window.customCards || [];
@@ -85,6 +89,8 @@ class KoboldAlarmClockCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
+    //TODO: since connected can only happen after successful reconnection, we can't'put subscribeEvents here, b/c/ hass not available. set variable to be used in hassConnection?
+
     this._updateLoop();
 
     // if (this._config.debug) {
@@ -124,11 +130,13 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** Recovering from disconnect');
       // };
 
-      //TODO: another thing to try: just refresh browser now; don't wait for restart event
-
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
         this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
+
+        // wait until connected variable--set is connectedCallback--is true
+        // https://www.reddit.com/r/learnjavascript/comments/uxu6zw/code_review_for_my_wait_until_true_function/
+
         window.setTimeout(() => {
           conn.subscribeEvents(() => {
             window.setTimeout(() => {
@@ -145,7 +153,7 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _dialogClosedEvent = (event: CustomEvent) => {
-    // NOTE: this will fire when closing any edit dialog
+    // NOTE: this will fire when closing edit dialog in other cards; TODO: constrain to this card
     if (event.detail.dialog === 'hui-dialog-edit-card') {
       window.setMyEditMode(false);
       window.setTimeout(() => {
@@ -507,12 +515,18 @@ class KoboldAlarmClockCard extends LitElement {
 
     let rounds = 0;
     // wait for availability of card-options; kobold card might be nested
-    while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
+    while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)
+      // while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
       await new Promise((r) => setTimeout(r, 100));
     if (rounds === 6) {
       console.warn('*** _showEditor(); Timed out waiting for edit mode');
     } else {
-      const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
+      // const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
+      const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path ?? this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path;
+      // console.log('*** path1: ', this.closest<HuiCardOptions>('hui-card-options')?.path);
+      // console.log('*** path2: ', this.getRootNode().host.closest('hui-card-options')?.path);
+      // console.log('*** path3: ', this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path);
+      // console.log('*** huiCardPath: ', huiCardPath);
       Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
 
       let rounds = 0;
