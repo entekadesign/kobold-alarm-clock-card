@@ -4185,6 +4185,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     connectedCallback() {
         super.connectedCallback();
         //TODO: since connected can only happen after successful reconnection, we can't'put subscribeEvents here, b/c/ hass not available. set variable to be used in hassConnection?
+        this._koboldConnected = true;
         this._updateLoop();
         // if (this._config.debug) {
         this._hass.callService('system_log', 'write', {
@@ -4204,6 +4205,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     }
     disconnectedCallback() {
         super.disconnectedCallback();
+        this._koboldConnected = false;
         clearTimeout(this._updateLoopId);
         if (this._config.debug) {
             this._hass.callService('system_log', 'write', {
@@ -4958,7 +4960,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     }
   `;
     constructor(...args){
-        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this.preview = false, this._connectionStatusEvent = async (event)=>{
+        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this._koboldConnected = false, this.preview = false, this._connectionStatusEvent = async (event)=>{
             if (event.detail === 'connected') {
                 // if (this._config.debug) {
                 this._hass.callService('system_log', 'write', {
@@ -4973,8 +4975,23 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                         'message': '*** Awaiting HA started event',
                         'level': 'info'
                     });
-                    // wait until connected variable--set is connectedCallback--is true
+                    // wait until connected variable--set in connectedCallback--is true
                     // https://www.reddit.com/r/learnjavascript/comments/uxu6zw/code_review_for_my_wait_until_true_function/
+                    let rounds = 0;
+                    function checkConnection(resolve) {
+                        const interval = setInterval(()=>{
+                            console.log('*** Checking for Kobold connection to HA...');
+                            rounds++;
+                            if (this._koboldConnected) resolve(interval);
+                        }, 1000);
+                    }
+                    let koboldConnected = new Promise(checkConnection);
+                    koboldConnected.then(()=>{
+                        this._hass.callService('system_log', 'write', {
+                            'message': '*** Kobold now connected to HA after ' + rounds + ' seconds',
+                            'level': 'info'
+                        });
+                    });
                     window.setTimeout(()=>{
                         conn.subscribeEvents(()=>{
                             window.setTimeout(()=>{
@@ -5019,6 +5036,9 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
 (0, $94bec1997c2bf05d$export$29e00dfd3077644b)([
     (0, $80d0a90ac7091ff8$export$ca000e230c0caa3e)()
 ], $2e66b84a6df852d7$var$KoboldAlarmClockCard.prototype, "_koboldEditor", void 0);
+(0, $94bec1997c2bf05d$export$29e00dfd3077644b)([
+    (0, $80d0a90ac7091ff8$export$ca000e230c0caa3e)()
+], $2e66b84a6df852d7$var$KoboldAlarmClockCard.prototype, "_koboldConnected", void 0);
 (0, $94bec1997c2bf05d$export$29e00dfd3077644b)([
     (0, $754a20b4896266a7$export$d541bacb2bda4494)({
         type: Boolean,

@@ -72,6 +72,7 @@ class KoboldAlarmClockCard extends LitElement {
   @state() _hass: HomeAssistant;
   @state() _time: string;
   @state() _koboldEditor: KoboldEditor;
+  @state() _koboldConnected: boolean = false;
 
   @property({ type: Boolean, reflect: true }) public preview = false;
 
@@ -90,6 +91,7 @@ class KoboldAlarmClockCard extends LitElement {
     super.connectedCallback();
 
     //TODO: since connected can only happen after successful reconnection, we can't'put subscribeEvents here, b/c/ hass not available. set variable to be used in hassConnection?
+    this._koboldConnected = true;
 
     this._updateLoop();
 
@@ -112,6 +114,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._koboldConnected = false;
     clearTimeout(this._updateLoopId);
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
@@ -134,8 +137,21 @@ class KoboldAlarmClockCard extends LitElement {
       window.hassConnection.then(({ conn }) => {
         this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
 
-        // wait until connected variable--set is connectedCallback--is true
+        // wait until connected variable--set in connectedCallback--is true
         // https://www.reddit.com/r/learnjavascript/comments/uxu6zw/code_review_for_my_wait_until_true_function/
+
+        let rounds = 0;
+        function checkConnection(resolve) {
+          const interval = setInterval(() => {
+            console.log('*** Checking for Kobold connection to HA...');
+            rounds++;
+            if (this._koboldConnected) resolve(interval);
+          }, 1000);
+        }
+        let koboldConnected = new Promise(checkConnection);
+        koboldConnected.then(() => {
+          this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
+        });
 
         window.setTimeout(() => {
           conn.subscribeEvents(() => {
