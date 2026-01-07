@@ -4204,7 +4204,7 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     }
     disconnectedCallback() {
         super.disconnectedCallback();
-        this._koboldConnected = false;
+        // this._koboldConnected = false;
         clearTimeout(this._updateLoopId);
         if (this._config.debug) {
             this._hass.callService('system_log', 'write', {

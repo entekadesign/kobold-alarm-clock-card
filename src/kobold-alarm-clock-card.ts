@@ -113,7 +113,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._koboldConnected = false;
+    // this._koboldConnected = false;
     clearTimeout(this._updateLoopId);
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
