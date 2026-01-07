@@ -4184,16 +4184,15 @@ window.customCards.push({
 class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$export$3f2f9f5909897157) {
     connectedCallback() {
         super.connectedCallback();
-        //TODO: since connected can only happen after successful reconnection, we can't'put subscribeEvents here, b/c/ hass not available. set variable to be used in hassConnection?
         this._koboldConnected = true;
         this._updateLoop();
-        // if (this._config.debug) {
-        this._hass.callService('system_log', 'write', {
-            'message': '*** connectedCallback(); _cardID: ' + this._cardId,
-            'level': 'info'
-        });
-        console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
-        // };
+        if (this._config.debug) {
+            this._hass.callService('system_log', 'write', {
+                'message': '*** connectedCallback(); _cardID: ' + this._cardId,
+                'level': 'info'
+            });
+            console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
+        }
         // recover from disconnect, e.g., HA restart
         window.addEventListener('connection-status', this._connectionStatusEvent);
         (0, $68bfe1b558ade806$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
@@ -4962,37 +4961,35 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
     constructor(...args){
         super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this._koboldConnected = false, this.preview = false, this._connectionStatusEvent = async (event)=>{
             if (event.detail === 'connected') {
-                // if (this._config.debug) {
                 this._hass.callService('system_log', 'write', {
                     'message': '*** Recovering from disconnect',
                     'level': 'info'
                 });
                 console.warn('*** Recovering from disconnect');
-                // };
                 // If HA restarts, reload browser
                 window.hassConnection.then(({ conn: conn })=>{
-                    this._hass.callService('system_log', 'write', {
+                    if (this._config.debug) this._hass.callService('system_log', 'write', {
                         'message': '*** Awaiting HA started event',
                         'level': 'info'
                     });
-                    // wait until connected variable--set in connectedCallback--is true
-                    // https://www.reddit.com/r/learnjavascript/comments/uxu6zw/code_review_for_my_wait_until_true_function/
+                    // wait until connected variable--set in connectedCallback()--is true
                     let rounds = 0;
-                    function checkConnection(resolve) {
+                    let koboldConnected = new Promise((resolve)=>{
                         const interval = setInterval(()=>{
-                            console.log('*** Checking for Kobold connection to HA...');
+                            if (this._config.debug) this._hass.callService('system_log', 'write', {
+                                'message': '*** Checking for Kobold connection to HA...',
+                                'level': 'info'
+                            });
                             rounds++;
                             if (this._koboldConnected) resolve(interval);
                         }, 1000);
-                    }
-                    let koboldConnected = new Promise(checkConnection);
-                    koboldConnected.then(()=>{
-                        this._hass.callService('system_log', 'write', {
+                    });
+                    koboldConnected.then((interval)=>{
+                        if (this._config.debug) this._hass.callService('system_log', 'write', {
                             'message': '*** Kobold now connected to HA after ' + rounds + ' seconds',
                             'level': 'info'
                         });
-                    });
-                    window.setTimeout(()=>{
+                        clearInterval(interval);
                         conn.subscribeEvents(()=>{
                             window.setTimeout(()=>{
                                 this._hass.callService('system_log', 'write', {
@@ -5005,7 +5002,18 @@ class $2e66b84a6df852d7$var$KoboldAlarmClockCard extends (0, $8e623fec6553c8a3$e
                                 }, 2000);
                             }, 5000);
                         }, 'homeassistant_started');
-                    }, 30000);
+                    });
+                // window.setTimeout(() => {
+                //   conn.subscribeEvents(() => {
+                //     window.setTimeout(() => {
+                //       this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+                //       this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                //       window.setTimeout(() => {
+                //         location.reload();
+                //       }, 1000 * 2);
+                //     }, 1000 * 5);
+                //   }, 'homeassistant_started');
+                // }, 1000 * 30);
                 });
             }
         }, this._dialogClosedEvent = (event)=>{

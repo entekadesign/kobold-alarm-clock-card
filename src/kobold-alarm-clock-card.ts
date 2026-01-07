@@ -90,15 +90,14 @@ class KoboldAlarmClockCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    //TODO: since connected can only happen after successful reconnection, we can't'put subscribeEvents here, b/c/ hass not available. set variable to be used in hassConnection?
     this._koboldConnected = true;
 
     this._updateLoop();
 
-    // if (this._config.debug) {
-    this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
-    console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
-    // };
+    if (this._config.debug) {
+      this._hass.callService('system_log', 'write', { 'message': '*** connectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
+      console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
+    };
 
     // recover from disconnect, e.g., HA restart
     window.addEventListener('connection-status', this._connectionStatusEvent);
@@ -128,32 +127,31 @@ class KoboldAlarmClockCard extends LitElement {
   _connectionStatusEvent = async (event: CustomEvent) => {
     if (event.detail === 'connected') {
 
-      // if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
       console.warn('*** Recovering from disconnect');
-      // };
 
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
-        this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
+        if (this._config.debug) {
+          this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
+        };
 
-        // wait until connected variable--set in connectedCallback--is true
-        // https://www.reddit.com/r/learnjavascript/comments/uxu6zw/code_review_for_my_wait_until_true_function/
-
+        // wait until connected variable--set in connectedCallback()--is true
         let rounds = 0;
-        function checkConnection(resolve) {
+        let koboldConnected = new Promise((resolve) => {
           const interval = setInterval(() => {
-            console.log('*** Checking for Kobold connection to HA...');
+            if (this._config.debug) {
+              this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
+            };
             rounds++;
             if (this._koboldConnected) resolve(interval);
           }, 1000);
-        }
-        let koboldConnected = new Promise(checkConnection);
-        koboldConnected.then(() => {
-          this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
         });
-
-        window.setTimeout(() => {
+        koboldConnected.then((interval: ReturnType<typeof setInterval>) => {
+          if (this._config.debug) {
+            this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
+          }
+          clearInterval(interval);
           conn.subscribeEvents(() => {
             window.setTimeout(() => {
               this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
@@ -163,7 +161,19 @@ class KoboldAlarmClockCard extends LitElement {
               }, 1000 * 2);
             }, 1000 * 5);
           }, 'homeassistant_started');
-        }, 1000 * 30);
+        });
+
+        // window.setTimeout(() => {
+        //   conn.subscribeEvents(() => {
+        //     window.setTimeout(() => {
+        //       this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+        //       this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+        //       window.setTimeout(() => {
+        //         location.reload();
+        //       }, 1000 * 2);
+        //     }, 1000 * 5);
+        //   }, 'homeassistant_started');
+        // }, 1000 * 30);
       });
     }
   }
