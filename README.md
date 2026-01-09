@@ -34,6 +34,9 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
+<style>@media (max-width: 800px) { div.table-responsive + table td, div.table-responsive + table th { width: 100%; display: block;}}</style>
+<div class="table-responsive"></div>
+
 |||
 | :---: | :---: |
 | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" alt="Main view, 24-hour" width="100%" /><figcaption>**Main view: 24-hour format**</figcaption></figure> | <figure><img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-editing.jpg" alt="Main view, alternative font" width="100%" /><figcaption>**Main view: 12-hour format, editing next alarm**</figcaption></figure> |
@@ -170,7 +173,7 @@ Some debugging information can be logged in the HA system log by enabling "Debug
 
 ## Development
 
-If you notice an error or have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock-card/pulls).
+If you notice an error, [open an issue](https://codeberg.org/entekadesign/kobold-alarm-clock-card/issues). If you have a feature suggestion that would benefit many users, [send me a note](mailto:marco@entekadesign.com) or [open a pull request](https://codeberg.org/entekadesign/kobold-alarm-clock-card/pulls).
 
 The best place for discussion about this card is the [Home Assistant Community Forum](https://community.home-assistant.io/t/kobold-turn-an-old-device-into-a-multi-alarm-clock/).
 
