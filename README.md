@@ -34,8 +34,14 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 <br>
 
-<style>@media (max-width: 800px) { div.table-responsive + table td, div.table-responsive + table th { width: 100%; display: block;}}</style>
-<div class="table-responsive"></div>
+<picture>
+<source media="(max-width: 768px)" srcset="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" width="100%">
+<img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/main-view.jpg" style="margin-right: 1%" alt width="48%" title="My writing on DEV">
+</picture>
+<picture>
+<source media="(max-width: 768px)" srcset="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" width="100%">
+<img src="https://codeberg.org/entekadesign/kobold-alarm-clock-card/media/branch/main/assets/settings.jpg" style="margin-left: 1%" alt width="48%" title="My writing on DEV">
+</picture>
 
 |||
 | :---: | :---: |
