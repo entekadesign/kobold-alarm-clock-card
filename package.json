@@ -19,7 +19,8 @@
     "parcel": "^2.14.4"
   },
   "browserslist": [
-	"> 0.5%, last 2 versions, not dead",
-	"ios >= 15"
-	]
+    "defaults and fully supports es6-module",
+    "maintained node versions",
+    "ios >= 15"
+  ]
 }

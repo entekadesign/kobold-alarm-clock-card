@@ -12,6 +12,7 @@ export interface NextAlarmObject extends TimeObject {
     date_time: string;
     snooze?: boolean;
     overridden?: boolean;
+    holiday?: boolean;
 }
 
 export interface Duration { hours: number; minutes: number; seconds: number; }

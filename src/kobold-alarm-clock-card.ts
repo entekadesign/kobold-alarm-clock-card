@@ -26,7 +26,9 @@ dayjs.extend(relativeTime);
 import type { CardConfig, NextAlarmObject, KoboldEditor } from './types';
 
 // HA types
-import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
+// import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
+// TODO: replace: custom-card-helpers not updated with latest HA types
+import type { LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
   interface Window {
@@ -44,7 +46,6 @@ declare global {
   interface HuiCardEditMode extends LitElement {
     path: [number, number] | [number, number, number];
   }
-
 }
 
 window.customCards = window.customCards || [];
@@ -69,10 +70,10 @@ class KoboldAlarmClockCard extends LitElement {
   private _cardHelpers: any;
 
   @state() _nextAlarm: NextAlarmObject;
-  @state() _hass: HomeAssistant;
+  @state() _hass: any; // _hass: HomeAssistant;
   @state() _time: string;
   @state() _koboldEditor: KoboldEditor;
-  @state() _koboldConnected: boolean = false;
+  @state() _koboldHasConnected: boolean = false;
 
   @property({ type: Boolean, reflect: true }) public preview = false;
 
@@ -90,7 +91,7 @@ class KoboldAlarmClockCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    this._koboldConnected = true;
+    this._koboldHasConnected = this._alarmController.koboldConnected = true;
 
     this._updateLoop();
 
@@ -113,7 +114,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    // this._koboldConnected = false;
+    this._alarmController.koboldConnected = false;
     clearTimeout(this._updateLoopId);
     if (this._config.debug) {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
@@ -138,16 +139,16 @@ class KoboldAlarmClockCard extends LitElement {
 
         // wait until connected variable--set in connectedCallback()--is true
         let rounds = 0;
-        let koboldConnected = new Promise((resolve) => {
+        let koboldIsConnected = new Promise((resolve) => {
           const interval = setInterval(() => {
             if (this._config.debug) {
               this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
             };
             rounds++;
-            if (this._koboldConnected) resolve(interval);
+            if (this._koboldHasConnected) resolve(interval);
           }, 1000);
         });
-        koboldConnected.then((interval: ReturnType<typeof setInterval>) => {
+        koboldIsConnected.then((interval: ReturnType<typeof setInterval>) => {
           if (this._config.debug) {
             this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
           }
@@ -315,7 +316,8 @@ class KoboldAlarmClockCard extends LitElement {
     if (!this._alarmController) this._alarmController = new AlarmController(this._config, this._cardId);
   }
 
-  set hass(hass: HomeAssistant) {
+  // set hass(hass: HomeAssistant) {
+  set hass(hass) {
 
     this._hass = hass;
     this._alarmController.hass = hass;

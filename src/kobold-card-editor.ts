@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
 @customElement('kobold-card-editor')
 class KoboldCardEditor extends LitElement {
 
-    private _configSchemaSettings = (time_format_12hr?: boolean) => [
+    private _configSchemaSettings = (time_format_12hr?: boolean, workday_sensor?: boolean) => [
         {
             name: "alarm_entities",
             label: localize('config.alarm_entities'),
@@ -59,6 +59,17 @@ class KoboldCardEditor extends LitElement {
                     selector: { duration: {} },
                 },
             ],
+        },
+        {
+            name: "workday_sensor",
+            label: "Workday Sensor Entity", //localize('config.workday_entity'),
+            selector: { entity: { filter: { integration: 'workday', domain: 'binary_sensor' } } },
+        },
+        {
+            name: "workday_enabled",
+            label: "Disable alarm on non-workdays", //localize('config.workday_enabled'),
+            selector: { boolean: {} },
+            disabled: workday_sensor,
         },
         {
             name: "alarm_actions",
@@ -410,6 +421,7 @@ class KoboldCardEditor extends LitElement {
     }
 
     // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
+    // TODO: is this necessary, now that alarms not evaluated when viewing settings dialog (i.e., when preview is true)
     async _saveNextAlarm(nextAlarmConfig) {
         try {
             let nextAlarm;
@@ -500,7 +512,7 @@ class KoboldCardEditor extends LitElement {
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings(this._config.time_format === "12hr")}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined)}
           .computeLabel=${(s) => s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>

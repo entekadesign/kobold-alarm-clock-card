@@ -18,6 +18,7 @@ export class AlarmController {
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
+    private _koboldConnected: boolean;
     static oldTabs: boolean;
 
     static defaultConfig = {
@@ -128,6 +129,10 @@ export class AlarmController {
         return data;
     }
 
+    set koboldConnected(connectedState: boolean) {
+        this._koboldConnected = connectedState;
+    }
+
     set configEntries(entries: Object) {
         this._saveConfigEntries(entries);
     }
@@ -137,10 +142,15 @@ export class AlarmController {
     }
     get nextAlarm(): NextAlarmObject {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
+
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
             return AlarmController.defaultConfig.next_alarm;
         }
+
+        // console.log('*** nextAlarm: ', nextAlarm);
+        // console.log('*** workday sensor state: ', this._hass.states[this._config.workday_sensor].state);
+
         return nextAlarm;
     }
 
@@ -167,6 +177,10 @@ export class AlarmController {
 
     _evaluate() {
 
+        if (Helpers.getPreview() || !this._koboldConnected) return;
+        // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
+        // console.log('*** koboldConnected: ', this._koboldConnected);
+
         const nextAlarm = this.nextAlarm;
         const dateToday = dayjs().format('YYYY-MM-DD');
 
@@ -178,11 +192,13 @@ export class AlarmController {
 
         if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
             this._throttleAlarmRinging(true);
+            return;
         } else if (this.isAlarmRinging()) {
             // dismiss alarm after alarm_duration_default time elapses
             if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
                 this.dismiss();
             }
+            return;
             // NOTE: alarm_actions don't execute during nap or snooze
         } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) {
             this._config.alarm_actions
@@ -194,8 +210,38 @@ export class AlarmController {
                     }
                     if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
                         this._runAction(action);
+                        return;
                     }
                 });
+        }
+
+        if (this._config.workday_sensor && this._config.workday_enabled) {
+            // console.log("checking whether nextAlarm is workday...");
+            this.checkWorkdayDate(nextAlarm.date).then((response) => {
+                const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
+                // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
+                if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) {
+                    this.nextAlarm = {
+                        ...nextAlarm,
+                        enabled: false,
+                        holiday: true
+                    };
+                    return;
+                } else if (nextAlarmIsWorkday && nextAlarm.holiday) {
+                    this.nextAlarm = {
+                        ...nextAlarm,
+                        holiday: false
+                    };
+                };
+            }, (error) => {
+                console.error('*** Failed to connect to Workday Sensor: ', error);
+                this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error, 'level': 'info' });
+            });
+        } else {
+            if (nextAlarm.holiday) {
+                delete nextAlarm.holiday;
+                this.nextAlarm = nextAlarm;
+            }
         }
     }
 
@@ -206,6 +252,11 @@ export class AlarmController {
         }
         this.nextAlarmReset();
     }, 1000);
+
+    async checkWorkdayDate(date: string) {
+        //callService(domain: string, service: string, serviceData?: object, target?: HassServiceTarget, notifyOnError?: boolean, returnResponse?: boolean): ServiceCallResponse;
+        return await this._hass.callService('workday', 'check_date', { check_date: date }, { entity_id: this._config.workday_sensor }, false, true);
+    }
 
     async _saveConfigEntries(entries) {
         try {
@@ -274,6 +325,7 @@ export class AlarmController {
                         }
                     } else {
                         if ((action === 'turn_on' && entityState !== 'on') || (action === 'turn_off' && entityState !== 'off')) {
+                            // console.log('*** entity: ' + entity + '; action: ' + action);
                             this._hass.callService('homeassistant', action, { 'entity_id': entity });
                         }
                     }
