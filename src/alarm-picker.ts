@@ -175,7 +175,7 @@ class AlarmPicker extends LitElement {
                     </ha-textfield>
                 </div>
 
-                <ha-switch id="alarmEnabledToggleButton" ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this._toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
+                <ha-switch id="alarmEnabledToggleButton" ?holiday=${this.config?.next_alarm.holiday} ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this._toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
 
             </div>
         `;
@@ -269,6 +269,10 @@ class AlarmPicker extends LitElement {
 
         #alarmEnabledToggleButton {
             margin: 0 0.5rem;
+        }
+        #alarmEnabledToggleButton[holiday] {
+            border: 1px dotted #696969;
+            padding: 8px;
         }
         :host(:not(.narrow)) #alarmEnabledToggleButton {
             scale: 1.25;

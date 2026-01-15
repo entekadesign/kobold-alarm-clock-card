@@ -126,6 +126,8 @@ export class AlarmController {
 
         if (overridden) data.overridden = true;
 
+        // if (holiday) data.holiday = true; // add this?
+
         return data;
     }
 

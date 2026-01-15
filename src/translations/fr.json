@@ -8,6 +8,8 @@
     "clock_display_font": "Police d'affichage de l'horloge",
     "snooze_duration_default": "Police d'affichage de l'horloge",
     "alarm_duration_default": "Durée de l'alarme par défaut",
+    "workday_sensor_entity": "Entité de capteur Workday",
+    "alarm_on_non_workdays": "Désactiver l'alarme les jours non ouvrables",
     "alarm_actions": "Actions d'alarme",
     "cards": "Cartes à afficher",
     "debug": "Mode débogage",

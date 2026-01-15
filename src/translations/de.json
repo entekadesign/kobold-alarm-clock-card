@@ -8,6 +8,8 @@
     "clock_display_font": "Schriftart der Uhranzeige",
     "snooze_duration_default": "Standardmäßige Schlummerdauer",
     "alarm_duration_default": "Standardmäßige Alarmdauer",
+    "workday_sensor_entity": "Workday-Sensorentität",
+    "alarm_on_non_workdays": "Alarm an arbeitsfreien Tagen deaktivieren",
     "alarm_actions": "Alarmaktionen",
     "cards": "Karten zum Ausstellen",
     "debug": "Debug-Modus",

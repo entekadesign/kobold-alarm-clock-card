@@ -62,12 +62,12 @@ class KoboldCardEditor extends LitElement {
         },
         {
             name: "workday_sensor",
-            label: "Workday Sensor Entity", //localize('config.workday_entity'),
+            label: localize('config.workday_sensor_entity'),
             selector: { entity: { filter: { integration: 'workday', domain: 'binary_sensor' } } },
         },
         {
             name: "workday_enabled",
-            label: "Disable alarm on non-workdays", //localize('config.workday_enabled'),
+            label: localize('config.alarm_on_non_workdays'),
             selector: { boolean: {} },
             disabled: workday_sensor,
         },
@@ -369,6 +369,7 @@ class KoboldCardEditor extends LitElement {
 
     _valueChanged(event: CustomEvent) {
         event.stopPropagation();
+        event.preventDefault(); // prevent ios from moving focus to a textarea
         if (!this._config) return;
         const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         // console.log('*** configChanges: ', configChanges);

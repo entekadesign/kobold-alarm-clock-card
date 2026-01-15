@@ -8,6 +8,8 @@
     "clock_display_font": "Clock display font",
     "snooze_duration_default": "Snooze duration default",
     "alarm_duration_default": "Alarm duration default",
+    "workday_sensor_entity": "Workday sensor entity",
+    "alarm_on_non_workdays": "Disable alarm on non-workdays",
     "alarm_actions": "Alarm actions",
     "cards": "Cards to display",
     "debug": "Debug mode",

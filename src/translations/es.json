@@ -8,6 +8,8 @@
     "clock_display_font": "Fuente de visualización del reloj",
     "snooze_duration_default": "Duración de la repetición predeterminada",
     "alarm_duration_default": "Duración de la alarma predeterminada",
+    "workday_sensor_entity": "Entidad sensora de jornada laboral",
+    "alarm_on_non_workdays": "Desactivar la alarma en días no laborables",
     "alarm_actions": "Acciones de alarma",
     "cards": "Tarjetas para exhibir",
     "debug": "Modo de depuración",

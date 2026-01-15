@@ -8,6 +8,8 @@
     "clock_display_font": "Шрифт отображения часов",
     "snooze_duration_default": "Длительность повтора по умолчанию",
     "alarm_duration_default": "Длительность будильника по умолчанию",
+    "workday_sensor_entity": "Датчик Workday",
+    "alarm_on_non_workdays": "Отключить будильник в нерабочие дни",
     "alarm_actions": "Действия по тревоге",
     "cards": "Карты для отображения",
     "debug": "Режим отладки",

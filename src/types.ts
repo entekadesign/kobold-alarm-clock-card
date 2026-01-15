@@ -66,6 +66,8 @@ export type TranslationKey =
     | 'config.clock_display_font'
     | 'config.snooze_duration_default'
     | 'config.alarm_duration_default'
+    | 'config.workday_sensor_entity'
+    | 'config.alarm_on_non_workdays'
     | 'config.alarm_actions'
     | 'config.cards'
     | 'config.debug'
