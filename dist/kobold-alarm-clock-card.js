@@ -1535,7 +1535,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             'turn_off': 'media_pause'
         };
         this._alarmActionsScript = [];
-        this._throttleNextAlarmReset = (0, $be7da167267683bf$export$4dc2b60021baefca).throttle(()=>{
+        this._nextAlarmResetThrottled = (0, $be7da167267683bf$export$4dc2b60021baefca).throttle(()=>{
             if (this._config.debug) {
                 console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
                 this._hass.callService('system_log', 'write', {
@@ -1613,7 +1613,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`
         };
         if (overridden) data.overridden = true;
-        // if (holiday) data.holiday = true; // add this?
+        // if (holiday) data.holiday = true;
         return data;
     }
     set koboldConnected(connectedState) {
@@ -1659,43 +1659,26 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         // console.log('*** koboldConnected: ', this._koboldConnected);
         const nextAlarm = this.nextAlarm;
         const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('YYYY-MM-DD');
-        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) this._throttleNextAlarmReset();
-        if (!this.isAlarmEnabled) return;
-        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
-            this._throttleAlarmRinging(true);
+        if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) {
+            this._nextAlarmResetThrottled();
             return;
-        } else if (this.isAlarmRinging()) {
-            // dismiss alarm after alarm_duration_default time elapses
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) this.dismiss();
-            return;
-        // NOTE: alarm_actions don't execute during nap or snooze
-        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
-            let myDuration = structuredClone(action.offset);
-            if (action.negative && action.offset) myDuration = {
-                hours: myDuration.hours *= -1,
-                minutes: myDuration.minutes *= -1,
-                seconds: myDuration.seconds *= -1
-            };
-            if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) {
-                this._runAction(action);
-                return;
-            }
-        });
+        }
         if (this._config.workday_sensor && this._config.workday_enabled) // console.log("checking whether nextAlarm is workday...");
         this.checkWorkdayDate(nextAlarm.date).then((response)=>{
             const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
             // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
-            if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) {
+            if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) this.nextAlarm = {
+                ...nextAlarm,
+                enabled: false,
+                holiday: true
+            };
+            else if (nextAlarmIsWorkday && nextAlarm.holiday) {
                 this.nextAlarm = {
                     ...nextAlarm,
-                    enabled: false,
-                    holiday: true
+                    holiday: false
                 };
-                return;
-            } else if (nextAlarmIsWorkday && nextAlarm.holiday) this.nextAlarm = {
-                ...nextAlarm,
-                holiday: false
-            };
+                this._nextAlarmResetThrottled();
+            }
         }, (error)=>{
             console.error('*** Failed to connect to Workday Sensor: ', error);
             this._hass.callService('system_log', 'write', {
@@ -1703,10 +1686,28 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
                 'level': 'info'
             });
         });
-        else if (nextAlarm.holiday) {
-            delete nextAlarm.holiday;
-            this.nextAlarm = nextAlarm;
+        else {
+            console.log("either no workday sensor or not enabled");
+            if (nextAlarm.holiday) {
+                delete nextAlarm.holiday;
+                this.nextAlarm = nextAlarm;
+                this._nextAlarmResetThrottled();
+            }
         }
+        if (!this.isAlarmEnabled) return;
+        if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
+        else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
+        {
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) this.dismiss();
+        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
+            let myDuration = structuredClone(action.offset);
+            if (action.negative && action.offset) myDuration = {
+                hours: myDuration.hours *= -1,
+                minutes: myDuration.minutes *= -1,
+                seconds: myDuration.seconds *= -1
+            };
+            if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) this._runAction(action);
+        });
     }
     async checkWorkdayDate(date) {
         //callService(domain: string, service: string, serviceData?: object, target?: HassServiceTarget, notifyOnError?: boolean, returnResponse?: boolean): ServiceCallResponse;
@@ -3582,7 +3583,10 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
     }
     _valueChanged(event) {
         event.stopPropagation();
-        event.preventDefault(); // prevent ios from moving focus to a textarea
+        // const el = event.target;
+        // console.log('*** target: ', el);
+        // element.setAttribute('tabindex', '-1');
+        // event.preventDefault(); // TODO: prevent ios from moving focus to a textarea
         if (!this._config) return;
         const configChanges = (0, $be7da167267683bf$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
         // console.log('*** configChanges: ', configChanges);
@@ -3592,6 +3596,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().add(1, 'day').format('dd').toLowerCase();
         const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('dd').toLowerCase();
         Object.keys(configChanges).forEach((item)=>{
+            // console.log('*** item: ' + item + '; value: ' + event.detail.value[item]);
             if (event.detail.value[item] === undefined || event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined) event.detail.value[item] = (0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).defaultConfig[item];
             if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
                 const interveningAlarm = item === dayTomorrow && (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') < this._oldConfig[dayToday].time;

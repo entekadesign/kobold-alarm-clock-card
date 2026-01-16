@@ -369,7 +369,10 @@ class KoboldCardEditor extends LitElement {
 
     _valueChanged(event: CustomEvent) {
         event.stopPropagation();
-        event.preventDefault(); // prevent ios from moving focus to a textarea
+        // const el = event.target;
+        // console.log('*** target: ', el);
+        // element.setAttribute('tabindex', '-1');
+        // event.preventDefault(); // TODO: prevent ios from moving focus to a textarea
         if (!this._config) return;
         const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         // console.log('*** configChanges: ', configChanges);
@@ -381,6 +384,7 @@ class KoboldCardEditor extends LitElement {
 
         Object.keys(configChanges).forEach(
             (item) => {
+                // console.log('*** item: ' + item + '; value: ' + event.detail.value[item]);
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
                     event.detail.value[item] = AlarmController.defaultConfig[item];
                 }

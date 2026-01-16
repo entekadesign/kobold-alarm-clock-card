@@ -112,6 +112,14 @@ export class AlarmController {
         if (!!Helpers.deepCompareObj(this.nextAlarm, keyValue)) this.nextAlarm = keyValue;
     }
 
+    _nextAlarmResetThrottled = Helpers.throttle(() => {
+        if (this._config.debug) {
+            console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
+            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm because nextAlarm date is in the past', 'level': 'info' });
+        }
+        this.nextAlarmReset();
+    }, 1000);
+
     static createNextAlarm(alarm: TimeObject, forToday = false, overridden = false): NextAlarmObject {
         let alarmDate = dayjs();
         if (!((alarm.time >= alarmDate.format('HH:mm:ss')) && forToday)) {
@@ -126,7 +134,7 @@ export class AlarmController {
 
         if (overridden) data.overridden = true;
 
-        // if (holiday) data.holiday = true; // add this?
+        // if (holiday) data.holiday = true;
 
         return data;
     }
@@ -187,34 +195,8 @@ export class AlarmController {
         const dateToday = dayjs().format('YYYY-MM-DD');
 
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
-            this._throttleNextAlarmReset();
-        }
-
-        if (!this.isAlarmEnabled) return;
-
-        if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
-            this._throttleAlarmRinging(true);
+            this._nextAlarmResetThrottled();
             return;
-        } else if (this.isAlarmRinging()) {
-            // dismiss alarm after alarm_duration_default time elapses
-            if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
-                this.dismiss();
-            }
-            return;
-            // NOTE: alarm_actions don't execute during nap or snooze
-        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) {
-            this._config.alarm_actions
-                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
-                .forEach(action => {
-                    let myDuration: Duration = structuredClone(action.offset);
-                    if (action.negative && action.offset) {
-                        myDuration = { hours: myDuration.hours *= -1, minutes: myDuration.minutes *= -1, seconds: myDuration.seconds *= -1 };
-                    }
-                    if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
-                        this._runAction(action);
-                        return;
-                    }
-                });
         }
 
         if (this._config.workday_sensor && this._config.workday_enabled) {
@@ -228,32 +210,53 @@ export class AlarmController {
                         enabled: false,
                         holiday: true
                     };
-                    return;
                 } else if (nextAlarmIsWorkday && nextAlarm.holiday) {
                     this.nextAlarm = {
                         ...nextAlarm,
                         holiday: false
                     };
+                    this._nextAlarmResetThrottled();
                 };
             }, (error) => {
                 console.error('*** Failed to connect to Workday Sensor: ', error);
                 this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error, 'level': 'info' });
             });
         } else {
+            console.log("either no workday sensor or not enabled");
             if (nextAlarm.holiday) {
                 delete nextAlarm.holiday;
                 this.nextAlarm = nextAlarm;
+                this._nextAlarmResetThrottled();
             }
         }
-    }
 
-    _throttleNextAlarmReset = Helpers.throttle(() => {
-        if (this._config.debug) {
-            console.warn('*** _evaluate(); Resetting nextAlarm because nextAlarm date is in the past');
-            this._hass.callService('system_log', 'write', { 'message': '*** Resetting nextAlarm because nextAlarm date is in the past', 'level': 'info' });
+        if (!this.isAlarmEnabled) return;
+
+        if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
+            this._throttleAlarmRinging(true);
+            // return;
+        } else if (this.isAlarmRinging()) {
+            // dismiss alarm after alarm_duration_default time elapses
+            if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
+                this.dismiss();
+            }
+            // return;
+            // NOTE: alarm_actions don't execute during nap or snooze
+        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) {
+            this._config.alarm_actions
+                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+                .forEach(action => {
+                    let myDuration: Duration = structuredClone(action.offset);
+                    if (action.negative && action.offset) {
+                        myDuration = { hours: myDuration.hours *= -1, minutes: myDuration.minutes *= -1, seconds: myDuration.seconds *= -1 };
+                    }
+                    if (dayjs(nextAlarm.time, 'HH:mm:ss').add(dayjs.duration(myDuration)).format('HH:mm:ss') <= dayjs().format('HH:mm:ss')) {
+                        this._runAction(action);
+                        // return;
+                    }
+                });
         }
-        this.nextAlarmReset();
-    }, 1000);
+    }
 
     async checkWorkdayDate(date: string) {
         //callService(domain: string, service: string, serviceData?: object, target?: HassServiceTarget, notifyOnError?: boolean, returnResponse?: boolean): ServiceCallResponse;
