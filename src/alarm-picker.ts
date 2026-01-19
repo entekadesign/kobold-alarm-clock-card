@@ -26,6 +26,16 @@ class AlarmPicker extends LitElement {
     @query('ha-icon.button') _iconButtonQ: HTMLElement;
     @query('#alarmPicker', true) _alarmPickerQ: HTMLElement;
 
+    connectedCallback(): void {
+        super.connectedCallback();
+        document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) });
+    }
+
+    disconnectedCallback(): void {
+        super.disconnectedCallback();
+        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+    }
+
     updated() {
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
@@ -42,9 +52,22 @@ class AlarmPicker extends LitElement {
                 });
             }
 
-            if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+            // if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+            //     myStyle = document.createElement('style');
+            //     const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+            //     myStyle.innerHTML = switchStyle;
+            //     this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
+            // }
+
+            if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                let switchStyle = '';
+                if (!this.classList.contains('narrow')) {
+                    switchStyle += 'div.mdc-switch { scale: 1.25; } ';
+                }
+                if (this.classList.contains('dark')) {
+                    switchStyle += '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                }
                 myStyle.innerHTML = switchStyle;
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
@@ -82,15 +105,27 @@ class AlarmPicker extends LitElement {
         this._displayedValueM = timeArray[1];
 
         this._alarmPickerQ.classList.add('open');
-        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
-        document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) }, false);
+        // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
     };
 
     _clickOutsideAlarmTimeInput(event: Event) {
+        // console.log('*** clicked; composed path includes alarmpicker: ', event.composedPath().includes(this._alarmPickerQ));
+        // console.log('*** clicked; target: ', event.target);
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
-            this._alarmPickerQ.classList.remove('open');
-            document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+            // console.log('*** clicked outside slider');
+            if (this._alarmPickerQ?.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+            this._alarmPickerQ?.classList.remove('open');
+            if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
+                const sliderTime = this._displayedValueH + ':' + this._displayedValueM + ':00';
+                if (sliderTime !== this.nextAlarm.time) {
+                    // console.log('*** save slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
+                    this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
+                }
+                // console.log('*** slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
+                // console.log('*** nexrtAlarm time: ' + this.nextAlarm.time);
+            }
+            // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
         }
     }
 
@@ -101,10 +136,10 @@ class AlarmPicker extends LitElement {
     _updateValue(event: Event) {
         const value = (<HTMLInputElement>event.target).value;  //Number((e.target).value);
         (<HTMLInputElement>event.target).id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
-        this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
-        if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
-        this._alarmPickerQ.classList.remove('open');
-        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+        // this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
+        // if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+        // this._alarmPickerQ.classList.remove('open');
+        // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
     }
 
     _getScheduleButtonIcon(nextAlarm: NextAlarmObject) {
@@ -190,6 +225,7 @@ class AlarmPicker extends LitElement {
             --switch-checked-track-color: #696969;
             --md-slider-inactive-track-color: #696969;
             --md-slider-label-text-color: var(--ha-card-background, var(--card-background-color));
+            --wa-tooltip-content-color: var(--primary-text-color);
         }
 
         @media (max-width: 600px), (max-height: 600px) {
@@ -269,14 +305,17 @@ class AlarmPicker extends LitElement {
 
         #alarmEnabledToggleButton {
             margin: 0 0.5rem;
+            height: 1.25em;
+            padding-top: 0.6em;
         }
         #alarmEnabledToggleButton[holiday] {
             border: 1px dotted #696969;
-            padding: 8px;
+            /* padding: 8px; */
+            padding: 0.6em 0.6em 0 0.6em;
         }
-        :host(:not(.narrow)) #alarmEnabledToggleButton {
+        /*:host(:not(.narrow)) #alarmEnabledToggleButton {
             scale: 1.25;
-        }
+        }*/
 
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
             display: none;

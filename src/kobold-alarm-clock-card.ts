@@ -23,7 +23,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 
-import type { CardConfig, NextAlarmObject, KoboldEditor } from './types';
+import type { CardConfig, NextAlarmObject, KoboldEditor, TimeObject } from './types';
 
 // HA types
 // import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
@@ -88,7 +88,7 @@ class KoboldAlarmClockCard extends LitElement {
   @query('#alarmTop div#koboldLogo', true) _koboldLogoQ: HTMLElement;
   @query('alarm-picker', true) _alarmPickerQ: HTMLElement;
 
-  connectedCallback() {
+  connectedCallback(): void {
     super.connectedCallback();
 
     this._koboldHasConnected = this._alarmController.koboldConnected = true;
@@ -112,7 +112,7 @@ class KoboldAlarmClockCard extends LitElement {
     };
   }
 
-  disconnectedCallback() {
+  disconnectedCallback(): void {
     super.disconnectedCallback();
     this._alarmController.koboldConnected = false;
     clearTimeout(this._updateLoopId);
@@ -232,6 +232,8 @@ class KoboldAlarmClockCard extends LitElement {
       if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('dark');
     }
 
+    this._checkForNarrowDisplay();
+
     if (!this._alarmController.isAlarmRinging()) {
       // when card starts up, hide cards (prevents flicker during save)
       this._hideCards(true);
@@ -249,21 +251,14 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   updated(_changedProperties: PropertyValues): void {
-    const cardWidth = this.getBoundingClientRect().width;
 
-    if (cardWidth < 750) {
-      this.classList.add('narrow');
-      if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
-    } else {
-      this.classList.remove('narrow');
-      if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
-    }
+    this._checkForNarrowDisplay();
 
     if (!this._injectStylesDone) {
       this._injectStylesDone = true;
 
       // Is Kobold displayed in Kiosk mode?
-      if (cardWidth === window.innerWidth) {
+      if (this.getBoundingClientRect().width === window.innerWidth) {
 
         // hide visible line separating sidebar from main view on iOS
         if (Helpers.getDrawer()) Helpers.getDrawer().style.borderRightStyle = 'unset';
@@ -457,6 +452,18 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
+  _checkForNarrowDisplay() {
+    const cardWidth = this.getBoundingClientRect().width;
+
+    if (cardWidth < 750) {
+      this.classList.add('narrow');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
+    } else {
+      this.classList.remove('narrow');
+      if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
+    }
+  }
+
   _periodHtml(periodKern: string, timeTxt: string, periodIcon: string) {
     if (periodIcon) {
       return '<span class="periodIcon' + periodKern + '">' + (timeTxt === dayjs('2018-08-27 23:00:00').format('A') ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
@@ -472,7 +479,7 @@ class KoboldAlarmClockCard extends LitElement {
   _onAlarmChanged(event: CustomEvent) {
     // this only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
 
-    let data = { enabled: event.detail.nextAlarm.enabled, time: event.detail.nextAlarm.time };
+    let data: TimeObject = { enabled: event.detail.nextAlarm.enabled, time: event.detail.nextAlarm.time };
 
     // hide cards during save to avoid flicker
     if (!this._config.hide_cards_default) this._hideCards(true);
@@ -487,18 +494,21 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _toggleHideCards(event) {
-    event.stopPropagation();
+    // event.stopPropagation(); // allow propagation so as to not interfere with alarmpicker's slider animation
     if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
       if (!this._config.hide_cards_default) {
         // hiding cards
         this._hideCards(true);
-        // allow animation to complete before saving
+        // allow card hiding animation to complete before saving
         window.setTimeout(() => {
           this._alarmController.hideCardsDefault = true;
         }, 250);
       } else {
         // showing cards
-        this._alarmController.hideCardsDefault = false;
+        // allow slider animation to complete in case open
+        window.setTimeout(() => {
+          this._alarmController.hideCardsDefault = false;
+        }, 120);
       }
     }
   }

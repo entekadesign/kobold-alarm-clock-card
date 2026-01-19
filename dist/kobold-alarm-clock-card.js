@@ -1613,7 +1613,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`
         };
         if (overridden) data.overridden = true;
-        // if (holiday) data.holiday = true;
+        // if (holiday) data.holiday = true; TODO: would this be helpful?
         return data;
     }
     set koboldConnected(connectedState) {
@@ -1663,8 +1663,16 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             this._nextAlarmResetThrottled();
             return;
         }
+        const deleteHolilday = (nextAlarm)=>{
+            if (nextAlarm.holiday) {
+                // console.log('deleting holiday');
+                delete nextAlarm.holiday;
+                this.nextAlarm = nextAlarm;
+                this._nextAlarmResetThrottled();
+            }
+        };
         if (this._config.workday_sensor && this._config.workday_enabled) // console.log("checking whether nextAlarm is workday...");
-        this.checkWorkdayDate(nextAlarm.date).then((response)=>{
+        this._checkWorkdayDate(nextAlarm.date).then((response)=>{
             const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
             // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
             if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) this.nextAlarm = {
@@ -1672,13 +1680,12 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
                 enabled: false,
                 holiday: true
             };
-            else if (nextAlarmIsWorkday && nextAlarm.holiday) {
-                this.nextAlarm = {
-                    ...nextAlarm,
-                    holiday: false
-                };
-                this._nextAlarmResetThrottled();
-            }
+            else if (nextAlarmIsWorkday) // this.nextAlarm = {
+            //     ...nextAlarm,
+            //     holiday: false
+            // };
+            // this._nextAlarmResetThrottled();
+            deleteHolilday(nextAlarm);
         }, (error)=>{
             console.error('*** Failed to connect to Workday Sensor: ', error);
             this._hass.callService('system_log', 'write', {
@@ -1686,14 +1693,13 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
                 'level': 'info'
             });
         });
-        else {
-            console.log("either no workday sensor or not enabled");
-            if (nextAlarm.holiday) {
-                delete nextAlarm.holiday;
-                this.nextAlarm = nextAlarm;
-                this._nextAlarmResetThrottled();
-            }
-        }
+        else // console.log("either no workday sensor or not enabled");
+        // if (nextAlarm.holiday) {
+        //     delete nextAlarm.holiday;
+        //     this.nextAlarm = nextAlarm;
+        //     this._nextAlarmResetThrottled();
+        // }
+        deleteHolilday(nextAlarm);
         if (!this.isAlarmEnabled) return;
         if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
@@ -1709,7 +1715,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(myDuration)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) this._runAction(action);
         });
     }
-    async checkWorkdayDate(date) {
+    async _checkWorkdayDate(date) {
         //callService(domain: string, service: string, serviceData?: object, target?: HassServiceTarget, notifyOnError?: boolean, returnResponse?: boolean): ServiceCallResponse;
         return await this._hass.callService('workday', 'check_date', {
             check_date: date
@@ -2844,6 +2850,16 @@ var $dc565e4cd1f32ca8$exports = {};
 
 (0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).extend((0, (/*@__PURE__*/$parcel$interopDefault($dc565e4cd1f32ca8$exports))));
 class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2f9f5909897157) {
+    connectedCallback() {
+        super.connectedCallback();
+        document.addEventListener('click', (event)=>{
+            this._clickOutsideAlarmTimeInput(event);
+        });
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+    }
     updated() {
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
@@ -2858,9 +2874,17 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
                     slidersHost.shadowRoot.appendChild(myStyle);
                 });
             }
-            if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+            // if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
+            //     myStyle = document.createElement('style');
+            //     const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+            //     myStyle.innerHTML = switchStyle;
+            //     this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
+            // }
+            if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                let switchStyle = '';
+                if (!this.classList.contains('narrow')) switchStyle += 'div.mdc-switch { scale: 1.25; } ';
+                if (this.classList.contains('dark')) switchStyle += '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
                 myStyle.innerHTML = switchStyle;
                 this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
@@ -2890,16 +2914,24 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
         this._displayedValueH = timeArray[0];
         this._displayedValueM = timeArray[1];
         this._alarmPickerQ.classList.add('open');
-        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
-        document.addEventListener('click', (event)=>{
-            this._clickOutsideAlarmTimeInput(event);
-        }, false);
+    // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+    // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
     }
     _clickOutsideAlarmTimeInput(event) {
+        // console.log('*** clicked; composed path includes alarmpicker: ', event.composedPath().includes(this._alarmPickerQ));
+        // console.log('*** clicked; target: ', event.target);
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
-            this._alarmPickerQ.classList.remove('open');
-            document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+            // console.log('*** clicked outside slider');
+            if (this._alarmPickerQ?.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+            this._alarmPickerQ?.classList.remove('open');
+            if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
+                const sliderTime = this._displayedValueH + ':' + this._displayedValueM + ':00';
+                if (sliderTime !== this.nextAlarm.time) // console.log('*** save slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
+                this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
+            // console.log('*** slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
+            // console.log('*** nexrtAlarm time: ' + this.nextAlarm.time);
+            }
+        // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
         }
     }
     _alarmTimeFormat() {
@@ -2908,10 +2940,10 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
     _updateValue(event) {
         const value = event.target.value; //Number((e.target).value);
         event.target.id === 'hoursSlider' ? this._displayedValueH = value : this._displayedValueM = value;
-        this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
-        if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
-        this._alarmPickerQ.classList.remove('open');
-        document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+    // this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
+    // if (this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
+    // this._alarmPickerQ.classList.remove('open');
+    // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
     }
     _getScheduleButtonIcon(nextAlarm) {
         if (!nextAlarm.enabled) return 'mdi:alarm-off';
@@ -2998,6 +3030,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
             --switch-checked-track-color: #696969;
             --md-slider-inactive-track-color: #696969;
             --md-slider-label-text-color: var(--ha-card-background, var(--card-background-color));
+            --wa-tooltip-content-color: var(--primary-text-color);
         }
 
         @media (max-width: 600px), (max-height: 600px) {
@@ -3077,14 +3110,17 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
 
         #alarmEnabledToggleButton {
             margin: 0 0.5rem;
+            height: 1.25em;
+            padding-top: 0.6em;
         }
         #alarmEnabledToggleButton[holiday] {
             border: 1px dotted #696969;
-            padding: 8px;
+            /* padding: 8px; */
+            padding: 0.6em 0.6em 0 0.6em;
         }
-        :host(:not(.narrow)) #alarmEnabledToggleButton {
+        /*:host(:not(.narrow)) #alarmEnabledToggleButton {
             scale: 1.25;
-        }
+        }*/
 
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
             display: none;
@@ -4330,6 +4366,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             this.classList.remove('dark');
             if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('dark');
         }
+        this._checkForNarrowDisplay();
         if (!this._alarmController.isAlarmRinging()) {
             // when card starts up, hide cards (prevents flicker during save)
             this._hideCards(true);
@@ -4342,18 +4379,11 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         else console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot');
     }
     updated(_changedProperties) {
-        const cardWidth = this.getBoundingClientRect().width;
-        if (cardWidth < 750) {
-            this.classList.add('narrow');
-            if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
-        } else {
-            this.classList.remove('narrow');
-            if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
-        }
+        this._checkForNarrowDisplay();
         if (!this._injectStylesDone) {
             this._injectStylesDone = true;
             // Is Kobold displayed in Kiosk mode?
-            if (cardWidth === window.innerWidth) {
+            if (this.getBoundingClientRect().width === window.innerWidth) {
                 // hide visible line separating sidebar from main view on iOS
                 if ((0, $be7da167267683bf$export$4dc2b60021baefca).getDrawer()) (0, $be7da167267683bf$export$4dc2b60021baefca).getDrawer().style.borderRightStyle = 'unset';
                 // prevent scrolling
@@ -4503,6 +4533,16 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             this._dateQ.innerHTML = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format(dateFormat);
         }
     }
+    _checkForNarrowDisplay() {
+        const cardWidth = this.getBoundingClientRect().width;
+        if (cardWidth < 750) {
+            this.classList.add('narrow');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.add('narrow');
+        } else {
+            this.classList.remove('narrow');
+            if (this._alarmPickerQ) this._alarmPickerQ.classList.remove('narrow');
+        }
+    }
     _periodHtml(periodKern, timeTxt, periodIcon) {
         if (periodIcon) return '<span class="periodIcon' + periodKern + '">' + (timeTxt === (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))('2018-08-27 23:00:00').format('A') ? '<ha-icon icon="mdi:weather-night"></ha-icon>' : '') + '</span>';
         else return '<span class="periodName' + periodKern + '">' + timeTxt + '</span>';
@@ -4527,17 +4567,20 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         this._alarmController[event.target.id]();
     }
     _toggleHideCards(event) {
-        event.stopPropagation();
+        // event.stopPropagation(); // allow propagation so as to not interfere with alarmpicker's slider animation
         if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
             if (!this._config.hide_cards_default) {
                 // hiding cards
                 this._hideCards(true);
-                // allow animation to complete before saving
+                // allow card hiding animation to complete before saving
                 window.setTimeout(()=>{
                     this._alarmController.hideCardsDefault = true;
                 }, 250);
             } else // showing cards
-            this._alarmController.hideCardsDefault = false;
+            // allow slider animation to complete in case open
+            window.setTimeout(()=>{
+                this._alarmController.hideCardsDefault = false;
+            }, 120);
         }
     }
     _hideCards(hideCards) {

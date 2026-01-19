@@ -134,7 +134,7 @@ export class AlarmController {
 
         if (overridden) data.overridden = true;
 
-        // if (holiday) data.holiday = true;
+        // if (holiday) data.holiday = true; TODO: would this be helpful?
 
         return data;
     }
@@ -199,9 +199,17 @@ export class AlarmController {
             return;
         }
 
+        const deleteHolilday = (nextAlarm) => {
+            if (nextAlarm.holiday) {
+                // console.log('deleting holiday');
+                delete nextAlarm.holiday;
+                this.nextAlarm = nextAlarm;
+                this._nextAlarmResetThrottled();
+            }
+        }
         if (this._config.workday_sensor && this._config.workday_enabled) {
             // console.log("checking whether nextAlarm is workday...");
-            this.checkWorkdayDate(nextAlarm.date).then((response) => {
+            this._checkWorkdayDate(nextAlarm.date).then((response) => {
                 const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
                 // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
                 if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) {
@@ -210,24 +218,26 @@ export class AlarmController {
                         enabled: false,
                         holiday: true
                     };
-                } else if (nextAlarmIsWorkday && nextAlarm.holiday) {
-                    this.nextAlarm = {
-                        ...nextAlarm,
-                        holiday: false
-                    };
-                    this._nextAlarmResetThrottled();
+                } else if (nextAlarmIsWorkday) {
+                    // this.nextAlarm = {
+                    //     ...nextAlarm,
+                    //     holiday: false
+                    // };
+                    // this._nextAlarmResetThrottled();
+                    deleteHolilday(nextAlarm);
                 };
             }, (error) => {
                 console.error('*** Failed to connect to Workday Sensor: ', error);
                 this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error, 'level': 'info' });
             });
         } else {
-            console.log("either no workday sensor or not enabled");
-            if (nextAlarm.holiday) {
-                delete nextAlarm.holiday;
-                this.nextAlarm = nextAlarm;
-                this._nextAlarmResetThrottled();
-            }
+            // console.log("either no workday sensor or not enabled");
+            // if (nextAlarm.holiday) {
+            //     delete nextAlarm.holiday;
+            //     this.nextAlarm = nextAlarm;
+            //     this._nextAlarmResetThrottled();
+            // }
+            deleteHolilday(nextAlarm);
         }
 
         if (!this.isAlarmEnabled) return;
@@ -258,7 +268,7 @@ export class AlarmController {
         }
     }
 
-    async checkWorkdayDate(date: string) {
+    async _checkWorkdayDate(date: string) {
         //callService(domain: string, service: string, serviceData?: object, target?: HassServiceTarget, notifyOnError?: boolean, returnResponse?: boolean): ServiceCallResponse;
         return await this._hass.callService('workday', 'check_date', { check_date: date }, { entity_id: this._config.workday_sensor }, false, true);
     }
