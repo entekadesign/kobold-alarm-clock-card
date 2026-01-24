@@ -131,6 +131,31 @@ class KoboldCardEditor extends LitElement {
         },
     ]
 
+    private _configSchemaNap = [
+        {
+            type: "grid",
+            name: "",
+            schema: [
+                {
+                    type: "grid",
+                    name: "next_alarm",
+                    schema: [
+                        {
+                            name: "overridden",
+                            label: localize('config.nap_duration'),
+                            selector: { boolean: {} },
+                        },
+                    ]
+                },
+                {
+                    name: "nap_duration",
+                    label: "",
+                    selector: { duration: {} },
+                },
+            ],
+        },
+    ]
+
     private _configSchemaSchedule = (alarms_disabled?: boolean) => [
         {
             name: "alarms_enabled",
@@ -266,6 +291,8 @@ class KoboldCardEditor extends LitElement {
     ]
 
     private _oldConfig: CardConfig;
+    private _configChanges: Object;
+    // private _injectStylesDone: boolean;
 
     @state() _hass: HomeAssistant;
     @state() _config: CardConfig;
@@ -313,53 +340,102 @@ class KoboldCardEditor extends LitElement {
                 if (event.isComposing || event.keyCode === 229) {
                     return;
                 }
-                if (event.key === 'Enter') {
-                    this._handleSaveButton();
-                }
+                // if (event.key === 'Enter') {
+                //     this._handleSaveButton();
+                // }
             });
         } else {
             console.error('*** firstUpdated(); Editor dialog not found. Refresh browser');
         }
 
-        let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
-        if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
-        if (editButtons.length > 0) {
-            editButtons.forEach(
-                (button, index) => {
-                    button.addEventListener('click', () => {
+        // let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
+        // if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
+        // if (editButtons.length > 0) {
+        //     editButtons.forEach(
+        //         (button, index) => {
+        //             button.addEventListener('click', () => {
 
-                        if (index === 1) {
-                            this._handleSaveButton();
-                        }
-                    })
-                }
-            );
-        } else {
-            console.error('*** firstUpdated(); Editor buttons not found. Refresh browser');
-        }
+        //                 if (index === 1) {
+        //                     this._handleSaveButton();
+        //                 }
+        //             })
+        //         }
+        //     );
+        // } else {
+        //     console.error('*** firstUpdated(); Editor buttons not found. Refresh browser');
+        // }
     }
 
     updated(_changedProperties: PropertyValues): void {
-        const formRootHost = this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot;
-
-        if (formRootHost && !formRootHost.querySelector('style#formRoot')) {
-            const formStyle = 'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }';
-            const myStyle = document.createElement('style');
-            myStyle.setAttribute('id', 'formRoot');
-            myStyle.innerHTML = formStyle;
-            formRootHost.appendChild(myStyle);
-        }
     }
 
-    _handleSaveButton() {
-        // nextAlarmConfig undefined unless nap settings tab was visited
-        if (this._nextAlarmConfig) {
-            const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-            const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
-            if (nextAlarmDiff || napDurationDiff) {
-                this._saveNextAlarm(this._nextAlarmConfig);
-            }
-        }
+    // _handleSaveButton() {
+    //     // nextAlarmConfig undefined unless nap settings tab was visited
+    //     if (this._nextAlarmConfig) {
+    //         const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
+    //         const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
+    //         if (nextAlarmDiff || napDurationDiff) {
+    //             this._saveNextAlarm(this._nextAlarmConfig);
+    //         }
+    //     }
+    // }
+
+    _injectStyles() {
+        // console.log('*** this._selectedTab: ' + this._selectedTab);
+        let rounds = 0;
+        let componentHosts: Array<ShadowRoot> = [];
+        let componentStyles: Array<string> = [];
+        let componentHostsPromise = new Promise((resolve, reject) => {
+            const interval = setInterval(() => {
+                switch (this._selectedTab) {
+                    case 1:
+                        componentHosts = [this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot.querySelector('ha-form-grid')?.shadowRoot.querySelector('ha-form')?.shadowRoot,
+                        this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
+                        ];
+                        componentStyles = ['ha-form-grid { grid-template-columns: auto 0 !important; justify-content: end; }',
+                            'ha-form-grid { grid-template-columns: auto 60% !important; justify-content: end; }'
+                        ];
+                        break;
+                    case 2:
+                        componentHosts = [this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot];
+                        componentStyles = ['ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }'];
+                        break;
+                    default:
+                    //
+                }
+
+                if (rounds >= 2) {
+                    // console.log('*** rejecting round: ' + rounds);
+                    clearInterval(interval);
+                    reject(new Error('timeout'));
+                };
+                if (componentHosts !== undefined) {
+                    // console.log('*** resolving round:', rounds);
+                    resolve(interval);
+                }
+                rounds++;
+            }, 10);
+        });
+        componentHostsPromise
+            .catch((error) => {
+                if (!error.message || error.message !== 'timeout')
+                    throw (error);
+                if (error.message === 'timeout') console.error('*** Attempt to inject styles into HA components of editor dialog timed out');
+                return null;
+            })
+            .then((interval: ReturnType<typeof setInterval>) => {
+                if (interval && componentHosts) {
+                    clearInterval(interval);
+                    const myStyle = [];
+                    componentStyles.forEach((style) => { myStyle.push(document.createElement('style').innerHTML = style); });
+                    componentHosts.forEach((host, index) => {
+                        const myStyle = document.createElement('style');
+                        myStyle.innerHTML = componentStyles[index];
+                        host.appendChild(myStyle)
+                    });
+                }
+            });
+
     }
 
     _getDayOfWeek(days: number) {
@@ -374,17 +450,20 @@ class KoboldCardEditor extends LitElement {
         // element.setAttribute('tabindex', '-1');
         // event.preventDefault(); // TODO: prevent ios from moving focus to a textarea
         if (!this._config) return;
-        const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
+        // const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
+        this._configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         // console.log('*** configChanges: ', configChanges);
         // console.log('*** this._oldConfig: ', this._oldConfig);
         // console.log('*** event.detail.value: ', event.detail.value);
-        if (!configChanges) return;
+        // if (!configChanges) return;
+        if (!this._configChanges) return;
         const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
         const dayToday = dayjs().format('dd').toLowerCase();
 
-        Object.keys(configChanges).forEach(
+        // Object.keys(configChanges).forEach(
+        Object.keys(this._configChanges).forEach(
             (item) => {
-                // console.log('*** item: ' + item + '; value: ' + event.detail.value[item]);
+                // console.log('*** item: ' + item + '; value: ' + JSON.stringify(event.detail.value[item]));
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
                     event.detail.value[item] = AlarmController.defaultConfig[item];
                 }
@@ -402,6 +481,25 @@ class KoboldCardEditor extends LitElement {
                         }
                     }
                 }
+                if (item === 'nap_duration') {
+                    event.detail.value.next_alarm.overridden = true;
+                }
+
+                if (event.detail.value.next_alarm.overridden) {
+                    // console.log('*** overridden is made true. item: ', item);
+                    const nextAlarmTime = dayjs().add(dayjs.duration(event.detail.value.nap_duration));
+                    // console.log('*** nextAlarmTime: ', nextAlarmTime);
+                    event.detail.value.next_alarm = AlarmController.createNextAlarm({ enabled: true, time: nextAlarmTime.format('HH:mm:ss') }, true, true);
+                } else if (item === 'next_alarm') {
+                    // console.log('*** nextAlarmReset. item: ', item);
+                    //overridden is switched to false: nextAlarmReset
+                    // this code from controller's nextAlarmReset // TODO: refactor?
+                    const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
+                    const dayToday = dayjs().format('dd').toLowerCase();
+                    const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
+                    const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
+                    event.detail.value.next_alarm = AlarmController.createNextAlarm(newAlarm, forToday);
+                }
             });
 
         this._config = Helpers.deepMerge(AlarmController.defaultConfig, event.detail.value);
@@ -410,52 +508,52 @@ class KoboldCardEditor extends LitElement {
         Helpers.fireEvent('config-changed', { config: this._config }, this);
     }
 
-    _valueChangedNap(event) {
-        event.stopPropagation();
-        if (event.detail.value === undefined) {
-            this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig.nap_duration;
-            this._nextAlarmConfig.next_alarm.overridden = false;
-            this.requestUpdate();
-            return;
-        }
+    // _valueChangedNap(event) {
+    //     event.stopPropagation();
+    //     if (event.detail.value === undefined) {
+    //         this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig.nap_duration;
+    //         this._nextAlarmConfig.next_alarm.overridden = false;
+    //         this.requestUpdate();
+    //         return;
+    //     }
 
-        this._nextAlarmConfig.next_alarm.overridden = true;
-        this._nextAlarmConfig.nap_duration = event.detail.value;
+    //     this._nextAlarmConfig.next_alarm.overridden = true;
+    //     this._nextAlarmConfig.nap_duration = event.detail.value;
 
-        this.requestUpdate();
-    }
+    //     this.requestUpdate();
+    // }
 
-    // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
-    // TODO: is this necessary, now that alarms not evaluated when viewing settings dialog (i.e., when preview is true)
-    async _saveNextAlarm(nextAlarmConfig) {
-        try {
-            let nextAlarm;
-            if (nextAlarmConfig.next_alarm.overridden) {
-                const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
-                nextAlarm = AlarmController.createNextAlarm({ enabled: true, time: nextAlarmTime.format('HH:mm:ss') }, true, true);
-            } else {
-                //overridden is switched to false: nextAlarmReset
-                const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
-                const dayToday = dayjs().format('dd').toLowerCase();
-                const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
-                const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
-                nextAlarm = AlarmController.createNextAlarm(newAlarm, forToday);
-            }
-            this.alarmController.configEntries = { nap_duration: nextAlarmConfig.nap_duration, next_alarm: nextAlarm };
+    // // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
+    // // TODO: is this necessary, now that alarms not evaluated when viewing settings dialog (i.e., when preview is true)
+    // async _saveNextAlarm(nextAlarmConfig) {
+    //     try {
+    //         let nextAlarm;
+    //         if (nextAlarmConfig.next_alarm.overridden) {
+    //             const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
+    //             nextAlarm = AlarmController.createNextAlarm({ enabled: true, time: nextAlarmTime.format('HH:mm:ss') }, true, true);
+    //         } else {
+    //             //overridden is switched to false: nextAlarmReset
+    //             const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
+    //             const dayToday = dayjs().format('dd').toLowerCase();
+    //             const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
+    //             const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
+    //             nextAlarm = AlarmController.createNextAlarm(newAlarm, forToday);
+    //         }
+    //         this.alarmController.configEntries = { nap_duration: nextAlarmConfig.nap_duration, next_alarm: nextAlarm };
 
-            // Override HA refresh dashboard notification
-            window.setTimeout(() => {
-                Helpers.fireEvent('hass-notification', { message: localize('notification.successfully_saved') }, Helpers.getHa());
-            }, 50);
-        } catch (err: any) {
-            // alert(`Saving failed: ${err.message}.`);
-            alert(`${localize('error.saving_failed')}: ${err.message}.`);
-            // Override HA successful save notification
-            window.setTimeout(() => {
-                Helpers.fireEvent('hass-notification', { message: localize('error.saving_failed') }, Helpers.getHa());
-            }, 50);
-        }
-    }
+    //         // Override HA refresh dashboard notification
+    //         window.setTimeout(() => {
+    //             Helpers.fireEvent('hass-notification', { message: localize('notification.successfully_saved') }, Helpers.getHa());
+    //         }, 50);
+    //     } catch (err: any) {
+    //         // alert(`Saving failed: ${err.message}.`);
+    //         alert(`${localize('error.saving_failed')}: ${err.message}.`);
+    //         // Override HA successful save notification
+    //         window.setTimeout(() => {
+    //             Helpers.fireEvent('hass-notification', { message: localize('error.saving_failed') }, Helpers.getHa());
+    //         }, 50);
+    //     }
+    // }
 
     _handleSwitchTab(event) {
         switch (event.detail.name) {
@@ -463,10 +561,11 @@ class KoboldCardEditor extends LitElement {
                 this._selectedTab = 0;
                 break;
             case 'nap':
-                this._selectedTab = 1;
+                // this._injectStylesDone = undefined;
+                this._selectedTab = 1; this._injectStyles();
                 break;
             case 'schedule':
-                this._selectedTab = 2;
+                this._selectedTab = 2; this._injectStyles();
                 break;
             default:
                 this._selectedTab = 0;
@@ -480,7 +579,7 @@ class KoboldCardEditor extends LitElement {
 
         return html`
     <div id="kobold-card-config" class="card-config"
-        @kobold-tab=${(event) => { this._selectedTab = event.detail.tab }}
+        @kobold-tab=${(event) => { this._selectedTab = event.detail.tab; this._injectStyles(); }}
     >
         <div class="toolbar">
             ${AlarmController.oldTabs ? html`
@@ -524,42 +623,81 @@ class KoboldCardEditor extends LitElement {
     </div>`;
     }
 
+    // _renderNapEditor() {
+    //     // Helpers.preloadHaElements([
+    //     //     'ha-duration-input'
+    //     // ]);
+    //     // if (!this._nextAlarmConfig) {
+    //     //     this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
+    //     //     if (this._config.next_alarm.overridden) {
+    //     //         const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+    //     //         const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+    //     //         this._nextAlarmConfig.nap_duration = myDur;
+    //     //     } else {
+    //     //         this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+    //     //     }
+    //     //     this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+    //     // }
+    //     Helpers.preloadHaElements([
+    //         'ha-duration-input'
+    //     ]);
+    //     // if (!this._nextAlarmConfig) {
+    //     //     this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
+    //     if (this._config.next_alarm.overridden) {
+    //         const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+    //         const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+    //         this._config.nap_duration = myDur;
+    //         // this._nextAlarmConfig.nap_duration = myDur;
+    //         // } else {
+    //         // this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
+    //     }
+    //     // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+    //     // }
+
+    //     return html`
+    //   <div class="box">
+    //     <div class="kobold-nap-form">
+    //       <div class="ha-form-grid">
+    //         <div class="ha-form">
+    //           <div class="ha-formfield">
+    //             <span><p>${localize('config.nap_duration')}</p></span>
+    //             <ha-switch ?checked=${this._config.next_alarm.overridden} @change=${() => { this._config.next_alarm.overridden = !this._config.next_alarm.overridden }}></ha-switch>
+    //           </div>
+    //         </div>
+    //         <div class="ha-form">
+    //             <ha-duration-input
+    //                 .data=${this._config.nap_duration}
+    //                 @value-changed=${this._valueChanged}
+    //             ></ha-duration-input>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>`;
+    // }
+
+
     _renderNapEditor() {
-        Helpers.preloadHaElements([
-            'ha-duration-input'
-        ]);
-        if (!this._nextAlarmConfig) {
-            this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-            if (this._config.next_alarm.overridden) {
-                const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-                const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-                this._nextAlarmConfig.nap_duration = myDur;
-            } else {
-                this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-            }
-            this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
+
+        // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with duration between now and nextAlarm
+        // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
+        // TODO: is detecting overridden property here necessary?
+        if (this._config.next_alarm.overridden && (this._configChanges ? (!this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden) : true)) {
+            const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+            const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+            this._config.nap_duration = myDur;
         }
 
         return html`
-      <div class="box">
-        <div class="kobold-nap-form">
-          <div class="ha-form-grid">
-            <div class="ha-form">
-              <div class="ha-formfield">
-                <span><p>${localize('config.nap_duration')}</p></span>
-                <ha-switch ?checked=${this._nextAlarmConfig.next_alarm.overridden} @change=${() => { this._nextAlarmConfig.next_alarm.overridden = !this._nextAlarmConfig.next_alarm.overridden; this.requestUpdate() }}></ha-switch>
-              </div>
-            </div>
-            <div class="ha-form">
-                <ha-duration-input
-                    .data=${this._nextAlarmConfig.nap_duration}
-                    @value-changed=${this._valueChangedNap}
-                ></ha-duration-input>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }
+    <div class="box" id="nap">
+      <ha-form
+        .hass=${this._hass}
+        .data=${this._config}
+        .schema=${this._configSchemaNap}
+        .computeLabel=${(s) => s.label ?? s.name}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+    </div>`;
+    };
 
     _renderScheduleEditor() {
         return html`
@@ -603,6 +741,7 @@ class KoboldCardEditor extends LitElement {
             margin-right: auto;
         }
 
+        /*
         .kobold-nap-form .ha-form-grid {
             display: grid !important;
             grid-template-columns: auto 50%;
@@ -629,5 +768,6 @@ class KoboldCardEditor extends LitElement {
         .kobold-nap-form p {
             margin: 0;
         }
+        */
     `;
 }

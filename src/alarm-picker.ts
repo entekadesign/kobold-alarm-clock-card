@@ -29,6 +29,9 @@ class AlarmPicker extends LitElement {
     connectedCallback(): void {
         super.connectedCallback();
         document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) });
+        // Update component styles after nextAlarm updates, etc
+        this._injectStylesDone = undefined;
+        this.requestUpdate();
     }
 
     disconnectedCallback(): void {
@@ -110,6 +113,7 @@ class AlarmPicker extends LitElement {
     };
 
     _clickOutsideAlarmTimeInput(event: Event) {
+        // event.stopPropagation();
         // console.log('*** clicked; composed path includes alarmpicker: ', event.composedPath().includes(this._alarmPickerQ));
         // console.log('*** clicked; target: ', event.target);
         if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {

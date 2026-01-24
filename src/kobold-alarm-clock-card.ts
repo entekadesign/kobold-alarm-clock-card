@@ -574,6 +574,7 @@ class KoboldAlarmClockCard extends LitElement {
         console.warn('*** _showEditor(); Timed out waiting for editor');
       } else {
         this._koboldEditor.alarmController = this._alarmController;
+        // TODO: maybe replace with variable on editor because not working on slow devices
         Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
         this._koboldEditor = undefined;
       }

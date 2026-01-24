@@ -148,6 +148,7 @@ export class AlarmController {
     }
 
     set nextAlarm(nextAlarm: NextAlarmObject) {
+        // console.log('*** saving nextalarm config');
         this._saveConfigEntries({ next_alarm: nextAlarm });
     }
     get nextAlarm(): NextAlarmObject {
@@ -194,37 +195,28 @@ export class AlarmController {
         const nextAlarm = this.nextAlarm;
         const dateToday = dayjs().format('YYYY-MM-DD');
 
+        // is nextAlarm in the past?
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
             this._nextAlarmResetThrottled();
             return;
         }
 
-        const deleteHolilday = (nextAlarm) => {
-            if (nextAlarm.holiday) {
-                // console.log('deleting holiday');
-                delete nextAlarm.holiday;
-                this.nextAlarm = nextAlarm;
-                this._nextAlarmResetThrottled();
-            }
-        }
+        // should nextAlarm be disabled because it is a holiday?
         if (this._config.workday_sensor && this._config.workday_enabled) {
             // console.log("checking whether nextAlarm is workday...");
             this._checkWorkdayDate(nextAlarm.date).then((response) => {
                 const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
                 // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
-                if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) {
+                if ((!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) || (!nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden)) {
                     this.nextAlarm = {
                         ...nextAlarm,
                         enabled: false,
                         holiday: true
                     };
                 } else if (nextAlarmIsWorkday) {
-                    // this.nextAlarm = {
-                    //     ...nextAlarm,
-                    //     holiday: false
-                    // };
-                    // this._nextAlarmResetThrottled();
-                    deleteHolilday(nextAlarm);
+                    if (nextAlarm.holiday) {
+                        this._deleteHolilday(nextAlarm);
+                    }
                 };
             }, (error) => {
                 console.error('*** Failed to connect to Workday Sensor: ', error);
@@ -232,16 +224,14 @@ export class AlarmController {
             });
         } else {
             // console.log("either no workday sensor or not enabled");
-            // if (nextAlarm.holiday) {
-            //     delete nextAlarm.holiday;
-            //     this.nextAlarm = nextAlarm;
-            //     this._nextAlarmResetThrottled();
-            // }
-            deleteHolilday(nextAlarm);
+            if (nextAlarm.holiday) {
+                this._deleteHolilday(nextAlarm);
+            }
         }
 
         if (!this.isAlarmEnabled) return;
 
+        // trigger or dismiss alarm?
         if (!this.isAlarmRinging() && dayjs().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) {
             this._throttleAlarmRinging(true);
             // return;
@@ -266,6 +256,13 @@ export class AlarmController {
                     }
                 });
         }
+    }
+
+    _deleteHolilday = (nextAlarm) => {
+        // console.log('deleting holiday');
+        delete nextAlarm.holiday;
+        this.nextAlarm = nextAlarm;
+        this._nextAlarmResetThrottled();
     }
 
     async _checkWorkdayDate(date: string) {
