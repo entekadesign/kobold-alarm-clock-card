@@ -1662,6 +1662,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
     }
     _evaluate() {
         if ((0, $be7da167267683bf$export$4dc2b60021baefca).getPreview() || !this._koboldConnected) return;
+        // console.log('*** evaluating now');
         // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
         // console.log('*** koboldConnected: ', this._koboldConnected);
         const nextAlarm = this.nextAlarm;
@@ -2871,12 +2872,6 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
                     slidersHost.shadowRoot.appendChild(myStyle);
                 });
             }
-            // if (this.classList.contains('dark') && this._alarmPickerSwitchQ.shadowRoot) {
-            //     myStyle = document.createElement('style');
-            //     const switchStyle = '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
-            //     myStyle.innerHTML = switchStyle;
-            //     this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
-            // }
             if (this._alarmPickerSwitchQ.shadowRoot) {
                 myStyle = document.createElement('style');
                 let switchStyle = '';
@@ -2961,6 +2956,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
     _toggleAlarmEnabled(event) {
         this.nextAlarm.enabled = event.target.checked;
         this.requestUpdate('nextAlarm'); //necessary because lit does not mutate reactive object properties
+        // this.dispatchEvent(new CustomEvent('nextAlarm-changed', { detail: { nextAlarm: { time: this.nextAlarm.time, enabled: this.nextAlarm.holiday ? false : this.nextAlarm.enabled } } }));
         this.dispatchEvent(new CustomEvent('nextAlarm-changed', {
             detail: {
                 nextAlarm: {
@@ -3594,8 +3590,6 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         this._config = (0, $be7da167267683bf$export$4dc2b60021baefca).deepMerge((0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).defaultConfig, config);
         if (!this._oldConfig) this._oldConfig = this._config;
         const configChanges = (0, $be7da167267683bf$export$4dc2b60021baefca).deepCompareObj(this._config, config);
-        // console.log('*** setConfig; configChanges: ', configChanges);
-        // console.log('*** setConfig: _oldConfig: ', this._oldConfig);
         if (!configChanges) return;
         this._config.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('YYYY-MM-DD HH:mm:ss');
         (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('config-changed', {
@@ -3603,42 +3597,9 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         }, this); //updates lovelace.config
     // if (!this._oldConfig) this._oldConfig = this._config;
     }
-    firstUpdated(_changedProperties) {
-        const myDialog = (0, $be7da167267683bf$export$4dc2b60021baefca).getEditor().shadowRoot.querySelector('ha-dialog');
-        if (myDialog) myDialog.addEventListener('keydown', (event)=>{
-            //https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event#keydown_events_with_ime
-            if (event.isComposing || event.keyCode === 229) return;
-        // if (event.key === 'Enter') {
-        //     this._handleSaveButton();
-        // }
-        });
-        else console.error('*** firstUpdated(); Editor dialog not found. Refresh browser');
-    // let editButtons = Helpers.getEditorButtons().querySelectorAll('ha-button');
-    // if (editButtons.length === 0) editButtons = Helpers.getEditorButtons().querySelectorAll('mwc-button');
-    // if (editButtons.length > 0) {
-    //     editButtons.forEach(
-    //         (button, index) => {
-    //             button.addEventListener('click', () => {
-    //                 if (index === 1) {
-    //                     this._handleSaveButton();
-    //                 }
-    //             })
-    //         }
-    //     );
-    // } else {
-    //     console.error('*** firstUpdated(); Editor buttons not found. Refresh browser');
+    // firstUpdated(_changedProperties: PropertyValues): void {
     // }
-    }
-    updated(_changedProperties) {}
-    // _handleSaveButton() {
-    //     // nextAlarmConfig undefined unless nap settings tab was visited
-    //     if (this._nextAlarmConfig) {
-    //         const nextAlarmDiff = Helpers.deepCompareObj(this._nextAlarmConfig.next_alarm, this._config.next_alarm);
-    //         const napDurationDiff = Helpers.deepCompareObj(this._nextAlarmConfig.nap_duration, this._config.nap_duration);
-    //         if (nextAlarmDiff || napDurationDiff) {
-    //             this._saveNextAlarm(this._nextAlarmConfig);
-    //         }
-    //     }
+    // updated(_changedProperties: PropertyValues): void {
     // }
     _injectStyles() {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
@@ -3706,7 +3667,6 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         // const el = event.target;
         // console.log('*** target: ', el);
         // element.setAttribute('tabindex', '-1');
-        // event.preventDefault(); // TODO: prevent ios from moving focus to a textarea
         if (!this._config) return;
         // const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         this._configChanges = (0, $be7da167267683bf$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
@@ -3731,6 +3691,8 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                         ...this._config.next_alarm,
                         ...(0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
                     };
+                    if (event.detail.value.next_alarm.holiday) // console.log('*** holiday is true');
+                    event.detail.value.next_alarm.enabled = false;
                 }
             }
             if (item === 'nap_duration') event.detail.value.next_alarm.overridden = true;
@@ -3750,6 +3712,10 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                 const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('dd').toLowerCase();
                 const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') < this._config[dayToday].time;
                 const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
+                // if (event.detail.value.next_alarm.holiday) {
+                //     console.log('*** holiday is true');
+                //     event.detail.value.next_alarm.enabled = false;
+                // }
                 event.detail.value.next_alarm = (0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday);
             }
         });
@@ -3760,48 +3726,6 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
             config: this._config
         }, this);
     }
-    // _valueChangedNap(event) {
-    //     event.stopPropagation();
-    //     if (event.detail.value === undefined) {
-    //         this._nextAlarmConfig.nap_duration = AlarmController.defaultConfig.nap_duration;
-    //         this._nextAlarmConfig.next_alarm.overridden = false;
-    //         this.requestUpdate();
-    //         return;
-    //     }
-    //     this._nextAlarmConfig.next_alarm.overridden = true;
-    //     this._nextAlarmConfig.nap_duration = event.detail.value;
-    //     this.requestUpdate();
-    // }
-    // // fires *after* save button pressed in order to avoid alarm ringing during setting of nextAlarm in nap settings
-    // // TODO: is this necessary, now that alarms not evaluated when viewing settings dialog (i.e., when preview is true)
-    // async _saveNextAlarm(nextAlarmConfig) {
-    //     try {
-    //         let nextAlarm;
-    //         if (nextAlarmConfig.next_alarm.overridden) {
-    //             const nextAlarmTime = dayjs().add(dayjs.duration(nextAlarmConfig.nap_duration));
-    //             nextAlarm = AlarmController.createNextAlarm({ enabled: true, time: nextAlarmTime.format('HH:mm:ss') }, true, true);
-    //         } else {
-    //             //overridden is switched to false: nextAlarmReset
-    //             const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
-    //             const dayToday = dayjs().format('dd').toLowerCase();
-    //             const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
-    //             const newAlarm = forToday ? this._config[dayToday] : this._config[dayTomorrow];
-    //             nextAlarm = AlarmController.createNextAlarm(newAlarm, forToday);
-    //         }
-    //         this.alarmController.configEntries = { nap_duration: nextAlarmConfig.nap_duration, next_alarm: nextAlarm };
-    //         // Override HA refresh dashboard notification
-    //         window.setTimeout(() => {
-    //             Helpers.fireEvent('hass-notification', { message: localize('notification.successfully_saved') }, Helpers.getHa());
-    //         }, 50);
-    //     } catch (err: any) {
-    //         // alert(`Saving failed: ${err.message}.`);
-    //         alert(`${localize('error.saving_failed')}: ${err.message}.`);
-    //         // Override HA successful save notification
-    //         window.setTimeout(() => {
-    //             Helpers.fireEvent('hass-notification', { message: localize('error.saving_failed') }, Helpers.getHa());
-    //         }, 50);
-    //     }
-    // }
     _handleSwitchTab(event) {
         switch(event.detail.name){
             case 'settings':
@@ -3870,56 +3794,6 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
       ></ha-form>
     </div>`;
     }
-    // _renderNapEditor() {
-    //     // Helpers.preloadHaElements([
-    //     //     'ha-duration-input'
-    //     // ]);
-    //     // if (!this._nextAlarmConfig) {
-    //     //     this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-    //     //     if (this._config.next_alarm.overridden) {
-    //     //         const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-    //     //         const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-    //     //         this._nextAlarmConfig.nap_duration = myDur;
-    //     //     } else {
-    //     //         this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-    //     //     }
-    //     //     this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-    //     // }
-    //     Helpers.preloadHaElements([
-    //         'ha-duration-input'
-    //     ]);
-    //     // if (!this._nextAlarmConfig) {
-    //     //     this._nextAlarmConfig = { nap_duration: null, next_alarm: null };
-    //     if (this._config.next_alarm.overridden) {
-    //         const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
-    //         const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
-    //         this._config.nap_duration = myDur;
-    //         // this._nextAlarmConfig.nap_duration = myDur;
-    //         // } else {
-    //         // this._nextAlarmConfig.nap_duration = structuredClone(this._config.nap_duration);
-    //     }
-    //     // this._nextAlarmConfig.next_alarm = structuredClone(this._config.next_alarm);
-    //     // }
-    //     return html`
-    //   <div class="box">
-    //     <div class="kobold-nap-form">
-    //       <div class="ha-form-grid">
-    //         <div class="ha-form">
-    //           <div class="ha-formfield">
-    //             <span><p>${localize('config.nap_duration')}</p></span>
-    //             <ha-switch ?checked=${this._config.next_alarm.overridden} @change=${() => { this._config.next_alarm.overridden = !this._config.next_alarm.overridden }}></ha-switch>
-    //           </div>
-    //         </div>
-    //         <div class="ha-form">
-    //             <ha-duration-input
-    //                 .data=${this._config.nap_duration}
-    //                 @value-changed=${this._valueChanged}
-    //             ></ha-duration-input>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </div>`;
-    // }
     _renderNapEditor() {
         // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with duration between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);

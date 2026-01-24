@@ -189,6 +189,7 @@ export class AlarmController {
     _evaluate() {
 
         if (Helpers.getPreview() || !this._koboldConnected) return;
+        // console.log('*** evaluating now');
         // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
         // console.log('*** koboldConnected: ', this._koboldConnected);
 
