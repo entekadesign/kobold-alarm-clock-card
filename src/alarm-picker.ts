@@ -263,7 +263,7 @@ class AlarmPicker extends LitElement {
         }
 
         #alarmTimeInput[overridden] {
-            border: 1px dotted #696969;
+            border: 2px dotted #696969;
             padding: 1px;
         }
 
@@ -307,7 +307,7 @@ class AlarmPicker extends LitElement {
             padding-top: 0.6em;
         }
         #alarmEnabledToggleButton[holiday] {
-            border: 1px dotted #696969;
+            border: 2px dotted #696969;
             /* padding: 8px; */
             padding: 0.6em 0.6em 0 0.6em;
         }

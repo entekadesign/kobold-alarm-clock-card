@@ -1661,7 +1661,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         this._evaluate();
     }
     _evaluate() {
-        if ((0, $be7da167267683bf$export$4dc2b60021baefca).getPreview() || !this._koboldConnected) return;
+        if ((0, $be7da167267683bf$export$4dc2b60021baefca).getPreview() || !this._koboldConnected || !window.hassConnection) return;
         // console.log('*** evaluating now');
         // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
         // console.log('*** koboldConnected: ', this._koboldConnected);
@@ -1675,6 +1675,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         // should nextAlarm be disabled because it is a holiday?
         if (this._config.workday_sensor && this._config.workday_enabled) // console.log("checking whether nextAlarm is workday...");
         this._checkWorkdayDate(nextAlarm.date).then((response)=>{
+            // console.log('*** Workday Sensor response: ' + JSON.stringify(response));
             const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
             // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
             if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden || !nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden) this.nextAlarm = {
@@ -1686,9 +1687,9 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
                 if (nextAlarm.holiday) this._deleteHolilday(nextAlarm);
             }
         }, (error)=>{
-            console.error('*** Failed to connect to Workday Sensor: ', error);
+            console.error('*** Failed to connect to Workday Sensor: ', error.message);
             this._hass.callService('system_log', 'write', {
-                'message': '*** Failed to connect to Workday Sensor: ' + error,
+                'message': '*** Failed to connect to Workday Sensor: ' + error.message,
                 'level': 'info'
             });
         });
@@ -3064,7 +3065,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
         }
 
         #alarmTimeInput[overridden] {
-            border: 1px dotted #696969;
+            border: 2px dotted #696969;
             padding: 1px;
         }
 
@@ -3108,7 +3109,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
             padding-top: 0.6em;
         }
         #alarmEnabledToggleButton[holiday] {
-            border: 1px dotted #696969;
+            border: 2px dotted #696969;
             /* padding: 8px; */
             padding: 0.6em 0.6em 0 0.6em;
         }
@@ -3795,7 +3796,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
     </div>`;
     }
     _renderNapEditor() {
-        // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with duration between now and nextAlarm
+        // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with difference between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
         // TODO: is detecting overridden property here necessary?
         if (this._config.next_alarm.overridden && (this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden : true)) {
@@ -4483,7 +4484,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             if (this._hass) element.hass = this._hass;
             else console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
         } catch (error) {
-            console.warn(`*** Could not create card ${card.type}; ${error}`);
+            console.warn(`*** Could not create card ${card.type}; ${error.message}`);
         }
         return element;
     }
@@ -5108,34 +5109,47 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                     });
                     // wait until connected variable--set in connectedCallback()--is true
                     let rounds = 0;
-                    let koboldIsConnected = new Promise((resolve)=>{
+                    let koboldConnectionPromise = new Promise((resolve, reject)=>{
                         const interval = setInterval(()=>{
                             if (this._config.debug) this._hass.callService('system_log', 'write', {
                                 'message': '*** Checking for Kobold connection to HA...',
                                 'level': 'info'
                             });
-                            rounds++;
+                            if (rounds >= 10) {
+                                clearInterval(interval);
+                                reject(new Error('timeout'));
+                            }
                             if (this._koboldHasConnected) resolve(interval);
+                            rounds++;
                         }, 1000);
                     });
-                    koboldIsConnected.then((interval)=>{
-                        if (this._config.debug) this._hass.callService('system_log', 'write', {
-                            'message': '*** Kobold now connected to HA after ' + rounds + ' seconds',
+                    koboldConnectionPromise.catch((error)=>{
+                        if (!error.message || error.message !== 'timeout') throw error;
+                        if (error.message === 'timeout') this._hass.callService('system_log', 'write', {
+                            'message': '*** Kobold failed to connect after ' + rounds + ' seconds',
                             'level': 'info'
                         });
-                        clearInterval(interval);
-                        conn.subscribeEvents(()=>{
-                            window.setTimeout(()=>{
-                                this._hass.callService('system_log', 'write', {
-                                    'message': '*** HA Restarted. Refreshing browser',
-                                    'level': 'info'
-                                });
-                                this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                        return null;
+                    }).then((interval)=>{
+                        if (interval) {
+                            if (this._config.debug) this._hass.callService('system_log', 'write', {
+                                'message': '*** Kobold now connected to HA after ' + rounds + ' seconds',
+                                'level': 'info'
+                            });
+                            clearInterval(interval);
+                            conn.subscribeEvents(()=>{
                                 window.setTimeout(()=>{
-                                    location.reload();
-                                }, 2000);
-                            }, 5000);
-                        }, 'homeassistant_started');
+                                    this._hass.callService('system_log', 'write', {
+                                        'message': '*** HA Restarted. Refreshing browser',
+                                        'level': 'info'
+                                    });
+                                    this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                                    window.setTimeout(()=>{
+                                        location.reload();
+                                    }, 2000);
+                                }, 5000);
+                            }, 'homeassistant_started');
+                        }
                     });
                 // window.setTimeout(() => {
                 //   conn.subscribeEvents(() => {

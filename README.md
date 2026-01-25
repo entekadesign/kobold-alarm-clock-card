@@ -25,6 +25,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
         - when alarm rings
         - *X* minutes before or after alarm
         - when dismissing a ringing alarm, or when tapping/clicking snooze button
+    - Use [Workday integration](https://www.home-assistant.io/integrations/workday/) to automatically disable scheduled alarms on holidays
     - Add other HA cards to be displayed or hidden with a tap/click
 - **Customize appearance and function**
     - Set 12-hour or 24-hour time display format
@@ -49,6 +50,8 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 
 - [Home Assistant](https://www.home-assistant.io/installation/)
 - [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
+
+Note that alarms can only be triggered while Kobold is running in the foreground.
 
 ## Installation
 
@@ -104,6 +107,10 @@ If your HA instance's preferred language is German, French, Spanish, or Russian,
 ### Alarm ringer entities
 
 An *input boolean helper* entity should already be configured as one of Kobold's alarm ringer entities, but you can employ it as an [automation trigger](https://www.home-assistant.io/docs/automation/trigger/) to cause other events when an alarm rings, or you can add new alarm ringer entities using the entity selector in the **settings dialog**.
+
+### Workday sensor entity
+
+By installing HA's [Workday integration](https://www.home-assistant.io/integrations/workday/), you make a *workday sensor* entity avaiable, which can be selected using the entity selector in the **settings dialog**. Enable or disable the sensor using the "Disable alarm on non-workdays" toggle switch.
 
 ### Alarm actions
 

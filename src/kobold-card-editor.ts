@@ -541,7 +541,7 @@ class KoboldCardEditor extends LitElement {
 
     _renderNapEditor() {
 
-        // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with duration between now and nextAlarm
+        // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with difference between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
         // TODO: is detecting overridden property here necessary?
         if (this._config.next_alarm.overridden && (this._configChanges ? (!this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden) : true)) {

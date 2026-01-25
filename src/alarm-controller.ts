@@ -188,7 +188,7 @@ export class AlarmController {
 
     _evaluate() {
 
-        if (Helpers.getPreview() || !this._koboldConnected) return;
+        if (Helpers.getPreview() || !this._koboldConnected || !window.hassConnection) return;
         // console.log('*** evaluating now');
         // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
         // console.log('*** koboldConnected: ', this._koboldConnected);
@@ -206,6 +206,7 @@ export class AlarmController {
         if (this._config.workday_sensor && this._config.workday_enabled) {
             // console.log("checking whether nextAlarm is workday...");
             this._checkWorkdayDate(nextAlarm.date).then((response) => {
+                // console.log('*** Workday Sensor response: ' + JSON.stringify(response));
                 const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
                 // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
                 if ((!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) || (!nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden)) {
@@ -220,8 +221,8 @@ export class AlarmController {
                     }
                 };
             }, (error) => {
-                console.error('*** Failed to connect to Workday Sensor: ', error);
-                this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error, 'level': 'info' });
+                console.error('*** Failed to connect to Workday Sensor: ', error.message);
+                this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error.message, 'level': 'info' });
             });
         } else {
             // console.log("either no workday sensor or not enabled");
