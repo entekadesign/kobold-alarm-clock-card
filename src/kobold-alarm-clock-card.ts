@@ -27,7 +27,7 @@ import type { CardConfig, NextAlarmObject, KoboldEditor, TimeObject } from './ty
 
 // HA types
 // import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
-// TODO: replace: custom-card-helpers not updated with latest HA types
+// TODO: replace: custom-card-helpers not updated with latest HA types, but official source is years old: https://github.com/custom-cards/custom-card-helpers
 import type { LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
@@ -105,6 +105,7 @@ class KoboldAlarmClockCard extends LitElement {
     Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
     window.setMyEditMode = (mode = true) => {
+      // console.log('*** setmyeditmode called');
       const ll = Helpers.getLovelace();
       if (ll && ll.lovelace.editMode !== mode) {
         ll.lovelace.setEditMode(mode);
@@ -193,15 +194,30 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _dialogClosedEvent = (event: CustomEvent) => {
-    // NOTE: this will fire when closing edit dialog in other cards; TODO: constrain to this card
+    // event.stopPropagation();
+    // NOTE: this will fire when closing edit dialog in other cards
+    // console.log('*** dialog closed event: ', event.detail.dialog);
     if (event.detail.dialog === 'hui-dialog-edit-card') {
-      window.setMyEditMode(false);
-      window.setTimeout(() => {
-        // replace browser history with path lacking edit parameter
-        // see _handleClosed https://github.com/home-assistant/frontend/blob/f3380891486c01f2a75c83524578b5aeed85f114/src/dialogs/make-dialog-manager.ts
-        const base = window.location.pathname;
-        window.history.replaceState(null, '', base);
-      }, 100);
+      new Promise((r) => setTimeout(r, 100))
+        .then(() => {
+          window.setMyEditMode(false);
+        })
+        .then(() => {
+          window.setTimeout(() => {
+            // replace browser history with path lacking edit parameter
+            // see _handleClosed https://github.com/home-assistant/frontend/blob/f3380891486c01f2a75c83524578b5aeed85f114/src/dialogs/make-dialog-manager.ts
+            const base = window.location.pathname;
+            window.history.replaceState(null, '', base);
+          }, 100);
+        })
+
+      // window.setMyEditMode(false);
+      // window.setTimeout(() => {
+      //   // replace browser history with path lacking edit parameter
+      //   // see _handleClosed https://github.com/home-assistant/frontend/blob/f3380891486c01f2a75c83524578b5aeed85f114/src/dialogs/make-dialog-manager.ts
+      //   const base = window.location.pathname;
+      //   window.history.replaceState(null, '', base);
+      // }, 100);
     }
   }
 
@@ -553,6 +569,10 @@ class KoboldAlarmClockCard extends LitElement {
     event.stopPropagation();
     let tabNo = parseInt(event.target.id.slice(4));
     window.setMyEditMode();
+    // new Promise((r) => setTimeout(r, 100))
+    //   .then(() => {
+    //     //
+    //   });
 
     this._clockQ.style.display = 'none';
     //  dialogBackground styles

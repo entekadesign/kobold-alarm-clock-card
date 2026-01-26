@@ -134,8 +134,6 @@ export class AlarmController {
 
         if (overridden) data.overridden = true;
 
-        // if (holiday) data.holiday = true; TODO: would this be helpful?
-
         return data;
     }
 
@@ -203,29 +201,27 @@ export class AlarmController {
         }
 
         // should nextAlarm be disabled because it is a holiday?
-        if (this._config.workday_sensor && this._config.workday_enabled) {
-            // console.log("checking whether nextAlarm is workday...");
+        if (this._config.workday_sensor && this._hass.states[this._config.workday_sensor] && this._config.workday_enabled) {
+
             this._checkWorkdayDate(nextAlarm.date).then((response) => {
                 // console.log('*** Workday Sensor response: ' + JSON.stringify(response));
                 const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
-                // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
                 if ((!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) || (!nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden)) {
                     this.nextAlarm = {
                         ...nextAlarm,
                         enabled: false,
                         holiday: true
                     };
-                } else if (nextAlarmIsWorkday) {
-                    if (nextAlarm.holiday) {
-                        this._deleteHolilday(nextAlarm);
-                    }
+                } else if (nextAlarmIsWorkday && nextAlarm.holiday) {
+                    this._deleteHolilday(nextAlarm);
                 };
             }, (error) => {
-                console.error('*** Failed to connect to Workday Sensor: ', error.message);
-                this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error.message, 'level': 'info' });
+                if (this._config.debug) {
+                    console.error('*** Failed to connect to Workday Sensor: ', error.message);
+                    this._hass.callService('system_log', 'write', { 'message': '*** Failed to connect to Workday Sensor: ' + error.message, 'level': 'info' });
+                }
             });
         } else {
-            // console.log("either no workday sensor or not enabled");
             if (nextAlarm.holiday) {
                 this._deleteHolilday(nextAlarm);
             }

@@ -328,6 +328,9 @@ class KoboldCardEditor extends LitElement {
         this._config.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
         Helpers.fireEvent('config-changed', { config: this._config }, this); //updates lovelace.config
         // if (!this._oldConfig) this._oldConfig = this._config;
+        if (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]) {
+            console.error('*** Workday sensor not available');
+        }
     }
 
     // firstUpdated(_changedProperties: PropertyValues): void {
@@ -435,10 +438,12 @@ class KoboldCardEditor extends LitElement {
                             ...this._config.next_alarm,
                             ...AlarmController.createNextAlarm(newAlarm, forToday),
                         }
-                        if (event.detail.value.next_alarm.holiday) {
-                            // console.log('*** holiday is true');
-                            event.detail.value.next_alarm.enabled = false;
-                        }
+                        // if (event.detail.value.next_alarm.holiday && event.detail.value.next_alarm.enabled) {
+                        //     console.log('*** holiday is true');
+                        //     // event.detail.value.next_alarm.enabled = false;
+                        // } else if (!event.detail.value.next_alarm.holiday) {
+                        //     console.log('*** holiday false: reset alarm');
+                        // }
                     }
                 }
                 if (item === 'nap_duration') {
@@ -532,7 +537,7 @@ class KoboldCardEditor extends LitElement {
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined)}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]))}
           .computeLabel=${(s) => s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>

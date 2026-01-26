@@ -1619,7 +1619,6 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             date_time: `${alarmDate.format('YYYY-MM-DD')} ${alarm.time}`
         };
         if (overridden) data.overridden = true;
-        // if (holiday) data.holiday = true; TODO: would this be helpful?
         return data;
     }
     set koboldConnected(connectedState) {
@@ -1673,28 +1672,25 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             return;
         }
         // should nextAlarm be disabled because it is a holiday?
-        if (this._config.workday_sensor && this._config.workday_enabled) // console.log("checking whether nextAlarm is workday...");
-        this._checkWorkdayDate(nextAlarm.date).then((response)=>{
+        if (this._config.workday_sensor && this._hass.states[this._config.workday_sensor] && this._config.workday_enabled) this._checkWorkdayDate(nextAlarm.date).then((response)=>{
             // console.log('*** Workday Sensor response: ' + JSON.stringify(response));
             const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
-            // console.log("nextAlarm is workday: ", nextAlarmIsWorkday);
             if (!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden || !nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden) this.nextAlarm = {
                 ...nextAlarm,
                 enabled: false,
                 holiday: true
             };
-            else if (nextAlarmIsWorkday) {
-                if (nextAlarm.holiday) this._deleteHolilday(nextAlarm);
-            }
+            else if (nextAlarmIsWorkday && nextAlarm.holiday) this._deleteHolilday(nextAlarm);
         }, (error)=>{
-            console.error('*** Failed to connect to Workday Sensor: ', error.message);
-            this._hass.callService('system_log', 'write', {
-                'message': '*** Failed to connect to Workday Sensor: ' + error.message,
-                'level': 'info'
-            });
+            if (this._config.debug) {
+                console.error('*** Failed to connect to Workday Sensor: ', error.message);
+                this._hass.callService('system_log', 'write', {
+                    'message': '*** Failed to connect to Workday Sensor: ' + error.message,
+                    'level': 'info'
+                });
+            }
         });
-        else // console.log("either no workday sensor or not enabled");
-        if (nextAlarm.holiday) this._deleteHolilday(nextAlarm);
+        else if (nextAlarm.holiday) this._deleteHolilday(nextAlarm);
         if (!this.isAlarmEnabled) return;
         // trigger or dismiss alarm?
         if (!this.isAlarmRinging() && (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') >= nextAlarm.time && nextAlarm.date === dateToday) this._throttleAlarmRinging(true);
@@ -3596,7 +3592,8 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('config-changed', {
             config: this._config
         }, this); //updates lovelace.config
-    // if (!this._oldConfig) this._oldConfig = this._config;
+        // if (!this._oldConfig) this._oldConfig = this._config;
+        if (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]) console.error('*** Workday sensor not available');
     }
     // firstUpdated(_changedProperties: PropertyValues): void {
     // }
@@ -3692,8 +3689,12 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                         ...this._config.next_alarm,
                         ...(0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).createNextAlarm(newAlarm, forToday)
                     };
-                    if (event.detail.value.next_alarm.holiday) // console.log('*** holiday is true');
-                    event.detail.value.next_alarm.enabled = false;
+                // if (event.detail.value.next_alarm.holiday && event.detail.value.next_alarm.enabled) {
+                //     console.log('*** holiday is true');
+                //     // event.detail.value.next_alarm.enabled = false;
+                // } else if (!event.detail.value.next_alarm.holiday) {
+                //     console.log('*** holiday false: reset alarm');
+                // }
                 }
             }
             if (item === 'nap_duration') event.detail.value.next_alarm.overridden = true;
@@ -3789,7 +3790,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined)}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || this._config.workday_sensor && !this._hass.states[this._config.workday_sensor])}
           .computeLabel=${(s)=>s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>
@@ -4324,6 +4325,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
         window.setMyEditMode = (mode = true)=>{
+            // console.log('*** setmyeditmode called');
             const ll = (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace();
             if (ll && ll.lovelace.editMode !== mode) ll.lovelace.setEditMode(mode);
         };
@@ -4613,6 +4615,10 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         event.stopPropagation();
         let tabNo = parseInt(event.target.id.slice(4));
         window.setMyEditMode();
+        // new Promise((r) => setTimeout(r, 100))
+        //   .then(() => {
+        //     //
+        //   });
         this._clockQ.style.display = 'none';
         //  dialogBackground styles
         if ((0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot) {
@@ -5165,16 +5171,19 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                 });
             }
         }, this._dialogClosedEvent = (event)=>{
-            // NOTE: this will fire when closing edit dialog in other cards; TODO: constrain to this card
-            if (event.detail.dialog === 'hui-dialog-edit-card') {
+            // event.stopPropagation();
+            // NOTE: this will fire when closing edit dialog in other cards
+            // console.log('*** dialog closed event: ', event.detail.dialog);
+            if (event.detail.dialog === 'hui-dialog-edit-card') new Promise((r)=>setTimeout(r, 100)).then(()=>{
                 window.setMyEditMode(false);
+            }).then(()=>{
                 window.setTimeout(()=>{
                     // replace browser history with path lacking edit parameter
                     // see _handleClosed https://github.com/home-assistant/frontend/blob/f3380891486c01f2a75c83524578b5aeed85f114/src/dialogs/make-dialog-manager.ts
                     const base = window.location.pathname;
                     window.history.replaceState(null, '', base);
                 }, 100);
-            }
+            });
         }, this._koboldEditorEvent = (event)=>{
             this._koboldEditor = event.detail.editorEl;
         };
