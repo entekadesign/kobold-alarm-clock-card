@@ -110,7 +110,7 @@ An *input boolean helper* entity should already be configured as one of Kobold's
 
 ### Workday sensor entity
 
-By installing HA's [Workday integration](https://www.home-assistant.io/integrations/workday/), you make a *workday sensor* entity avaiable, which can be selected using the entity selector in the **settings dialog**. Enable or disable the sensor using the "Disable alarm on non-workdays" toggle switch.
+By installing HA's [Workday integration](https://www.home-assistant.io/integrations/workday/), you make a *workday sensor* entity avaiable, which can be selected using the entity selector in the **settings dialog**. Enable or disable the sensor using the "Disable alarm on non-workdays" toggle switch. A dotted border around the next alarm toggle switch indicates that the scheduled next alarm is disabled because it is not scheduled on a workday; the effect of the workday sensor can be overridden by tapping the next alarm toggle switch on the main view, or enabling a nap duration in the **nap dialog**.
 
 ### Alarm actions
 
