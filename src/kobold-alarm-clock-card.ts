@@ -26,8 +26,8 @@ dayjs.extend(relativeTime);
 import type { CardConfig, NextAlarmObject, KoboldEditor, TimeObject } from './types';
 
 // HA types
-// import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
-// TODO: replace: custom-card-helpers not updated with latest HA types, but official source is years old: https://github.com/custom-cards/custom-card-helpers
+// import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers"; // HomeAssistant type is outdated
+// Note: custom-card-helpers not updated with latest HA types; official source is years old: https://github.com/custom-cards/custom-card-helpers
 import type { LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
@@ -509,6 +509,8 @@ class KoboldAlarmClockCard extends LitElement {
     // this only fires for changes to nextalarm in #alarmpicker element html of kobold-alarm-clock-card.js
 
     let data: TimeObject = { enabled: event.detail.nextAlarm.enabled, time: event.detail.nextAlarm.time };
+
+    // console.log('*** onAlarmChanged. data: ', data);
 
     // hide cards during save to avoid flicker
     if (!this._config.hide_cards_default) this._hideCards(true);

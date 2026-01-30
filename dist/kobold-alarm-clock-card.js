@@ -1561,7 +1561,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             }
         }, 1000);
         this._cardId = cardId;
-        this._config = config; // TODO: make a copy here?
+        this._config = config; // TODO: make a copy here instead of get nextAlarm method?
     }
     set hass(hass) {
         this._hass = hass;
@@ -1634,7 +1634,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         });
     }
     get nextAlarm() {
-        const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
+        const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: make copy  in constructor instead?
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
             return $fbafc8504bdc8693$export$cfa71a29f5c0676d.defaultConfig.next_alarm;
@@ -2844,9 +2844,10 @@ var $dc565e4cd1f32ca8$exports = {};
 class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2f9f5909897157) {
     connectedCallback() {
         super.connectedCallback();
-        document.addEventListener('click', (event)=>{
-            this._clickOutsideAlarmTimeInput(event);
-        });
+        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event); event.preventDefault(); }); // TODO: fix; anonymous function makes removing listener impossible
+        this._clickOutsideAlarmTimeInput = this._clickOutsideAlarmTimeInput.bind(this); // ensure that event maintains local context
+        document.addEventListener('click', this._clickOutsideAlarmTimeInput);
+        // console.log('*** alarm-picker connecting');
         // Update component styles after nextAlarm updates, etc
         this._injectStylesDone = undefined;
         this.requestUpdate();
@@ -2854,6 +2855,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
     disconnectedCallback() {
         super.disconnectedCallback();
         document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+    // console.log('*** alarm-picker disconnecting');
     }
     updated() {
         if (!this._injectStylesDone) {
@@ -2891,7 +2893,10 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
             }
         }
     }
-    _clickHandler() {
+    _clickHandler(event) {
+        // console.log('*** click event: ', event);
+        event.stopPropagation();
+        // event.preventDefault();
         let timeArray;
         if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         const isEnabled = this.nextAlarm.enabled;
@@ -2904,14 +2909,19 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
         this._displayedValueM = timeArray[1];
         this._alarmPickerQ.classList.add('open');
     // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
-    // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
+    // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event); }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
     }
     _clickOutsideAlarmTimeInput(event) {
-        // event.stopPropagation();
+        event.stopPropagation();
+        // event.preventDefault();
+        // console.log('*** this: ', this);
         // console.log('*** clicked; composed path includes alarmpicker: ', event.composedPath().includes(this._alarmPickerQ));
         // console.log('*** clicked; target: ', event.target);
-        if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            // console.log('*** clicked outside slider');
+        // console.log('*** clicked; composed path: ', event.composedPath());
+        const openCheck = this.shadowRoot?.querySelector('#alarmPicker')?.classList.contains('open');
+        // console.log('*** test: ', test);
+        if (openCheck && typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
+            // console.log('*** clicked outside slider');//: ', Math.random().toString(36).slice(2, 9));
             if (this._alarmPickerQ?.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ?.classList.remove('open');
             if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
@@ -2968,7 +2978,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
     }
     render() {
         return (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)`
-            <div class="alarm" id="alarmPicker">
+            <div class="alarm" id="alarmPicker"}>
                 ${this.getAttribute('show-icon') ? (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)`
                     <ha-icon icon=${this._getScheduleButtonIcon(this.nextAlarm)} @click=${this._openSchedule} class="button"></ha-icon>
                 ` : ''}
@@ -3709,7 +3719,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
             } else if (item === 'next_alarm') {
                 // console.log('*** nextAlarmReset. item: ', item);
                 //overridden is switched to false: nextAlarmReset
-                // this code from controller's nextAlarmReset // TODO: refactor?
+                // this code from controller's nextAlarmReset // TODO: refactor? make nextAlarmReset static and call AlarmController.nextAlarmReset()?
                 const dayTomorrow = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().add(1, 'day').format('dd').toLowerCase();
                 const dayToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('dd').toLowerCase();
                 const forToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss') < this._config[dayToday].time;
@@ -3799,7 +3809,6 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
     _renderNapEditor() {
         // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with difference between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
-        // TODO: is detecting overridden property here necessary?
         if (this._config.next_alarm.overridden && (this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden : true)) {
             const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))()));
             const myDur = {
@@ -4566,6 +4575,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             enabled: event.detail.nextAlarm.enabled,
             time: event.detail.nextAlarm.time
         };
+        // console.log('*** onAlarmChanged. data: ', data);
         // hide cards during save to avoid flicker
         if (!this._config.hide_cards_default) this._hideCards(true);
         // allow animations to complete before saving

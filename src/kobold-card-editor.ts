@@ -457,7 +457,7 @@ class KoboldCardEditor extends LitElement {
                 } else if (item === 'next_alarm') {
                     // console.log('*** nextAlarmReset. item: ', item);
                     //overridden is switched to false: nextAlarmReset
-                    // this code from controller's nextAlarmReset // TODO: refactor?
+                    // this code from controller's nextAlarmReset // TODO: refactor? make nextAlarmReset static and call AlarmController.nextAlarmReset()?
                     const dayTomorrow = dayjs().add(1, 'day').format('dd').toLowerCase();
                     const dayToday = dayjs().format('dd').toLowerCase();
                     const forToday = dayjs().format('HH:mm:ss') < this._config[dayToday].time;
@@ -548,7 +548,6 @@ class KoboldCardEditor extends LitElement {
 
         // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with difference between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
-        // TODO: is detecting overridden property here necessary?
         if (this._config.next_alarm.overridden && (this._configChanges ? (!this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden) : true)) {
             const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
             const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };

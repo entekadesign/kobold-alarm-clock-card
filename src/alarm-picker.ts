@@ -28,7 +28,11 @@ class AlarmPicker extends LitElement {
 
     connectedCallback(): void {
         super.connectedCallback();
-        document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) });
+        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event); event.preventDefault(); }); // TODO: fix; anonymous function makes removing listener impossible
+
+        this._clickOutsideAlarmTimeInput = this._clickOutsideAlarmTimeInput.bind(this); // ensure that event maintains local context
+        document.addEventListener('click', this._clickOutsideAlarmTimeInput);
+        // console.log('*** alarm-picker connecting');
         // Update component styles after nextAlarm updates, etc
         this._injectStylesDone = undefined;
         this.requestUpdate();
@@ -37,6 +41,7 @@ class AlarmPicker extends LitElement {
     disconnectedCallback(): void {
         super.disconnectedCallback();
         document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
+        // console.log('*** alarm-picker disconnecting');
     }
 
     updated() {
@@ -84,7 +89,10 @@ class AlarmPicker extends LitElement {
         }
     }
 
-    _clickHandler() {
+    _clickHandler(event: Event) {
+        // console.log('*** click event: ', event);
+        event.stopPropagation();
+        // event.preventDefault();
         let timeArray: Array<string>;
         if (!this._alarmPickerQ.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
         const isEnabled = this.nextAlarm.enabled;
@@ -102,15 +110,20 @@ class AlarmPicker extends LitElement {
 
         this._alarmPickerQ.classList.add('open');
         // document.removeEventListener('click', this._clickOutsideAlarmTimeInput);
-        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event) }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
+        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event); }); // click event not detected if clicking near clock numerals so animation doesn't run; move these listeners to connectedcallback/disconnectedcallback
     };
 
     _clickOutsideAlarmTimeInput(event: Event) {
-        // event.stopPropagation();
+        event.stopPropagation();
+        // event.preventDefault();
+        // console.log('*** this: ', this);
         // console.log('*** clicked; composed path includes alarmpicker: ', event.composedPath().includes(this._alarmPickerQ));
         // console.log('*** clicked; target: ', event.target);
-        if (typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
-            // console.log('*** clicked outside slider');
+        // console.log('*** clicked; composed path: ', event.composedPath());
+        const openCheck = this.shadowRoot?.querySelector('#alarmPicker')?.classList.contains('open');
+        // console.log('*** test: ', test);
+        if (openCheck && typeof event.composedPath === 'function' && !event.composedPath().includes(this._alarmPickerQ)) {
+            // console.log('*** clicked outside slider');//: ', Math.random().toString(36).slice(2, 9));
             if (this._alarmPickerQ?.classList.contains('open')) this.dispatchEvent(new CustomEvent('toggle-logo-visibility'));
             this._alarmPickerQ?.classList.remove('open');
             if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
@@ -169,7 +182,7 @@ class AlarmPicker extends LitElement {
     render() {
 
         return html`
-            <div class="alarm" id="alarmPicker">
+            <div class="alarm" id="alarmPicker"}>
                 ${this.getAttribute('show-icon') ? html`
                     <ha-icon icon=${this._getScheduleButtonIcon(this.nextAlarm)} @click=${this._openSchedule} class="button"></ha-icon>
                 ` : ''}

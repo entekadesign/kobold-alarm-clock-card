@@ -51,7 +51,7 @@ export class AlarmController {
 
     constructor(config: CardConfig, cardId?: string) {
         this._cardId = cardId;
-        this._config = config; // TODO: make a copy here?
+        this._config = config; // TODO: make a copy here instead of get nextAlarm method?
     }
 
     set hass(hass: HomeAssistant) {
@@ -150,7 +150,7 @@ export class AlarmController {
         this._saveConfigEntries({ next_alarm: nextAlarm });
     }
     get nextAlarm(): NextAlarmObject {
-        const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: necessary to make a copy? this should happen when saving, not now, right?
+        const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: make copy  in constructor instead?
 
         if (!nextAlarm) {
             console.warn('*** get nextAlarm(); NextAlarm undefined: returning default config');
