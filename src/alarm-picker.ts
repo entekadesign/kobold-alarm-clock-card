@@ -98,13 +98,14 @@ class AlarmPicker extends LitElement {
         const isEnabled = this.nextAlarm.enabled;
         const isOverridden = this.config.next_alarm.overridden;
         // if (isEnabled && !isOverridden || !isEnabled && !isOverridden) {
-        if (!isOverridden) {
-            timeArray = dayjs(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
-        } else {
-            // set sliders to nextAlarm time
-            timeArray = this.nextAlarm.time.split(':');
-        }
+        // if (!isOverridden) {
+        //     timeArray = dayjs(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
+        // } else {
+        //     // set sliders to nextAlarm time
+        //     timeArray = this.nextAlarm.time.split(':');
+        // }
 
+        timeArray = this.nextAlarm.time.split(':');
         this._displayedValueH = timeArray[0];
         this._displayedValueM = timeArray[1];
 
@@ -128,6 +129,7 @@ class AlarmPicker extends LitElement {
             this._alarmPickerQ?.classList.remove('open');
             if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
                 const sliderTime = this._displayedValueH + ':' + this._displayedValueM + ':00';
+                // console.log('*** nextAlarm time: ' + this.nextAlarm.time + '; slider time: ' + sliderTime);
                 if (sliderTime !== this.nextAlarm.time) {
                     // console.log('*** save slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
                     this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);

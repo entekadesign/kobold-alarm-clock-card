@@ -2902,8 +2902,12 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
         const isEnabled = this.nextAlarm.enabled;
         const isOverridden = this.config.next_alarm.overridden;
         // if (isEnabled && !isOverridden || !isEnabled && !isOverridden) {
-        if (!isOverridden) timeArray = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
-        else // set sliders to nextAlarm time
+        // if (!isOverridden) {
+        //     timeArray = dayjs(this.time, this._alarmTimeFormat()).format('HH:mm').split(':');
+        // } else {
+        //     // set sliders to nextAlarm time
+        //     timeArray = this.nextAlarm.time.split(':');
+        // }
         timeArray = this.nextAlarm.time.split(':');
         this._displayedValueH = timeArray[0];
         this._displayedValueM = timeArray[1];
@@ -2926,6 +2930,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
             this._alarmPickerQ?.classList.remove('open');
             if (this._displayedValueH !== undefined && this._displayedValueM !== undefined) {
                 const sliderTime = this._displayedValueH + ':' + this._displayedValueM + ':00';
+                // console.log('*** nextAlarm time: ' + this.nextAlarm.time + '; slider time: ' + sliderTime);
                 if (sliderTime !== this.nextAlarm.time) // console.log('*** save slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
                 this._onTimeChanged(this._displayedValueH + ':' + this._displayedValueM);
             // console.log('*** slider time: ' + this._displayedValueH + ':' + this._displayedValueM);
@@ -3809,15 +3814,11 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
     _renderNapEditor() {
         // if configChanges is undefined, or if configChanges has no nap_duration or overridden property, then populate nap_duration with difference between now and nextAlarm
         // console.log('*** configchanges doenst contain nap duration: ', this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') : true);
-        if (this._config.next_alarm.overridden && (this._configChanges ? !this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden : true)) {
-            const dayDur = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this._config.next_alarm.date_time).diff((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))()));
-            const myDur = {
-                hours: parseInt(dayDur.format('HH')),
-                minutes: parseInt(dayDur.format('mm')),
-                seconds: parseInt(dayDur.format('ss'))
-            };
-            this._config.nap_duration = myDur;
-        }
+        // if (this._config.next_alarm.overridden && (this._configChanges ? (!this._configChanges.hasOwnProperty('nap_duration') && !this._configChanges['next_alarm'].overridden) : true)) {
+        //     const dayDur = dayjs.duration(dayjs(this._config.next_alarm.date_time).diff(dayjs()));
+        //     const myDur: Duration = { hours: parseInt(dayDur.format('HH')), minutes: parseInt(dayDur.format('mm')), seconds: parseInt(dayDur.format('ss')) };
+        //     this._config.nap_duration = myDur;
+        // }
         return (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)`
     <div class="box" id="nap">
       <ha-form
