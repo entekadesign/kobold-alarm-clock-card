@@ -134,61 +134,65 @@ class KoboldAlarmClockCard extends LitElement {
 
       // If HA restarts, reload browser
       window.hassConnection.then(({ conn }) => {
-        if (this._config.debug) {
-          this._hass.callService('system_log', 'write', { 'message': '*** Awaiting HA started event', 'level': 'info' });
-        };
+        this._hass.callService('system_log', 'write', { 'message': '*** Reconnected.', 'level': 'info' });
+        console.info('*** Reconnected');
 
-        // wait until connected variable--set in connectedCallback()--is true
-        let rounds = 0;
-        let koboldConnectionPromise = new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            if (this._config.debug) {
-              this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
-            };
-            if (rounds >= 10) {
-              clearInterval(interval);
-              reject(new Error('timeout'));
-            };
-            if (this._koboldHasConnected) resolve(interval);
-            rounds++;
-          }, 1000);
-        });
-        koboldConnectionPromise
-          .catch((error) => {
-            if (!error.message || error.message !== 'timeout')
-              throw (error);
-            if (error.message === 'timeout') this._hass.callService('system_log', 'write', { 'message': '*** Kobold failed to connect after ' + rounds + ' seconds', 'level': 'info' });
-            return null;
-          })
-          .then((interval: ReturnType<typeof setInterval>) => {
-            if (interval) {
-              if (this._config.debug) {
-                this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
-              }
-              clearInterval(interval);
-              conn.subscribeEvents(() => {
-                window.setTimeout(() => {
-                  this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
-                  this._alarmController.dismiss(); // in case alarm ringing at moment of restart
-                  window.setTimeout(() => {
-                    location.reload();
-                  }, 1000 * 2);
-                }, 1000 * 5);
-              }, 'homeassistant_started');
-            }
-          });
+        // // wait until connected variable--set in connectedCallback()--is true
+        // let rounds = 0;
+        // let koboldConnectionPromise = new Promise((resolve, reject) => {
+        //   const interval = setInterval(() => {
+        //     if (this._config.debug) {
+        //       this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
+        //     };
+        //     if (rounds >= 10) {
+        //       clearInterval(interval);
+        //       reject(new Error('timeout'));
+        //     };
+        //     if (this._koboldHasConnected) resolve(interval);
+        //     rounds++;
+        //   }, 1000);
+        // });
+        // koboldConnectionPromise
+        //   .catch((error) => {
+        //     if (!error.message || error.message !== 'timeout')
+        //       throw (error);
+        //     if (error.message === 'timeout') this._hass.callService('system_log', 'write', { 'message': '*** Kobold failed to connect after ' + rounds + ' seconds', 'level': 'info' });
+        //     return null;
+        //   })
+        //   .then((interval: ReturnType<typeof setInterval>) => {
+        //     if (interval) {
+        //       if (this._config.debug) {
+        //         this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
+        //       }
+        //       clearInterval(interval);
+        //       conn.subscribeEvents(() => {
+        //         window.setTimeout(() => {
+        //           this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+        //           this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+        //           window.setTimeout(() => {
+        //             location.reload();
+        //           }, 1000 * 2);
+        //         }, 1000 * 5);
+        //       }, 'homeassistant_started');
+        //     }
+        //   });
 
-        // window.setTimeout(() => {
-        //   conn.subscribeEvents(() => {
-        //     window.setTimeout(() => {
-        //       this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
-        //       this._alarmController.dismiss(); // in case alarm ringing at moment of restart
-        //       window.setTimeout(() => {
-        //         location.reload();
-        //       }, 1000 * 2);
-        //     }, 1000 * 5);
-        //   }, 'homeassistant_started');
-        // }, 1000 * 30);
+        window.setTimeout(() => {
+          function refreshBrowser() {
+            this._alarmController.dismiss(); // in case alarm ringing at this moment
+            window.setTimeout(() => {
+              location.reload();
+            }, 1000 * 2);
+          }
+          window.setTimeout(() => {
+            refreshBrowser();
+          }, 1000 * 35);
+          conn.subscribeEvents(() => {
+            this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+            this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+            refreshBrowser();
+          }, 'homeassistant_started');
+        }, 1000 * 2);
       });
     }
   }

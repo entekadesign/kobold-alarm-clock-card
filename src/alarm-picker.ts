@@ -28,8 +28,6 @@ class AlarmPicker extends LitElement {
 
     connectedCallback(): void {
         super.connectedCallback();
-        // document.addEventListener('click', (event) => { this._clickOutsideAlarmTimeInput(event); event.preventDefault(); }); // TODO: fix; anonymous function makes removing listener impossible
-
         this._clickOutsideAlarmTimeInput = this._clickOutsideAlarmTimeInput.bind(this); // ensure that event maintains local context
         document.addEventListener('click', this._clickOutsideAlarmTimeInput);
         // console.log('*** alarm-picker connecting');
