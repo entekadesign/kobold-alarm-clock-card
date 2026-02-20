@@ -299,7 +299,9 @@ class KoboldCardEditor extends LitElement {
     @state() _selectedTab = 0;
     @state() _nextAlarmConfig: NextAlarmConfig;
 
-    @property({ attribute: false, reflect: false }) alarmController;
+    // @property({ attribute: false, reflect: false }) alarmController; //TODO: is this getting used?
+    @property({ attribute: false, reflect: false }) selectedTab: number = 0;
+    // @property() selectedTab: number = 0;
 
     constructor() {
         super();
@@ -333,12 +335,22 @@ class KoboldCardEditor extends LitElement {
         }
     }
 
-    // firstUpdated(_changedProperties: PropertyValues): void {
-    // }
-
+    willUpdate() {
+        if (this.selectedTab) {
+            // console.log('*** editor: willUpdate: selectedTab: ', this.selectedTab);
+            this._selectedTab = this.selectedTab;
+            this.selectedTab = undefined;
+            // this._injectStyles();
+        }
+    }
     // updated(_changedProperties: PropertyValues): void {
     // }
 
+    firstUpdated(_changedProperties: PropertyValues): void {
+        this.selectedTab = undefined; //temporary until all instances of this._selectedTab replaced w/ this.selectedTab
+        // console.log('*** editor: firstUpdated: selectedTab: ', this.selectedTab);
+        // console.log('*** editor: firstUpdated: alarmController: ', this.alarmController);
+    }
 
     _injectStyles() {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
@@ -491,6 +503,7 @@ class KoboldCardEditor extends LitElement {
             default:
                 this._selectedTab = 0;
         }
+        // console.log('*** handleSwitchTab: selectedTab: ', this._selectedTab);
     }
 
     render() {

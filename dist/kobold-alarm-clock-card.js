@@ -1660,7 +1660,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         this._evaluate();
     }
     _evaluate() {
-        if ((0, $be7da167267683bf$export$4dc2b60021baefca).getPreview() || !this._koboldConnected || !window.hassConnection) return;
+        if ((0, $be7da167267683bf$export$4dc2b60021baefca).getPreview() || !this._koboldConnected || !this._hass.connected) return;
         // console.log('*** evaluating now');
         // console.log('*** lovelace: ', Helpers.getLovelace().shadowRoot);
         // console.log('*** koboldConnected: ', this._koboldConnected);
@@ -3193,6 +3193,7 @@ $f99f1d54953b8552$var$AlarmPicker = (0, $daa14a4ff660f8e2$export$29e00dfd3077644
 
 var $04fcN = parcelRequire("04fcN");
 class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$export$3f2f9f5909897157) {
+    // @property() selectedTab: number = 0;
     constructor(){
         super(), this._configSchemaSettings = (time_format_12hr, workday_sensor)=>[
                 {
@@ -3581,7 +3582,8 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                         }
                     ]
                 }
-            ], this._selectedTab = 0;
+            ], this._selectedTab = 0, // @property({ attribute: false, reflect: false }) alarmController; //TODO: is this getting used?
+        this.selectedTab = 0;
         (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('kobold-editor', {
             editorEl: this
         }, (0, $be7da167267683bf$export$4dc2b60021baefca).getHa());
@@ -3609,10 +3611,21 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         // if (!this._oldConfig) this._oldConfig = this._config;
         if (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]) console.error('*** Workday sensor not available');
     }
-    // firstUpdated(_changedProperties: PropertyValues): void {
-    // }
+    willUpdate() {
+        if (this.selectedTab) {
+            // console.log('*** editor: willUpdate: selectedTab: ', this.selectedTab);
+            this._selectedTab = this.selectedTab;
+            this.selectedTab = undefined;
+        // this._injectStyles();
+        }
+    }
     // updated(_changedProperties: PropertyValues): void {
     // }
+    firstUpdated(_changedProperties) {
+        this.selectedTab = undefined; //temporary until all instances of this._selectedTab replaced w/ this.selectedTab
+    // console.log('*** editor: firstUpdated: selectedTab: ', this.selectedTab);
+    // console.log('*** editor: firstUpdated: alarmController: ', this.alarmController);
+    }
     _injectStyles() {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
         let rounds = 0;
@@ -3759,6 +3772,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
             default:
                 this._selectedTab = 0;
         }
+    // console.log('*** handleSwitchTab: selectedTab: ', this._selectedTab);
     }
     render() {
         if (!this._hass || !this._config) return (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)``;
@@ -3917,7 +3931,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         attribute: false,
         reflect: false
     })
-], $bc3bffd9bb722a75$var$KoboldCardEditor.prototype, "alarmController", void 0);
+], $bc3bffd9bb722a75$var$KoboldCardEditor.prototype, "selectedTab", void 0);
 $bc3bffd9bb722a75$var$KoboldCardEditor = (0, $daa14a4ff660f8e2$export$29e00dfd3077644b)([
     (0, $f3e828efb8d4e110$export$da64fc29f17f9d0e)('kobold-card-editor')
 ], $bc3bffd9bb722a75$var$KoboldCardEditor);
@@ -4354,6 +4368,12 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
     }
+    _refreshBrowser() {
+        this._alarmController.dismiss(); // in case alarm ringing at this moment
+        window.setTimeout(()=>{
+            location.reload();
+        }, 2000);
+    }
     static getConfigElement() {
         return document.createElement("kobold-card-editor");
     }
@@ -4656,12 +4676,10 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             while(!this._koboldEditor && rounds++ < 5)await new Promise((r)=>setTimeout(r, 100));
             if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for editor');
             else {
-                this._koboldEditor.alarmController = this._alarmController;
-                // TODO: maybe replace with variable on editor because not working on slow devices
-                (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('kobold-tab', {
-                    tab: tabNo
-                }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
-                this._koboldEditor = undefined;
+                // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
+                this._koboldEditor.selectedTab = tabNo;
+                // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+                this._koboldEditor = undefined; //TODO: why is this necessary? to prevent multiplication of elements?
             }
         }
         this._clockQ.style.display = 'flex';
@@ -5117,72 +5135,107 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                     'level': 'info'
                 });
                 console.warn('*** Recovering from disconnect');
-                // If HA restarts, reload browser
-                window.hassConnection.then(({ conn: conn })=>{
-                    this._hass.callService('system_log', 'write', {
-                        'message': '*** Reconnected.',
-                        'level': 'info'
-                    });
-                    console.info('*** Reconnected');
-                    // // wait until connected variable--set in connectedCallback()--is true
-                    // let rounds = 0;
-                    // let koboldConnectionPromise = new Promise((resolve, reject) => {
-                    //   const interval = setInterval(() => {
-                    //     if (this._config.debug) {
-                    //       this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
-                    //     };
-                    //     if (rounds >= 10) {
-                    //       clearInterval(interval);
-                    //       reject(new Error('timeout'));
-                    //     };
-                    //     if (this._koboldHasConnected) resolve(interval);
-                    //     rounds++;
-                    //   }, 1000);
-                    // });
-                    // koboldConnectionPromise
-                    //   .catch((error) => {
-                    //     if (!error.message || error.message !== 'timeout')
-                    //       throw (error);
-                    //     if (error.message === 'timeout') this._hass.callService('system_log', 'write', { 'message': '*** Kobold failed to connect after ' + rounds + ' seconds', 'level': 'info' });
-                    //     return null;
-                    //   })
-                    //   .then((interval: ReturnType<typeof setInterval>) => {
-                    //     if (interval) {
-                    //       if (this._config.debug) {
-                    //         this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
-                    //       }
-                    //       clearInterval(interval);
-                    //       conn.subscribeEvents(() => {
-                    //         window.setTimeout(() => {
-                    //           this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
-                    //           this._alarmController.dismiss(); // in case alarm ringing at moment of restart
-                    //           window.setTimeout(() => {
-                    //             location.reload();
-                    //           }, 1000 * 2);
-                    //         }, 1000 * 5);
-                    //       }, 'homeassistant_started');
-                    //     }
-                    //   });
-                    window.setTimeout(()=>{
-                        function refreshBrowser() {
-                            this._alarmController.dismiss(); // in case alarm ringing at this moment
-                            window.setTimeout(()=>{
-                                location.reload();
-                            }, 2000);
+                // wait until connected variable--set in connectedCallback()--is true
+                let rounds = 0;
+                let koboldConnectionPromise = new Promise((resolve, reject)=>{
+                    const interval = setInterval(()=>{
+                        // if (this._config.debug) {
+                        this._hass.callService('system_log', 'write', {
+                            'message': '*** Checking for Kobold connection to HA...',
+                            'level': 'info'
+                        });
+                        // };
+                        if (rounds >= 120) {
+                            clearInterval(interval);
+                            reject(new Error('timeout'));
                         }
-                        window.setTimeout(()=>{
-                            refreshBrowser();
-                        }, 35000);
-                        conn.subscribeEvents(()=>{
-                            this._hass.callService('system_log', 'write', {
-                                'message': '*** HA Restarted. Refreshing browser',
-                                'level': 'info'
-                            });
-                            this._alarmController.dismiss(); // in case alarm ringing at moment of restart
-                            refreshBrowser();
-                        }, 'homeassistant_started');
-                    }, 2000);
+                        if (this._hass && this._hass.connected) resolve(interval);
+                        rounds++;
+                    }, 1000);
                 });
+                koboldConnectionPromise.catch((error)=>{
+                    if (!error.message || error.message !== 'timeout') throw error;
+                    if (error.message === 'timeout') console.log('*** Kobold failed to connect after ' + rounds);
+                    return null;
+                }).then((interval)=>{
+                    if (interval) {
+                        // if (this._config.debug) {
+                        this._hass.callService('system_log', 'write', {
+                            'message': '*** Kobold now connected to HA after ' + rounds + ' seconds',
+                            'level': 'info'
+                        });
+                        // }
+                        clearInterval(interval);
+                        // TODO: test for routine disconnect by disabling internet for 10 seconds. check log for "now connected to HA after 10 seconds".
+                        // if found and kobol reconnects successfully, then add logic here: if (rounds < 10) refreshbrowser; otherwise, skip
+                        window.hassConnection.then(({ conn: conn })=>{
+                            conn.subscribeEvents(()=>{
+                                window.setTimeout(()=>{
+                                    this._hass.callService('system_log', 'write', {
+                                        'message': '*** HA Restarted. Refreshing browser',
+                                        'level': 'info'
+                                    });
+                                    this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+                                    window.setTimeout(()=>{
+                                        location.reload();
+                                    }, 2000);
+                                }, 5000);
+                            }, 'homeassistant_started');
+                        });
+                    }
+                });
+            // // If HA restarts, reload browser
+            // window.hassConnection.then(({ conn }) => {
+            //   // // wait until connected variable--set in connectedCallback()--is true
+            //   // let rounds = 0;
+            //   // let koboldConnectionPromise = new Promise((resolve, reject) => {
+            //   //   const interval = setInterval(() => {
+            //   //     if (this._config.debug) {
+            //   //       this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
+            //   //     };
+            //   //     if (rounds >= 10) {
+            //   //       clearInterval(interval);
+            //   //       reject(new Error('timeout'));
+            //   //     };
+            //   //     if (this._koboldHasConnected) resolve(interval);
+            //   //     rounds++;
+            //   //   }, 1000);
+            //   // });
+            //   // koboldConnectionPromise
+            //   //   .catch((error) => {
+            //   //     if (!error.message || error.message !== 'timeout')
+            //   //       throw (error);
+            //   //     if (error.message === 'timeout') this._hass.callService('system_log', 'write', { 'message': '*** Kobold failed to connect after ' + rounds + ' seconds', 'level': 'info' });
+            //   //     return null;
+            //   //   })
+            //   //   .then((interval: ReturnType<typeof setInterval>) => {
+            //   //     if (interval) {
+            //   //       if (this._config.debug) {
+            //   //         this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
+            //   //       }
+            //   //       clearInterval(interval);
+            //   //       conn.subscribeEvents(() => {
+            //   //         window.setTimeout(() => {
+            //   //           this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+            //   //           this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+            //   //           window.setTimeout(() => {
+            //   //             location.reload();
+            //   //           }, 1000 * 2);
+            //   //         }, 1000 * 5);
+            //   //       }, 'homeassistant_started');
+            //   //     }
+            //   //   });
+            //   window.setTimeout(() => {
+            //     window.setTimeout(() => {
+            //       this._hass.callService('system_log', 'write', { 'message': '*** Timed out. No homeassistant_started event received. Refreshing browser', 'level': 'info' });
+            //       this._refreshBrowser();
+            //     }, 1000 * 35);
+            //     conn.subscribeEvents(() => {
+            //       this._hass.callService('system_log', 'write', { 'message': '*** Homeassistant_started event received. Refreshing browser', 'level': 'info' });
+            //       this._refreshBrowser();
+            //     }, 'homeassistant_started');
+            //   }, 1000 * 2);
+            // });
             }
         }, this._dialogClosedEvent = (event)=>{
             // event.stopPropagation();

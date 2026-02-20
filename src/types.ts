@@ -15,7 +15,11 @@ export interface NextAlarmObject extends TimeObject {
     holiday?: boolean;
 }
 
-export interface Duration { hours: number; minutes: number; seconds: number; }
+export interface Duration {
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
 
 export interface CardConfig extends LovelaceCardConfig {
     type: string;
@@ -54,7 +58,8 @@ export interface AlarmActionsObject {
 }
 
 export interface KoboldEditor extends LitElement {
-    alarmController: any;
+    // alarmController: any;
+    selectedTab: number;
 }
 
 export type TranslationKey =
