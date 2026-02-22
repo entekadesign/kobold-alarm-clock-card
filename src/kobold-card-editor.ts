@@ -296,7 +296,7 @@ class KoboldCardEditor extends LitElement {
 
     @state() _hass: HomeAssistant;
     @state() _config: CardConfig;
-    @state() _selectedTab = 0;
+    // @state() _selectedTab = 0;
     @state() _nextAlarmConfig: NextAlarmConfig;
 
     // @property({ attribute: false, reflect: false }) alarmController; //TODO: is this getting used?
@@ -335,19 +335,19 @@ class KoboldCardEditor extends LitElement {
         }
     }
 
-    willUpdate() {
-        if (this.selectedTab) {
-            // console.log('*** editor: willUpdate: selectedTab: ', this.selectedTab);
-            this._selectedTab = this.selectedTab;
-            this.selectedTab = undefined;
-            // this._injectStyles();
-        }
-    }
+    // willUpdate() {
+    //     if (this.selectedTab) {
+    //         // console.log('*** editor: willUpdate: selectedTab: ', this.selectedTab);
+    //         this._selectedTab = this.selectedTab;
+    //         this.selectedTab = undefined;
+    //         // this._injectStyles();
+    //     }
+    // }
     // updated(_changedProperties: PropertyValues): void {
     // }
 
     firstUpdated(_changedProperties: PropertyValues): void {
-        this.selectedTab = undefined; //temporary until all instances of this._selectedTab replaced w/ this.selectedTab
+        // this.selectedTab = undefined; //temporary until all instances of this._selectedTab replaced w/ this.selectedTab
         // console.log('*** editor: firstUpdated: selectedTab: ', this.selectedTab);
         // console.log('*** editor: firstUpdated: alarmController: ', this.alarmController);
     }
@@ -359,7 +359,7 @@ class KoboldCardEditor extends LitElement {
         let componentStyles: Array<string> = [];
         let componentHostsPromise = new Promise((resolve, reject) => {
             const interval = setInterval(() => {
-                switch (this._selectedTab) {
+                switch (this.selectedTab) {
                     case 1:
                         componentHosts = [this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot.querySelector('ha-form-grid')?.shadowRoot.querySelector('ha-form')?.shadowRoot,
                         this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
@@ -491,19 +491,19 @@ class KoboldCardEditor extends LitElement {
     _handleSwitchTab(event) {
         switch (event.detail.name) {
             case 'settings':
-                this._selectedTab = 0;
+                this.selectedTab = 0;
                 break;
             case 'nap':
                 // this._injectStylesDone = undefined;
-                this._selectedTab = 1; this._injectStyles();
+                this.selectedTab = 1; this._injectStyles();
                 break;
             case 'schedule':
-                this._selectedTab = 2; this._injectStyles();
+                this.selectedTab = 2; this._injectStyles();
                 break;
             default:
-                this._selectedTab = 0;
+                this.selectedTab = 0;
         }
-        // console.log('*** handleSwitchTab: selectedTab: ', this._selectedTab);
+        // console.log('*** handleSwitchTab: selectedTab: ', this.selectedTab);
     }
 
     render() {
@@ -512,32 +512,30 @@ class KoboldCardEditor extends LitElement {
         }
 
         return html`
-    <div id="kobold-card-config" class="card-config"
-        @kobold-tab=${(event) => { this._selectedTab = event.detail.tab; this._injectStyles(); }}
-    >
+    <div id="kobold-card-config" class="card-config">
         <div class="toolbar">
             ${AlarmController.oldTabs ? html`
                 <sl-tab-group
                     @sl-tab-show=${this._handleSwitchTab}
                 >
-                    <sl-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>${localize('config.settings')}</sl-tab>
-                    <sl-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>${localize('config.nap')}<</sl-tab>
-                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>${localize('config.schedule')}</sl-tab>
+                    <sl-tab slot="nav" .panel=${"settings"} .active=${this.selectedTab === 0}>${localize('config.settings')}</sl-tab>
+                    <sl-tab slot="nav" .panel=${"nap"} .active=${this.selectedTab === 1}>${localize('config.nap')}<</sl-tab>
+                    <sl-tab slot="nav" .panel=${"schedule"} .active=${this.selectedTab === 2}>${localize('config.schedule')}</sl-tab>
                 </sl-tab-group>
                 ` : html`
                 <ha-tab-group
                     @wa-tab-show=${this._handleSwitchTab}
                 >
-                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this._selectedTab === 0}>${localize('config.settings')}</ha-tab-group-tab>
-                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this._selectedTab === 1}>${localize('config.nap')}</ha-tab-group-tab>
-                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this._selectedTab === 2}>${localize('config.schedule')}</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"settings"} .active=${this.selectedTab === 0}>${localize('config.settings')}</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"nap"} .active=${this.selectedTab === 1}>${localize('config.nap')}</ha-tab-group-tab>
+                    <ha-tab-group-tab slot="nav" .panel=${"schedule"} .active=${this.selectedTab === 2}>${localize('config.schedule')}</ha-tab-group-tab>
                 </ha-tab-group>
                 `
             }
         </div>
         <div id="editor">
           ${[this._renderSettingsEditor, this._renderNapEditor, this._renderScheduleEditor][
-                this._selectedTab
+                this.selectedTab
             ].bind(this)()}
         </div>
     </div>

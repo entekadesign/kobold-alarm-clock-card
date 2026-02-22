@@ -13,7 +13,7 @@ let myStyle = document.createElement('style');
 myStyle.innerHTML = fontStyles;
 document.head.appendChild(myStyle);
 
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/de';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/es';
@@ -68,6 +68,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _elements: Array<LovelaceCard>;
   private _injectStylesDone: boolean;
   private _cardHelpers: any;
+  private _disconnectTimestamp: Dayjs;
 
   @state() _nextAlarm: NextAlarmObject;
   @state() _hass: any; // _hass: HomeAssistant;
@@ -127,55 +128,78 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _connectionStatusEvent = async (event: CustomEvent) => {
+    if (event.detail === 'disconnected') {
+      this._disconnectTimestamp = dayjs();
+    }
     if (event.detail === 'connected') {
-
       this._hass.callService('system_log', 'write', { 'message': '*** Recovering from disconnect', 'level': 'info' });
       console.warn('*** Recovering from disconnect');
 
+      let disconnectedTime = 0;
+      if (this._disconnectTimestamp) {
+        disconnectedTime = dayjs().diff(this._disconnectTimestamp, 'seconds');
+        if (this._config.debug) {
+          this._hass.callService('system_log', 'write', { 'message': '*** Disconnected for ' + disconnectedTime + ' seconds', 'level': 'info' });
+          console.warn('*** Disconnected for ' + disconnectedTime + ' seconds');
+        }
+      }
 
-      // wait until connected variable--set in connectedCallback()--is true
-      let rounds = 0;
-      let koboldConnectionPromise = new Promise((resolve, reject) => {
-        const interval = setInterval(() => {
-          // if (this._config.debug) {
-          this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
-          // };
-          if (rounds >= 120) {
-            clearInterval(interval);
-            reject(new Error('timeout'));
-          };
-          if (this._hass && this._hass.connected) resolve(interval);
-          rounds++;
-        }, 1000);
+      window.hassConnection.then(({ conn }) => {
+
+        if (disconnectedTime > 600) {
+          // no homeassistant_start event is expected
+          // restart takes ca 360 seconds for update + restart, 80 seconds for restart alone
+          this._refreshBrowser();
+        }
+        conn.subscribeEvents(() => {
+          this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted', 'level': 'info' });
+          this._refreshBrowser();
+        }, 'homeassistant_started');
       });
-      koboldConnectionPromise
-        .catch((error) => {
-          if (!error.message || error.message !== 'timeout')
-            throw (error);
-          if (error.message === 'timeout') console.log('*** Kobold failed to connect after ' + rounds);
-          return null;
-        })
-        .then((interval: ReturnType<typeof setInterval>) => {
-          if (interval) {
-            // if (this._config.debug) {
-            this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
-            // }
-            clearInterval(interval);
-            // TODO: test for routine disconnect by disabling internet for 10 seconds. check log for "now connected to HA after 10 seconds".
-            // if found and kobol reconnects successfully, then add logic here: if (rounds < 10) refreshbrowser; otherwise, skip
-            window.hassConnection.then(({ conn }) => {
-              conn.subscribeEvents(() => {
-                window.setTimeout(() => {
-                  this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
-                  this._alarmController.dismiss(); // in case alarm ringing at moment of restart
-                  window.setTimeout(() => {
-                    location.reload();
-                  }, 1000 * 2);
-                }, 1000 * 5);
-              }, 'homeassistant_started');
-            });
-          }
-        });
+
+      // // wait until connected variable--set in connectedCallback()--is true
+      // let rounds = 0;
+      // let koboldConnectionPromise = new Promise((resolve, reject) => {
+      //   const interval = setInterval(() => {
+      //     // if (this._config.debug) {
+      //     this._hass.callService('system_log', 'write', { 'message': '*** Checking for Kobold connection to HA...', 'level': 'info' });
+      //     // };
+      //     if (rounds >= 120) {
+      //       clearInterval(interval);
+      //       reject(new Error('timeout'));
+      //     };
+      //     if (this._hass && this._hass.connected) resolve(interval);
+      //     rounds++;
+      //   }, 1000);
+      // });
+      // koboldConnectionPromise
+      //   .catch((error) => {
+      //     if (!error.message || error.message !== 'timeout')
+      //       throw (error);
+      //     if (error.message === 'timeout') console.log('*** Kobold failed to connect after ' + rounds);
+      //     return null;
+      //   })
+      //   .then((interval: ReturnType<typeof setInterval>) => {
+      //     if (interval) {
+      //       // if (this._config.debug) {
+      //       this._hass.callService('system_log', 'write', { 'message': '*** Kobold now connected to HA after ' + rounds + ' seconds', 'level': 'info' });
+      //       // }
+      //       clearInterval(interval);
+      //       // TODO: test for routine disconnect by disabling internet for 10 seconds. check log for "now connected to HA after 10 seconds".
+      //       // if found and kobol reconnects successfully, then add logic here: if (rounds < 10) refreshbrowser; otherwise, skip
+      //       window.hassConnection.then(({ conn }) => {
+      //         conn.subscribeEvents(() => {
+      //           window.setTimeout(() => {
+      //             this._hass.callService('system_log', 'write', { 'message': '*** HA Restarted. Refreshing browser', 'level': 'info' });
+      //             this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+      //             window.setTimeout(() => {
+      //               location.reload();
+      //             }, 1000 * 2);
+      //           }, 1000 * 5);
+      //         }, 'homeassistant_started');
+      //       });
+      //     }
+      //   });
 
 
       // // If HA restarts, reload browser
@@ -236,9 +260,11 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _refreshBrowser() {
-    this._alarmController.dismiss(); // in case alarm ringing at this moment
+    this._hass.callService('system_log', 'write', { 'message': '*** Refreshing browser', 'level': 'info' });
+    this._alarmController.dismiss(); // in case alarm ringing at moment of restart
     window.setTimeout(() => {
-      location.reload();
+      // wait a moment to give time to send message to syslog
+      this._refreshBrowser();
     }, 1000 * 2);
   }
 
@@ -660,7 +686,7 @@ class KoboldAlarmClockCard extends LitElement {
         // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
         this._koboldEditor.selectedTab = tabNo;
         // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
-        this._koboldEditor = undefined; //TODO: why is this necessary? to prevent multiplication of elements?
+        this._koboldEditor = undefined;  //TODO: why is this necessary?
       }
     }
     this._clockQ.style.display = 'flex';
