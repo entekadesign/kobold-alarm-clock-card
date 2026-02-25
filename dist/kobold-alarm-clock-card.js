@@ -3628,6 +3628,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
     }
     _injectStyles() {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
+        // TODO: replace with testUntilTimeout()?
         let rounds = 0;
         let componentHosts = [];
         let componentStyles = [];
@@ -4368,7 +4369,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         this._alarmController.dismiss(); // in case alarm ringing at moment of restart
         window.setTimeout(()=>{
             // wait a moment to give time to send message to syslog
-            this._refreshBrowser();
+            location.reload();
         }, 2000);
     }
     static getConfigElement() {
@@ -4654,6 +4655,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             myStyle.innerHTML = dialogBackgroundStyle;
             (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
         }
+        // TODO: replace with testUntilTimeout()?
         let rounds = 0;
         // wait for availability of card-options; kobold card might be nested
         while(!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)// while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
@@ -4669,6 +4671,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('ll-edit-card', {
                 path: huiCardPath
             }, this);
+            // TODO: replace with testUntilTimeout()?
             let rounds = 0;
             while(!this._koboldEditor && rounds++ < 5)await new Promise((r)=>setTimeout(r, 100));
             if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for editor');
@@ -5125,7 +5128,8 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
     }
   `;
     constructor(...args){
-        super(...args), this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString(), this._koboldHasConnected = false, this.preview = false, this._connectionStatusEvent = async (event)=>{
+        super(...args), // private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString();
+        this._cardId = Math.random().toString(36).slice(2, 9) + ', ' + (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('YYYY-MM-DD HH:mm:ss'), this._koboldHasConnected = false, this.preview = false, this._connectionStatusEvent = async (event)=>{
             if (event.detail === 'disconnected') this._disconnectTimestamp = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))();
             if (event.detail === 'connected') {
                 this._hass.callService('system_log', 'write', {
@@ -5146,7 +5150,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                 }
                 window.hassConnection.then(({ conn: conn })=>{
                     if (disconnectedTime > 600) // no homeassistant_start event is expected
-                    // restart takes ca 360 seconds for update + restart, 80 seconds for restart alone
+                    // restart takes 80-400 seconds; delays due to updates, traffic, etc.
                     this._refreshBrowser();
                     conn.subscribeEvents(()=>{
                         this._hass.callService('system_log', 'write', {

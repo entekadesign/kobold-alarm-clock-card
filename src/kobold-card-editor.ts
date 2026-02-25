@@ -354,6 +354,7 @@ class KoboldCardEditor extends LitElement {
 
     _injectStyles() {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
+        // TODO: replace with testUntilTimeout()?
         let rounds = 0;
         let componentHosts: Array<ShadowRoot> = [];
         let componentStyles: Array<string> = [];

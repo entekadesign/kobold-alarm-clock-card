@@ -60,7 +60,8 @@ window.customCards.push({
 @customElement('kobold-alarm-clock-card')
 class KoboldAlarmClockCard extends LitElement {
 
-  private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString();
+  // private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + new Date().toISOString();
+  private _cardId: string = Math.random().toString(36).slice(2, 9) + ', ' + dayjs().format('YYYY-MM-DD HH:mm:ss');
   private _config: CardConfig;
   private _updateLoopId: number;
   private _alarmController: AlarmController;
@@ -148,7 +149,7 @@ class KoboldAlarmClockCard extends LitElement {
 
         if (disconnectedTime > 600) {
           // no homeassistant_start event is expected
-          // restart takes ca 360 seconds for update + restart, 80 seconds for restart alone
+          // restart takes 80-400 seconds; delays due to updates, traffic, etc.
           this._refreshBrowser();
         }
         conn.subscribeEvents(() => {
@@ -264,7 +265,7 @@ class KoboldAlarmClockCard extends LitElement {
     this._alarmController.dismiss(); // in case alarm ringing at moment of restart
     window.setTimeout(() => {
       // wait a moment to give time to send message to syslog
-      this._refreshBrowser();
+      location.reload();
     }, 1000 * 2);
   }
 
@@ -661,6 +662,7 @@ class KoboldAlarmClockCard extends LitElement {
       Helpers.getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
     }
 
+    // TODO: replace with testUntilTimeout()?
     let rounds = 0;
     // wait for availability of card-options; kobold card might be nested
     while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)
@@ -677,6 +679,7 @@ class KoboldAlarmClockCard extends LitElement {
       // console.log('*** huiCardPath: ', huiCardPath);
       Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
 
+      // TODO: replace with testUntilTimeout()?
       let rounds = 0;
       while (!this._koboldEditor && rounds++ < 5)
         await new Promise((r) => setTimeout(r, 100));

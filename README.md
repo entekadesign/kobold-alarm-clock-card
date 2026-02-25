@@ -51,7 +51,7 @@ Install the Kobold custom card on your Home Assistant (HA) instance to turn almo
 - [Home Assistant](https://www.home-assistant.io/installation/)
 - [*Input boolean helper* integration](https://www.home-assistant.io/integrations/input_boolean/)
 
-Note that alarms can only be triggered while Kobold is running in the foreground.
+For consistent performance, Kobold should run in the foreground at all times.
 
 ## Installation
 
