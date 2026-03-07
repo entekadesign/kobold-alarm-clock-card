@@ -1570,6 +1570,9 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         $fbafc8504bdc8693$export$cfa71a29f5c0676d.oldTabs = !(0, $be7da167267683bf$export$4dc2b60021baefca).atLeastVersion(this._hass.config.version, 2025, 10, 1);
         this._evaluate();
     }
+    set workerRegistration(workerRegistration) {
+        this._workerRegistration = workerRegistration;
+    }
     snooze() {
         this._throttleAlarmRinging(false);
         // allow animations to complete before saving
@@ -1666,6 +1669,23 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         // console.log('*** koboldConnected: ', this._koboldConnected);
         const nextAlarm = this.nextAlarm;
         const dateToday = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('YYYY-MM-DD');
+        // // console.log('*** evaluate; this._workerRegistration: ', this._workerRegistration);
+        // if ('serviceWorker' in navigator) {
+        //     // console.log('*** evaluate; worker ready: ', navigator.serviceWorker.ready);
+        //     // navigator.serviceWorker.ready.then((registration) => {
+        //     //     console.log('registration: ', registration);
+        //     //     console.log('this.registration: ', this._workerRegistration);
+        //     //     // this._workerRegistration.pushManager.subscribe({ userVisibleOnly: true }).then(function (sub) {
+        //     //     // console.log('endpoint:', sub.endpoint);
+        //     if (this._workerRegistration && this._workerRegistration.active) {
+        //         // ping worker
+        //         // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
+        //         this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        //         // console.log("Posted message");
+        //     }
+        //     // });
+        //     // });
+        // }
         // is nextAlarm in the past?
         if ((nextAlarm.date < dateToday || (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().subtract(1, 'minute') > (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.date_time) && nextAlarm.date === dateToday) && !this.isAlarmRinging()) {
             this._nextAlarmResetThrottled();
@@ -4336,10 +4356,15 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             });
             console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
         }
-        // recover from disconnect, e.g., HA restart
+        // TODO: will moving all these to an imported mixin prevent having to remove listeners?
+        // recover from interruptions, e.g., tab switch, disconnect, etc.
+        document.addEventListener('visibilitychange', this._visibilityChangeEvent);
         window.addEventListener('connection-status', this._connectionStatusEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
+        if ('serviceWorker' in navigator) this._serviceWorkerMessage({
+            disconnected: false
+        });
         window.setMyEditMode = (mode = true)=>{
             // console.log('*** setmyeditmode called');
             const ll = (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace();
@@ -4357,9 +4382,13 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             });
             console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
         }
+        document.removeEventListener('visibilitychange', this._visibilityChangeEvent);
         window.removeEventListener('connection-status', this._connectionStatusEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
+        if ('serviceWorker' in navigator) this._serviceWorkerMessage({
+            disconnected: true
+        });
     }
     _refreshBrowser() {
         this._hass.callService('system_log', 'write', {
@@ -4412,6 +4441,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             }, 250);
         }
         this._updateTime();
+        if ('serviceWorker' in navigator) this._registerWorker();
         if (this._haCardQ) this._buildCard();
         else console.warn('*** firstUpdated(); Missing <ha-card> in shadowRoot');
     }
@@ -4474,6 +4504,20 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         if (this._elements) this._elements.forEach((element)=>{
             element.hass = hass;
         });
+        // console.log('*** hass() called; config: ', this._config.next_alarm.time);
+        // console.log('*** evaluate; this._workerRegistration: ', this._workerRegistration);
+        if ('serviceWorker' in navigator) // console.log('*** evaluate; worker ready: ', navigator.serviceWorker.ready);
+        // navigator.serviceWorker.ready.then((registration) => {
+        //     console.log('registration: ', registration);
+        //     console.log('this.registration: ', this._workerRegistration);
+        //     // this._workerRegistration.pushManager.subscribe({ userVisibleOnly: true }).then(function (sub) {
+        //     // console.log('endpoint:', sub.endpoint);
+        {
+            if (this._workerRegistration && this._workerRegistration.active) // ping worker
+            // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
+            this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        // console.log("Posted message");
+        }
     }
     getCardSize() {
         return 3;
@@ -4516,6 +4560,16 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             console.warn(`*** Could not create card ${card.type}; ${error.message}`);
         }
         return element;
+    }
+    async _registerWorker() {
+        try {
+            const workerRegistration = await navigator.serviceWorker.register(new URL("worker.js", import.meta.url));
+            // console.log('*** Worker registration succeeded:', workerRegistration);
+            // this._alarmController.workerRegistration = workerRegistration;
+            this._workerRegistration = workerRegistration;
+        } catch (error) {
+            console.error(`*** Worker registration failed with ${error}`);
+        }
     }
     _updateLoop() {
         this._updateLoopId = setTimeout(()=>{
@@ -5272,6 +5326,12 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             });
         }, this._koboldEditorEvent = (event)=>{
             this._koboldEditor = event.detail.editorEl;
+        }, this._visibilityChangeEvent = ()=>{
+            if ('serviceWorker' in navigator) this._serviceWorkerMessage({
+                visibility: document.visibilityState
+            });
+        }, this._serviceWorkerMessage = (data)=>{
+            if (this._workerRegistration && this._workerRegistration.active) this._workerRegistration.active.postMessage(JSON.stringify(data));
         };
     }
 }

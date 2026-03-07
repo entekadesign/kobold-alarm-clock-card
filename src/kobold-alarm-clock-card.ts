@@ -70,6 +70,7 @@ class KoboldAlarmClockCard extends LitElement {
   private _injectStylesDone: boolean;
   private _cardHelpers: any;
   private _disconnectTimestamp: Dayjs;
+  private _workerRegistration: ServiceWorkerRegistration;
 
   @state() _nextAlarm: NextAlarmObject;
   @state() _hass: any; // _hass: HomeAssistant;
@@ -102,10 +103,15 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
     };
 
-    // recover from disconnect, e.g., HA restart
+    // TODO: will moving all these to an imported mixin prevent having to remove listeners?
+    // recover from interruptions, e.g., tab switch, disconnect, etc.
+    document.addEventListener('visibilitychange', this._visibilityChangeEvent);
     window.addEventListener('connection-status', this._connectionStatusEvent);
     Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
+    if ('serviceWorker' in navigator) {
+      this._serviceWorkerMessage({ disconnected: false });
+    }
     window.setMyEditMode = (mode = true) => {
       // console.log('*** setmyeditmode called');
       const ll = Helpers.getLovelace();
@@ -123,9 +129,13 @@ class KoboldAlarmClockCard extends LitElement {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
+    document.removeEventListener('visibilitychange', this._visibilityChangeEvent);
     window.removeEventListener('connection-status', this._connectionStatusEvent);
     Helpers.getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
+    if ('serviceWorker' in navigator) {
+      this._serviceWorkerMessage({ disconnected: true });
+    }
   }
 
   _connectionStatusEvent = async (event: CustomEvent) => {
@@ -301,6 +311,19 @@ class KoboldAlarmClockCard extends LitElement {
     this._koboldEditor = event.detail.editorEl;
   }
 
+  _visibilityChangeEvent = () => {
+    if ('serviceWorker' in navigator) {
+      this._serviceWorkerMessage({ visibility: document.visibilityState });
+    }
+  }
+
+  _serviceWorkerMessage = (data: Object) => {
+    if (this._workerRegistration && this._workerRegistration.active) {
+      this._workerRegistration.active.postMessage(JSON.stringify(data));
+      // console.log("Posted serviceWorkerMessage");
+    }
+  }
+
   static getConfigElement() {
     return document.createElement("kobold-card-editor");
   }
@@ -347,6 +370,10 @@ class KoboldAlarmClockCard extends LitElement {
       }, 250);
     }
     this._updateTime();
+
+    if ('serviceWorker' in navigator) {
+      this._registerWorker();
+    }
 
     if (this._haCardQ) {
       this._buildCard();
@@ -429,6 +456,28 @@ class KoboldAlarmClockCard extends LitElement {
         element.hass = hass;
       });
     }
+
+    // console.log('*** hass() called; config: ', this._config.next_alarm.time);
+
+    // console.log('*** evaluate; this._workerRegistration: ', this._workerRegistration);
+    if ('serviceWorker' in navigator) {
+      // console.log('*** evaluate; worker ready: ', navigator.serviceWorker.ready);
+      // navigator.serviceWorker.ready.then((registration) => {
+      //     console.log('registration: ', registration);
+      //     console.log('this.registration: ', this._workerRegistration);
+      //     // this._workerRegistration.pushManager.subscribe({ userVisibleOnly: true }).then(function (sub) {
+      //     // console.log('endpoint:', sub.endpoint);
+      if (this._workerRegistration && this._workerRegistration.active) {
+        // ping worker
+        // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
+        this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        // console.log("Posted message");
+      }
+      // });
+      // });
+    }
+
+
   }
 
   getCardSize() {
@@ -491,6 +540,20 @@ class KoboldAlarmClockCard extends LitElement {
     }
     return element;
   }
+
+  async _registerWorker() {
+    try {
+      const workerRegistration = await navigator.serviceWorker.register(
+        new URL('worker.js', import.meta.url),
+        { type: 'module' }
+      );
+      // console.log('*** Worker registration succeeded:', workerRegistration);
+      // this._alarmController.workerRegistration = workerRegistration;
+      this._workerRegistration = workerRegistration;
+    } catch (error) {
+      console.error(`*** Worker registration failed with ${error}`);
+    }
+  };
 
   _updateLoop() {
     this._updateLoopId = setTimeout(() => { this._updateTime(); this._updateLoop(); }, 1000);

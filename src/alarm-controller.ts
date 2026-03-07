@@ -19,6 +19,7 @@ export class AlarmController {
     private _cardId?: string;
     private _alarmActionsScript?: Array<Record<string, boolean>> = [];
     private _koboldConnected: boolean;
+    private _workerRegistration: ServiceWorkerRegistration;
     static oldTabs: boolean;
 
     static defaultConfig = {
@@ -60,6 +61,10 @@ export class AlarmController {
         // console.log('*** _saveConfigEntries; current HA version: ', this._hass.config.version);
         AlarmController.oldTabs = !Helpers.atLeastVersion(this._hass.config.version, 2025, 10, 1);
         this._evaluate();
+    }
+
+    set workerRegistration(workerRegistration: ServiceWorkerRegistration) {
+        this._workerRegistration = workerRegistration;
     }
 
     snooze() {
@@ -192,6 +197,24 @@ export class AlarmController {
 
         const nextAlarm = this.nextAlarm;
         const dateToday = dayjs().format('YYYY-MM-DD');
+
+        // // console.log('*** evaluate; this._workerRegistration: ', this._workerRegistration);
+        // if ('serviceWorker' in navigator) {
+        //     // console.log('*** evaluate; worker ready: ', navigator.serviceWorker.ready);
+        //     // navigator.serviceWorker.ready.then((registration) => {
+        //     //     console.log('registration: ', registration);
+        //     //     console.log('this.registration: ', this._workerRegistration);
+        //     //     // this._workerRegistration.pushManager.subscribe({ userVisibleOnly: true }).then(function (sub) {
+        //     //     // console.log('endpoint:', sub.endpoint);
+        //     if (this._workerRegistration && this._workerRegistration.active) {
+        //         // ping worker
+        //         // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
+        //         this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        //         // console.log("Posted message");
+        //     }
+        //     // });
+        //     // });
+        // }
 
         // is nextAlarm in the past?
         if ((nextAlarm.date < dateToday || (dayjs().subtract(1, 'minute') > dayjs(nextAlarm.date_time) && nextAlarm.date === dateToday)) && !this.isAlarmRinging()) {
