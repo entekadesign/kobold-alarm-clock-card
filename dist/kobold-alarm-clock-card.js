@@ -4362,9 +4362,9 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         window.addEventListener('connection-status', this._connectionStatusEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
-        if ('serviceWorker' in navigator) this._serviceWorkerMessage({
-            disconnected: false
-        });
+        // if ('serviceWorker' in navigator) {
+        //   this._serviceWorkerMessage({ disconnected: false });
+        // }
         window.setMyEditMode = (mode = true)=>{
             // console.log('*** setmyeditmode called');
             const ll = (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace();
@@ -4386,16 +4386,19 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         window.removeEventListener('connection-status', this._connectionStatusEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
-        if ('serviceWorker' in navigator) this._serviceWorkerMessage({
-            disconnected: true
-        });
+        if ('serviceWorker' in navigator) {
+            this._alarmController.dismiss(); // in case alarm ringing at moment
+            this._serviceWorkerMessage({
+                disconnected: true
+            });
+        }
     }
     _refreshBrowser() {
         this._hass.callService('system_log', 'write', {
             'message': '*** Refreshing browser',
             'level': 'info'
         });
-        this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+        this._alarmController.dismiss(); // in case alarm ringing at moment
         window.setTimeout(()=>{
             // wait a moment to give time to send message to syslog
             location.reload();
@@ -4513,10 +4516,19 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         //     // this._workerRegistration.pushManager.subscribe({ userVisibleOnly: true }).then(function (sub) {
         //     // console.log('endpoint:', sub.endpoint);
         {
-            if (this._workerRegistration && this._workerRegistration.active) // ping worker
-            // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
-            this._workerRegistration.active.postMessage(JSON.stringify(this._config));
-        // console.log("Posted message");
+            if (this._workerRegistration && this._workerRegistration.active) {
+                // ping worker
+                // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
+                // this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+                const call_service = this._hass.callService.toString();
+                // console.log('*** callService string: ', call_service);
+                this._workerRegistration.active.postMessage(JSON.stringify({
+                    config: this._config,
+                    hass: this._hass,
+                    callService: call_service
+                }));
+            // console.log("Posted message");
+            }
         }
     }
     getCardSize() {
@@ -5327,9 +5339,14 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         }, this._koboldEditorEvent = (event)=>{
             this._koboldEditor = event.detail.editorEl;
         }, this._visibilityChangeEvent = ()=>{
-            if ('serviceWorker' in navigator) this._serviceWorkerMessage({
-                visibility: document.visibilityState
-            });
+            if ('serviceWorker' in navigator) {
+                if (document.visibilityState === 'hidden') {
+                    this._alarmController.dismiss(); // in case alarm ringing at moment
+                    this._serviceWorkerMessage({
+                        visibility: document.visibilityState
+                    });
+                }
+            }
         }, this._serviceWorkerMessage = (data)=>{
             if (this._workerRegistration && this._workerRegistration.active) this._workerRegistration.active.postMessage(JSON.stringify(data));
         };

@@ -109,9 +109,9 @@ class KoboldAlarmClockCard extends LitElement {
     window.addEventListener('connection-status', this._connectionStatusEvent);
     Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
-    if ('serviceWorker' in navigator) {
-      this._serviceWorkerMessage({ disconnected: false });
-    }
+    // if ('serviceWorker' in navigator) {
+    //   this._serviceWorkerMessage({ disconnected: false });
+    // }
     window.setMyEditMode = (mode = true) => {
       // console.log('*** setmyeditmode called');
       const ll = Helpers.getLovelace();
@@ -134,6 +134,7 @@ class KoboldAlarmClockCard extends LitElement {
     Helpers.getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
     if ('serviceWorker' in navigator) {
+      this._alarmController.dismiss(); // in case alarm ringing at moment
       this._serviceWorkerMessage({ disconnected: true });
     }
   }
@@ -272,7 +273,7 @@ class KoboldAlarmClockCard extends LitElement {
 
   _refreshBrowser() {
     this._hass.callService('system_log', 'write', { 'message': '*** Refreshing browser', 'level': 'info' });
-    this._alarmController.dismiss(); // in case alarm ringing at moment of restart
+    this._alarmController.dismiss(); // in case alarm ringing at moment
     window.setTimeout(() => {
       // wait a moment to give time to send message to syslog
       location.reload();
@@ -313,7 +314,10 @@ class KoboldAlarmClockCard extends LitElement {
 
   _visibilityChangeEvent = () => {
     if ('serviceWorker' in navigator) {
-      this._serviceWorkerMessage({ visibility: document.visibilityState });
+      if (document.visibilityState === 'hidden') {
+        this._alarmController.dismiss(); // in case alarm ringing at moment
+        this._serviceWorkerMessage({ visibility: document.visibilityState });
+      }
     }
   }
 
@@ -470,7 +474,10 @@ class KoboldAlarmClockCard extends LitElement {
       if (this._workerRegistration && this._workerRegistration.active) {
         // ping worker
         // this._workerRegistration.active.postMessage(JSON.stringify({ uid: 123, token: 'test' }));
-        this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        // this._workerRegistration.active.postMessage(JSON.stringify(this._config));
+        const call_service = this._hass.callService.toString();
+        // console.log('*** callService string: ', call_service);
+        this._workerRegistration.active.postMessage(JSON.stringify({ config: this._config, hass: this._hass, callService: call_service }));
         // console.log("Posted message");
       }
       // });
