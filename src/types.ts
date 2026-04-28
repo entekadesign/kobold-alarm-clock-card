@@ -21,7 +21,17 @@ export interface Duration {
     seconds: number;
 }
 
+export interface FormSchema {
+    type?: any;
+    name?: string;
+    label?: string;
+    selector?: any;
+    schema?: any;
+    disabled?: boolean;
+}
+
 export interface CardConfig extends LovelaceCardConfig {
+    [key: string]: any;
     type: string;
     name: string;
     alarm_entities?: Array<string>;
@@ -43,6 +53,9 @@ export interface CardConfig extends LovelaceCardConfig {
     hide_cards_default: boolean;
     cards?: Array<LovelaceCardConfig>;
     debug: boolean;
+    workday_enabled?: boolean;
+    workday_sensor?: string;
+    last_updated?: string;
 }
 
 export interface NextAlarmConfig {

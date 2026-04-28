@@ -7,7 +7,7 @@ import { LitElement, html, css, PropertyValues } from 'lit';
 import { state, customElement, property } from "lit/decorators.js";
 import { localize } from './localize';
 
-import type { CardConfig, NextAlarmConfig, Duration } from './types';
+import type { CardConfig, NextAlarmConfig, FormSchema } from './types';
 // HA types
 import type { HomeAssistant } from "custom-card-helpers";
 
@@ -356,21 +356,21 @@ class KoboldCardEditor extends LitElement {
         // console.log('*** this._selectedTab: ' + this._selectedTab);
         // TODO: replace with testUntilTimeout()?
         let rounds = 0;
-        let componentHosts: Array<ShadowRoot> = [];
+        let componentHosts: Array<ShadowRoot | any> = [];
         let componentStyles: Array<string> = [];
         let componentHostsPromise = new Promise((resolve, reject) => {
             const interval = setInterval(() => {
                 switch (this.selectedTab) {
                     case 1:
-                        componentHosts = [this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot.querySelector('ha-form-grid')?.shadowRoot.querySelector('ha-form')?.shadowRoot,
-                        this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
+                        componentHosts = [this.shadowRoot?.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot?.querySelector('ha-form-grid')?.shadowRoot?.querySelector('ha-form')?.shadowRoot,
+                        this.shadowRoot?.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
                         ];
                         componentStyles = ['ha-form-grid { grid-template-columns: auto 0 !important; justify-content: end; }',
                             'ha-form-grid { grid-template-columns: auto 60% !important; justify-content: end; }'
                         ];
                         break;
                     case 2:
-                        componentHosts = [this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot];
+                        componentHosts = [this.shadowRoot?.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot];
                         componentStyles = ['ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }'];
                         break;
                     default:
@@ -396,7 +396,9 @@ class KoboldCardEditor extends LitElement {
                 if (error.message === 'timeout') console.error('*** Attempt to inject styles into HA components of editor dialog timed out');
                 return null;
             })
-            .then((interval: ReturnType<typeof setInterval>) => {
+            // .then((interval: ReturnType<typeof setInterval>) => {
+            .then((value: unknown) => {
+                const interval = value as number;
                 if (interval && componentHosts) {
                     clearInterval(interval);
                     const myStyle = [];
@@ -424,7 +426,7 @@ class KoboldCardEditor extends LitElement {
         if (!this._config) return;
         // const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         this._configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
-        // console.log('*** configChanges: ', configChanges);
+        // console.log('*** configChanges: ', this._configChanges);
         // console.log('*** this._oldConfig: ', this._oldConfig);
         // console.log('*** event.detail.value: ', event.detail.value);
         // if (!configChanges) return;
@@ -437,7 +439,7 @@ class KoboldCardEditor extends LitElement {
             (item) => {
                 // console.log('*** item: ' + item + '; value: ' + JSON.stringify(event.detail.value[item]));
                 if (event.detail.value[item] === undefined || (event.detail.value[item].hasOwnProperty('time') && event.detail.value[item].time === undefined)) {
-                    event.detail.value[item] = AlarmController.defaultConfig[item];
+                    event.detail.value[item] = AlarmController.defaultConfig[item as keyof typeof AlarmController.defaultConfig];
                 }
                 if (item === dayTomorrow || item === dayToday || item === 'alarms_enabled') {
 
@@ -489,7 +491,7 @@ class KoboldCardEditor extends LitElement {
         Helpers.fireEvent('config-changed', { config: this._config }, this);
     }
 
-    _handleSwitchTab(event) {
+    _handleSwitchTab(event: CustomEvent) {
         switch (event.detail.name) {
             case 'settings':
                 this.selectedTab = 0;
@@ -549,8 +551,8 @@ class KoboldCardEditor extends LitElement {
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]))}
-          .computeLabel=${(s) => s.label ?? s.name}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || ((this._config.workday_sensor && !this._hass.states[this._config.workday_sensor]) ? true : false))}
+          .computeLabel=${(s: FormSchema) => s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>
     </div>`;
@@ -572,7 +574,7 @@ class KoboldCardEditor extends LitElement {
         .hass=${this._hass}
         .data=${this._config}
         .schema=${this._configSchemaNap}
-        .computeLabel=${(s) => s.label ?? s.name}
+        .computeLabel=${(s: FormSchema) => s.label ?? s.name}
         @value-changed=${this._valueChanged}
       ></ha-form>
     </div>`;
@@ -585,7 +587,7 @@ class KoboldCardEditor extends LitElement {
         .hass=${this._hass}
         .data=${this._config}
         .schema=${this._configSchemaSchedule(!this._config.alarms_enabled)}
-        .computeLabel=${(s) => s.label ?? s.name}
+        .computeLabel=${(s: FormSchema) => s.label ?? s.name}
         @value-changed=${this._valueChanged}
       ></ha-form>
     </div>`;

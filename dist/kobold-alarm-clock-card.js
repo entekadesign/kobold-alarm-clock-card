@@ -1566,8 +1566,10 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
     set hass(hass) {
         this._hass = hass;
         // tab element replacement beginning in HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
-        // console.log('*** _saveConfigEntries; current HA version: ', this._hass.config.version);
+        // console.log('*** _set hass(); current HA version: ', this._hass.config.version);
         $fbafc8504bdc8693$export$cfa71a29f5c0676d.oldTabs = !(0, $be7da167267683bf$export$4dc2b60021baefca).atLeastVersion(this._hass.config.version, 2025, 10, 1);
+        // ha-textfield replacement beginning in HA 2026.4: https://developers.home-assistant.io/blog/2026/03/25/frontend-component-updates-2026.4/
+        $fbafc8504bdc8693$export$cfa71a29f5c0676d.oldInput = !(0, $be7da167267683bf$export$4dc2b60021baefca).atLeastVersion(this._hass.config.version, 2026, 4, 0);
         this._evaluate();
     }
     snooze() {
@@ -1629,9 +1631,10 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
     }
     set nextAlarm(nextAlarm) {
         // console.log('*** saving nextalarm config');
-        this._saveConfigEntries({
+        // this._saveConfigEntries({ next_alarm: nextAlarm });
+        this.configEntries = {
             next_alarm: nextAlarm
-        });
+        };
     }
     get nextAlarm() {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: make copy  in constructor instead?
@@ -1697,7 +1700,8 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         else if (this.isAlarmRinging()) // dismiss alarm after alarm_duration_default time elapses
         {
             if ((0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(nextAlarm.time, 'HH:mm:ss').add((0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).duration(this._config.alarm_duration_default)).format('HH:mm:ss') <= (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('HH:mm:ss')) this.dismiss();
-        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) this._config.alarm_actions.filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
+        } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) this._config.alarm_actions// .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+        .filter((action)=>action.when !== 'on_snooze' && action.when !== 'on_dismiss' && this._alarmActionsScript && !this._alarmActionsScript[`${action.entity}-${action.when}`]).forEach((action)=>{
             let myDuration = structuredClone(action.offset);
             if (action.negative && action.offset) myDuration = {
                 hours: myDuration.hours *= -1,
@@ -1716,8 +1720,10 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         }, false, true);
     }
     async _saveConfigEntries(entries) {
+        // console.log('*** saving');
         try {
             const lovelace = (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().lovelace;
+            // console.log('*** config: ', lovelace.config);
             const newConfig = structuredClone(lovelace.config);
             const tabGroupArry = [
                 ...(0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelectorAll($fbafc8504bdc8693$export$cfa71a29f5c0676d.oldTabs ? 'sl-tab-group sl-tab' : 'ha-tab-group ha-tab-group-tab')
@@ -1725,13 +1731,22 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
             const viewIndex = tabGroupArry.findIndex((tab)=>{
                 return tab.hasAttribute('active');
             });
-            const cardConfig = (0, $be7da167267683bf$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
+            // cardConfig (config object for kobold) found within newConfig (config object for HA)
+            // exclamation mark (non-null assertion operator) here is necessary, because typescript linter fails to recognize guard on next line
+            // TODO: why is this?
+            let cardConfig = (0, $be7da167267683bf$export$4dc2b60021baefca).findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
             if (cardConfig) {
+                // console.log('*** cardConfig: ', cardConfig);
                 Object.keys(entries).forEach((entry)=>{
-                    if (cardConfig[entry] !== undefined) cardConfig[entry] = entries[entry];
+                    if (cardConfig[entry] !== undefined) // console.log('*** ENTRY: ', entry);
+                    // console.log('*** BEFORE: cardConfig.entry = ', cardConfig[entry]);
+                    // console.log('*** typeof cardConfig[entry]: ', typeof cardConfig[entry]);
+                    // console.log('*** typeof cardConfig: ', typeof cardConfig);
+                    cardConfig[entry] = entries[entry];
                     else console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
                 });
                 cardConfig.last_updated = (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))().format('YYYY-MM-DD HH:mm:ss');
+                // saving newConfig saves cardConfig becaause the latter part of the former
                 await lovelace.saveConfig(newConfig);
                 (0, $be7da167267683bf$export$4dc2b60021baefca).testUntilTimeout(()=>(0, $be7da167267683bf$export$4dc2b60021baefca).getNotification(), 5000).then(()=>{
                     if ((0, $be7da167267683bf$export$4dc2b60021baefca).getNotification().labelText.includes('dashboard was updated')) (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('hass-notification', {
@@ -1755,7 +1770,12 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], {
             "entity_id": myAction.entity
         });
-        this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
+        // this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
+        const alarmActionsScriptKey = `${myAction.entity}-${myAction.when}`;
+        const alarmAction = {
+            alarmActionsScriptKey: true
+        };
+        this._alarmActionsScript?.push(alarmAction);
     }
     _callAlarmRingingService(action) {
         if (this._config.debug) this._hass.callService('system_log', 'write', {
@@ -1784,6 +1804,7 @@ class $fbafc8504bdc8693$export$cfa71a29f5c0676d {
         }
     }
 }
+
 
 
 
@@ -1835,7 +1856,7 @@ const $8c0751cf7e613955$export$8d80f9cac07cdb3 = (t)=>new $8c0751cf7e613955$expo
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const { is: $a1659af8cb9ba679$var$i, defineProperty: $a1659af8cb9ba679$var$e, getOwnPropertyDescriptor: $a1659af8cb9ba679$var$r, getOwnPropertyNames: $a1659af8cb9ba679$var$h, getOwnPropertySymbols: $a1659af8cb9ba679$var$o, getPrototypeOf: $a1659af8cb9ba679$var$n } = Object, $a1659af8cb9ba679$var$a = globalThis, $a1659af8cb9ba679$var$c = $a1659af8cb9ba679$var$a.trustedTypes, $a1659af8cb9ba679$var$l = $a1659af8cb9ba679$var$c ? $a1659af8cb9ba679$var$c.emptyScript : "", $a1659af8cb9ba679$var$p = $a1659af8cb9ba679$var$a.reactiveElementPolyfillSupport, $a1659af8cb9ba679$var$d = (t, s)=>t, $a1659af8cb9ba679$export$7312b35fbf521afb = {
+ */ const { is: $a1659af8cb9ba679$var$i, defineProperty: $a1659af8cb9ba679$var$e, getOwnPropertyDescriptor: $a1659af8cb9ba679$var$h, getOwnPropertyNames: $a1659af8cb9ba679$var$r, getOwnPropertySymbols: $a1659af8cb9ba679$var$o, getPrototypeOf: $a1659af8cb9ba679$var$n } = Object, $a1659af8cb9ba679$var$a = globalThis, $a1659af8cb9ba679$var$c = $a1659af8cb9ba679$var$a.trustedTypes, $a1659af8cb9ba679$var$l = $a1659af8cb9ba679$var$c ? $a1659af8cb9ba679$var$c.emptyScript : "", $a1659af8cb9ba679$var$p = $a1659af8cb9ba679$var$a.reactiveElementPolyfillSupport, $a1659af8cb9ba679$var$d = (t, s)=>t, $a1659af8cb9ba679$export$7312b35fbf521afb = {
     toAttribute (t, s) {
         switch(s){
             case Boolean:
@@ -1866,11 +1887,12 @@ const $8c0751cf7e613955$export$8d80f9cac07cdb3 = (t)=>new $8c0751cf7e613955$expo
         }
         return i;
     }
-}, $a1659af8cb9ba679$export$53a6892c50694894 = (t, s)=>!$a1659af8cb9ba679$var$i(t, s), $a1659af8cb9ba679$var$y = {
+}, $a1659af8cb9ba679$export$53a6892c50694894 = (t, s)=>!$a1659af8cb9ba679$var$i(t, s), $a1659af8cb9ba679$var$b = {
     attribute: !0,
     type: String,
     converter: $a1659af8cb9ba679$export$7312b35fbf521afb,
     reflect: !1,
+    useDefault: !1,
     hasChanged: $a1659af8cb9ba679$export$53a6892c50694894
 };
 Symbol.metadata ??= Symbol("metadata"), $a1659af8cb9ba679$var$a.litPropertyMetadata ??= new WeakMap;
@@ -1883,14 +1905,14 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
             ...this._$Eh.keys()
         ];
     }
-    static createProperty(t, s = $a1659af8cb9ba679$var$y) {
-        if (s.state && (s.attribute = !1), this._$Ei(), this.elementProperties.set(t, s), !s.noAccessor) {
-            const i = Symbol(), r = this.getPropertyDescriptor(t, i, s);
-            void 0 !== r && $a1659af8cb9ba679$var$e(this.prototype, t, r);
+    static createProperty(t, s = $a1659af8cb9ba679$var$b) {
+        if (s.state && (s.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(t) && ((s = Object.create(s)).wrapped = !0), this.elementProperties.set(t, s), !s.noAccessor) {
+            const i = Symbol(), h = this.getPropertyDescriptor(t, i, s);
+            void 0 !== h && $a1659af8cb9ba679$var$e(this.prototype, t, h);
         }
     }
     static getPropertyDescriptor(t, s, i) {
-        const { get: e, set: h } = $a1659af8cb9ba679$var$r(this.prototype, t) ?? {
+        const { get: e, set: r } = $a1659af8cb9ba679$var$h(this.prototype, t) ?? {
             get () {
                 return this[s];
             },
@@ -1899,19 +1921,17 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
             }
         };
         return {
-            get () {
-                return e?.call(this);
-            },
+            get: e,
             set (s) {
-                const r = e?.call(this);
-                h.call(this, s), this.requestUpdate(t, r, i);
+                const h = e?.call(this);
+                r?.call(this, s), this.requestUpdate(t, h, i);
             },
             configurable: !0,
             enumerable: !0
         };
     }
     static getPropertyOptions(t) {
-        return this.elementProperties.get(t) ?? $a1659af8cb9ba679$var$y;
+        return this.elementProperties.get(t) ?? $a1659af8cb9ba679$var$b;
     }
     static _$Ei() {
         if (this.hasOwnProperty($a1659af8cb9ba679$var$d("elementProperties"))) return;
@@ -1924,7 +1944,7 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
         if (this.hasOwnProperty($a1659af8cb9ba679$var$d("finalized"))) return;
         if (this.finalized = !0, this._$Ei(), this.hasOwnProperty($a1659af8cb9ba679$var$d("properties"))) {
             const t = this.properties, s = [
-                ...$a1659af8cb9ba679$var$h(t),
+                ...$a1659af8cb9ba679$var$r(t),
                 ...$a1659af8cb9ba679$var$o(t)
             ];
             for (const i of s)this.createProperty(i, t[i]);
@@ -1984,33 +2004,36 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
     attributeChangedCallback(t, s, i) {
         this._$AK(t, i);
     }
-    _$EC(t, s) {
+    _$ET(t, s) {
         const i = this.constructor.elementProperties.get(t), e = this.constructor._$Eu(t, i);
         if (void 0 !== e && !0 === i.reflect) {
-            const r = (void 0 !== i.converter?.toAttribute ? i.converter : $a1659af8cb9ba679$export$7312b35fbf521afb).toAttribute(s, i.type);
-            this._$Em = t, null == r ? this.removeAttribute(e) : this.setAttribute(e, r), this._$Em = null;
+            const h = (void 0 !== i.converter?.toAttribute ? i.converter : $a1659af8cb9ba679$export$7312b35fbf521afb).toAttribute(s, i.type);
+            this._$Em = t, null == h ? this.removeAttribute(e) : this.setAttribute(e, h), this._$Em = null;
         }
     }
     _$AK(t, s) {
         const i = this.constructor, e = i._$Eh.get(t);
         if (void 0 !== e && this._$Em !== e) {
-            const t = i.getPropertyOptions(e), r = "function" == typeof t.converter ? {
+            const t = i.getPropertyOptions(e), h = "function" == typeof t.converter ? {
                 fromAttribute: t.converter
             } : void 0 !== t.converter?.fromAttribute ? t.converter : $a1659af8cb9ba679$export$7312b35fbf521afb;
-            this._$Em = e, this[e] = r.fromAttribute(s, t.type), this._$Em = null;
+            this._$Em = e;
+            const r = h.fromAttribute(s, t.type);
+            this[e] = r ?? this._$Ej?.get(e) ?? r, this._$Em = null;
         }
     }
-    requestUpdate(t, s, i) {
+    requestUpdate(t, s, i, e = !1, h) {
         if (void 0 !== t) {
-            if (i ??= this.constructor.getPropertyOptions(t), !(i.hasChanged ?? $a1659af8cb9ba679$export$53a6892c50694894)(this[t], s)) return;
-            this.P(t, s, i);
+            const r = this.constructor;
+            if (!1 === e && (h = this[t]), i ??= r.getPropertyOptions(t), !((i.hasChanged ?? $a1659af8cb9ba679$export$53a6892c50694894)(h, s) || i.useDefault && i.reflect && h === this._$Ej?.get(t) && !this.hasAttribute(r._$Eu(t, i)))) return;
+            this.C(t, s, i);
         }
-        !1 === this.isUpdatePending && (this._$ES = this._$ET());
+        !1 === this.isUpdatePending && (this._$ES = this._$EP());
     }
-    P(t, s, i) {
-        this._$AL.has(t) || this._$AL.set(t, s), !0 === i.reflect && this._$Em !== t && (this._$Ej ??= new Set).add(t);
+    C(t, s, { useDefault: i, reflect: e, wrapped: h }, r) {
+        i && !(this._$Ej ??= new Map).has(t) && (this._$Ej.set(t, r ?? s ?? this[t]), !0 !== h || void 0 !== r) || (this._$AL.has(t) || (this.hasUpdated || i || (s = void 0), this._$AL.set(t, s)), !0 === e && this._$Em !== t && (this._$Eq ??= new Set).add(t));
     }
-    async _$ET() {
+    async _$EP() {
         this.isUpdatePending = !0;
         try {
             await this._$ES;
@@ -2031,14 +2054,17 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
                 this._$Ep = void 0;
             }
             const t = this.constructor.elementProperties;
-            if (t.size > 0) for (const [s, i] of t)!0 !== i.wrapped || this._$AL.has(s) || void 0 === this[s] || this.P(s, this[s], i);
+            if (t.size > 0) for (const [s, i] of t){
+                const { wrapped: t } = i, e = this[s];
+                !0 !== t || this._$AL.has(s) || void 0 === e || this.C(s, void 0, i, e);
+            }
         }
         let t = !1;
         const s = this._$AL;
         try {
-            t = this.shouldUpdate(s), t ? (this.willUpdate(s), this._$EO?.forEach((t)=>t.hostUpdate?.()), this.update(s)) : this._$EU();
+            t = this.shouldUpdate(s), t ? (this.willUpdate(s), this._$EO?.forEach((t)=>t.hostUpdate?.()), this.update(s)) : this._$EM();
         } catch (s) {
-            throw t = !1, this._$EU(), s;
+            throw t = !1, this._$EM(), s;
         }
         t && this._$AE(s);
     }
@@ -2046,7 +2072,7 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
     _$AE(t) {
         this._$EO?.forEach((t)=>t.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = !0, this.firstUpdated(t)), this.updated(t);
     }
-    _$EU() {
+    _$EM() {
         this._$AL = new Map, this.isUpdatePending = !1;
     }
     get updateComplete() {
@@ -2059,7 +2085,7 @@ class $a1659af8cb9ba679$export$c7c07a37856565d extends HTMLElement {
         return !0;
     }
     update(t) {
-        this._$Ej &&= this._$Ej.forEach((t)=>this._$EC(t, this[t])), this._$EU();
+        this._$Eq &&= this._$Eq.forEach((t)=>this._$ET(t, this[t])), this._$EM();
     }
     updated(t) {}
     firstUpdated(t) {}
@@ -2068,103 +2094,103 @@ $a1659af8cb9ba679$export$c7c07a37856565d.elementStyles = [], $a1659af8cb9ba679$e
     mode: "open"
 }, $a1659af8cb9ba679$export$c7c07a37856565d[$a1659af8cb9ba679$var$d("elementProperties")] = new Map, $a1659af8cb9ba679$export$c7c07a37856565d[$a1659af8cb9ba679$var$d("finalized")] = new Map, $a1659af8cb9ba679$var$p?.({
     ReactiveElement: $a1659af8cb9ba679$export$c7c07a37856565d
-}), ($a1659af8cb9ba679$var$a.reactiveElementVersions ??= []).push("2.0.4");
+}), ($a1659af8cb9ba679$var$a.reactiveElementVersions ??= []).push("2.1.2");
 
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const $9472b6c6abbc82cb$var$t = globalThis, $9472b6c6abbc82cb$var$i = $9472b6c6abbc82cb$var$t.trustedTypes, $9472b6c6abbc82cb$var$s = $9472b6c6abbc82cb$var$i ? $9472b6c6abbc82cb$var$i.createPolicy("lit-html", {
+ */ const $9472b6c6abbc82cb$var$t = globalThis, $9472b6c6abbc82cb$var$i = (t)=>t, $9472b6c6abbc82cb$var$s = $9472b6c6abbc82cb$var$t.trustedTypes, $9472b6c6abbc82cb$var$e = $9472b6c6abbc82cb$var$s ? $9472b6c6abbc82cb$var$s.createPolicy("lit-html", {
     createHTML: (t)=>t
-}) : void 0, $9472b6c6abbc82cb$var$e = "$lit$", $9472b6c6abbc82cb$var$h = `lit$${Math.random().toFixed(9).slice(2)}$`, $9472b6c6abbc82cb$var$o = "?" + $9472b6c6abbc82cb$var$h, $9472b6c6abbc82cb$var$n = `<${$9472b6c6abbc82cb$var$o}>`, $9472b6c6abbc82cb$var$r = document, $9472b6c6abbc82cb$var$l = ()=>$9472b6c6abbc82cb$var$r.createComment(""), $9472b6c6abbc82cb$var$c = (t)=>null === t || "object" != typeof t && "function" != typeof t, $9472b6c6abbc82cb$var$a = Array.isArray, $9472b6c6abbc82cb$var$u = (t)=>$9472b6c6abbc82cb$var$a(t) || "function" == typeof t?.[Symbol.iterator], $9472b6c6abbc82cb$var$d = "[ \t\n\f\r]", $9472b6c6abbc82cb$var$f = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, $9472b6c6abbc82cb$var$v = /-->/g, $9472b6c6abbc82cb$var$_ = />/g, $9472b6c6abbc82cb$var$m = RegExp(`>|${$9472b6c6abbc82cb$var$d}(?:([^\\s"'>=/]+)(${$9472b6c6abbc82cb$var$d}*=${$9472b6c6abbc82cb$var$d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), $9472b6c6abbc82cb$var$p = /'/g, $9472b6c6abbc82cb$var$g = /"/g, $9472b6c6abbc82cb$var$$ = /^(?:script|style|textarea|title)$/i, $9472b6c6abbc82cb$var$y = (t)=>(i, ...s)=>({
+}) : void 0, $9472b6c6abbc82cb$var$h = "$lit$", $9472b6c6abbc82cb$var$o = `lit$${Math.random().toFixed(9).slice(2)}$`, $9472b6c6abbc82cb$var$n = "?" + $9472b6c6abbc82cb$var$o, $9472b6c6abbc82cb$var$r = `<${$9472b6c6abbc82cb$var$n}>`, $9472b6c6abbc82cb$var$l = document, $9472b6c6abbc82cb$var$c = ()=>$9472b6c6abbc82cb$var$l.createComment(""), $9472b6c6abbc82cb$var$a = (t)=>null === t || "object" != typeof t && "function" != typeof t, $9472b6c6abbc82cb$var$u = Array.isArray, $9472b6c6abbc82cb$var$d = (t)=>$9472b6c6abbc82cb$var$u(t) || "function" == typeof t?.[Symbol.iterator], $9472b6c6abbc82cb$var$f = "[ \t\n\f\r]", $9472b6c6abbc82cb$var$v = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, $9472b6c6abbc82cb$var$_ = /-->/g, $9472b6c6abbc82cb$var$m = />/g, $9472b6c6abbc82cb$var$p = RegExp(`>|${$9472b6c6abbc82cb$var$f}(?:([^\\s"'>=/]+)(${$9472b6c6abbc82cb$var$f}*=${$9472b6c6abbc82cb$var$f}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), $9472b6c6abbc82cb$var$g = /'/g, $9472b6c6abbc82cb$var$$ = /"/g, $9472b6c6abbc82cb$var$y = /^(?:script|style|textarea|title)$/i, $9472b6c6abbc82cb$var$x = (t)=>(i, ...s)=>({
             _$litType$: t,
             strings: i,
             values: s
-        }), $9472b6c6abbc82cb$export$c0bb0b647f701bb5 = $9472b6c6abbc82cb$var$y(1), $9472b6c6abbc82cb$export$7ed1367e7fa1ad68 = $9472b6c6abbc82cb$var$y(2), $9472b6c6abbc82cb$export$47d5b44d225be5b4 = $9472b6c6abbc82cb$var$y(3), $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 = Symbol.for("lit-noChange"), $9472b6c6abbc82cb$export$45b790e32b2810ee = Symbol.for("lit-nothing"), $9472b6c6abbc82cb$var$A = new WeakMap, $9472b6c6abbc82cb$var$C = $9472b6c6abbc82cb$var$r.createTreeWalker($9472b6c6abbc82cb$var$r, 129);
-function $9472b6c6abbc82cb$var$P(t, i) {
-    if (!$9472b6c6abbc82cb$var$a(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array");
-    return void 0 !== $9472b6c6abbc82cb$var$s ? $9472b6c6abbc82cb$var$s.createHTML(i) : i;
+        }), $9472b6c6abbc82cb$export$c0bb0b647f701bb5 = $9472b6c6abbc82cb$var$x(1), $9472b6c6abbc82cb$export$7ed1367e7fa1ad68 = $9472b6c6abbc82cb$var$x(2), $9472b6c6abbc82cb$export$47d5b44d225be5b4 = $9472b6c6abbc82cb$var$x(3), $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 = Symbol.for("lit-noChange"), $9472b6c6abbc82cb$export$45b790e32b2810ee = Symbol.for("lit-nothing"), $9472b6c6abbc82cb$var$C = new WeakMap, $9472b6c6abbc82cb$var$P = $9472b6c6abbc82cb$var$l.createTreeWalker($9472b6c6abbc82cb$var$l, 129);
+function $9472b6c6abbc82cb$var$V(t, i) {
+    if (!$9472b6c6abbc82cb$var$u(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array");
+    return void 0 !== $9472b6c6abbc82cb$var$e ? $9472b6c6abbc82cb$var$e.createHTML(i) : i;
 }
-const $9472b6c6abbc82cb$var$V = (t, i)=>{
-    const s = t.length - 1, o = [];
-    let r, l = 2 === i ? "<svg>" : 3 === i ? "<math>" : "", c = $9472b6c6abbc82cb$var$f;
+const $9472b6c6abbc82cb$var$N = (t, i)=>{
+    const s = t.length - 1, e = [];
+    let n, l = 2 === i ? "<svg>" : 3 === i ? "<math>" : "", c = $9472b6c6abbc82cb$var$v;
     for(let i = 0; i < s; i++){
         const s = t[i];
-        let a, u, d = -1, y = 0;
-        for(; y < s.length && (c.lastIndex = y, u = c.exec(s), null !== u);)y = c.lastIndex, c === $9472b6c6abbc82cb$var$f ? "!--" === u[1] ? c = $9472b6c6abbc82cb$var$v : void 0 !== u[1] ? c = $9472b6c6abbc82cb$var$_ : void 0 !== u[2] ? ($9472b6c6abbc82cb$var$$.test(u[2]) && (r = RegExp("</" + u[2], "g")), c = $9472b6c6abbc82cb$var$m) : void 0 !== u[3] && (c = $9472b6c6abbc82cb$var$m) : c === $9472b6c6abbc82cb$var$m ? ">" === u[0] ? (c = r ?? $9472b6c6abbc82cb$var$f, d = -1) : void 0 === u[1] ? d = -2 : (d = c.lastIndex - u[2].length, a = u[1], c = void 0 === u[3] ? $9472b6c6abbc82cb$var$m : '"' === u[3] ? $9472b6c6abbc82cb$var$g : $9472b6c6abbc82cb$var$p) : c === $9472b6c6abbc82cb$var$g || c === $9472b6c6abbc82cb$var$p ? c = $9472b6c6abbc82cb$var$m : c === $9472b6c6abbc82cb$var$v || c === $9472b6c6abbc82cb$var$_ ? c = $9472b6c6abbc82cb$var$f : (c = $9472b6c6abbc82cb$var$m, r = void 0);
-        const x = c === $9472b6c6abbc82cb$var$m && t[i + 1].startsWith("/>") ? " " : "";
-        l += c === $9472b6c6abbc82cb$var$f ? s + $9472b6c6abbc82cb$var$n : d >= 0 ? (o.push(a), s.slice(0, d) + $9472b6c6abbc82cb$var$e + s.slice(d) + $9472b6c6abbc82cb$var$h + x) : s + $9472b6c6abbc82cb$var$h + (-2 === d ? i : x);
+        let a, u, d = -1, f = 0;
+        for(; f < s.length && (c.lastIndex = f, u = c.exec(s), null !== u);)f = c.lastIndex, c === $9472b6c6abbc82cb$var$v ? "!--" === u[1] ? c = $9472b6c6abbc82cb$var$_ : void 0 !== u[1] ? c = $9472b6c6abbc82cb$var$m : void 0 !== u[2] ? ($9472b6c6abbc82cb$var$y.test(u[2]) && (n = RegExp("</" + u[2], "g")), c = $9472b6c6abbc82cb$var$p) : void 0 !== u[3] && (c = $9472b6c6abbc82cb$var$p) : c === $9472b6c6abbc82cb$var$p ? ">" === u[0] ? (c = n ?? $9472b6c6abbc82cb$var$v, d = -1) : void 0 === u[1] ? d = -2 : (d = c.lastIndex - u[2].length, a = u[1], c = void 0 === u[3] ? $9472b6c6abbc82cb$var$p : '"' === u[3] ? $9472b6c6abbc82cb$var$$ : $9472b6c6abbc82cb$var$g) : c === $9472b6c6abbc82cb$var$$ || c === $9472b6c6abbc82cb$var$g ? c = $9472b6c6abbc82cb$var$p : c === $9472b6c6abbc82cb$var$_ || c === $9472b6c6abbc82cb$var$m ? c = $9472b6c6abbc82cb$var$v : (c = $9472b6c6abbc82cb$var$p, n = void 0);
+        const x = c === $9472b6c6abbc82cb$var$p && t[i + 1].startsWith("/>") ? " " : "";
+        l += c === $9472b6c6abbc82cb$var$v ? s + $9472b6c6abbc82cb$var$r : d >= 0 ? (e.push(a), s.slice(0, d) + $9472b6c6abbc82cb$var$h + s.slice(d) + $9472b6c6abbc82cb$var$o + x) : s + $9472b6c6abbc82cb$var$o + (-2 === d ? i : x);
     }
     return [
-        $9472b6c6abbc82cb$var$P(t, l + (t[s] || "<?>") + (2 === i ? "</svg>" : 3 === i ? "</math>" : "")),
-        o
+        $9472b6c6abbc82cb$var$V(t, l + (t[s] || "<?>") + (2 === i ? "</svg>" : 3 === i ? "</math>" : "")),
+        e
     ];
 };
-class $9472b6c6abbc82cb$var$N {
-    constructor({ strings: t, _$litType$: s }, n){
+class $9472b6c6abbc82cb$var$S {
+    constructor({ strings: t, _$litType$: i }, e){
         let r;
         this.parts = [];
-        let c = 0, a = 0;
-        const u = t.length - 1, d = this.parts, [f, v] = $9472b6c6abbc82cb$var$V(t, s);
-        if (this.el = $9472b6c6abbc82cb$var$N.createElement(f, n), $9472b6c6abbc82cb$var$C.currentNode = this.el.content, 2 === s || 3 === s) {
+        let l = 0, a = 0;
+        const u = t.length - 1, d = this.parts, [f, v] = $9472b6c6abbc82cb$var$N(t, i);
+        if (this.el = $9472b6c6abbc82cb$var$S.createElement(f, e), $9472b6c6abbc82cb$var$P.currentNode = this.el.content, 2 === i || 3 === i) {
             const t = this.el.content.firstChild;
             t.replaceWith(...t.childNodes);
         }
-        for(; null !== (r = $9472b6c6abbc82cb$var$C.nextNode()) && d.length < u;){
+        for(; null !== (r = $9472b6c6abbc82cb$var$P.nextNode()) && d.length < u;){
             if (1 === r.nodeType) {
-                if (r.hasAttributes()) for (const t of r.getAttributeNames())if (t.endsWith($9472b6c6abbc82cb$var$e)) {
-                    const i = v[a++], s = r.getAttribute(t).split($9472b6c6abbc82cb$var$h), e = /([.?@])?(.*)/.exec(i);
+                if (r.hasAttributes()) for (const t of r.getAttributeNames())if (t.endsWith($9472b6c6abbc82cb$var$h)) {
+                    const i = v[a++], s = r.getAttribute(t).split($9472b6c6abbc82cb$var$o), e = /([.?@])?(.*)/.exec(i);
                     d.push({
                         type: 1,
-                        index: c,
+                        index: l,
                         name: e[2],
                         strings: s,
-                        ctor: "." === e[1] ? $9472b6c6abbc82cb$var$H : "?" === e[1] ? $9472b6c6abbc82cb$var$I : "@" === e[1] ? $9472b6c6abbc82cb$var$L : $9472b6c6abbc82cb$var$k
+                        ctor: "." === e[1] ? $9472b6c6abbc82cb$var$I : "?" === e[1] ? $9472b6c6abbc82cb$var$L : "@" === e[1] ? $9472b6c6abbc82cb$var$z : $9472b6c6abbc82cb$var$H
                     }), r.removeAttribute(t);
-                } else t.startsWith($9472b6c6abbc82cb$var$h) && (d.push({
+                } else t.startsWith($9472b6c6abbc82cb$var$o) && (d.push({
                     type: 6,
-                    index: c
+                    index: l
                 }), r.removeAttribute(t));
-                if ($9472b6c6abbc82cb$var$$.test(r.tagName)) {
-                    const t = r.textContent.split($9472b6c6abbc82cb$var$h), s = t.length - 1;
-                    if (s > 0) {
-                        r.textContent = $9472b6c6abbc82cb$var$i ? $9472b6c6abbc82cb$var$i.emptyScript : "";
-                        for(let i = 0; i < s; i++)r.append(t[i], $9472b6c6abbc82cb$var$l()), $9472b6c6abbc82cb$var$C.nextNode(), d.push({
+                if ($9472b6c6abbc82cb$var$y.test(r.tagName)) {
+                    const t = r.textContent.split($9472b6c6abbc82cb$var$o), i = t.length - 1;
+                    if (i > 0) {
+                        r.textContent = $9472b6c6abbc82cb$var$s ? $9472b6c6abbc82cb$var$s.emptyScript : "";
+                        for(let s = 0; s < i; s++)r.append(t[s], $9472b6c6abbc82cb$var$c()), $9472b6c6abbc82cb$var$P.nextNode(), d.push({
                             type: 2,
-                            index: ++c
+                            index: ++l
                         });
-                        r.append(t[s], $9472b6c6abbc82cb$var$l());
+                        r.append(t[i], $9472b6c6abbc82cb$var$c());
                     }
                 }
             } else if (8 === r.nodeType) {
-                if (r.data === $9472b6c6abbc82cb$var$o) d.push({
+                if (r.data === $9472b6c6abbc82cb$var$n) d.push({
                     type: 2,
-                    index: c
+                    index: l
                 });
                 else {
                     let t = -1;
-                    for(; -1 !== (t = r.data.indexOf($9472b6c6abbc82cb$var$h, t + 1));)d.push({
+                    for(; -1 !== (t = r.data.indexOf($9472b6c6abbc82cb$var$o, t + 1));)d.push({
                         type: 7,
-                        index: c
-                    }), t += $9472b6c6abbc82cb$var$h.length - 1;
+                        index: l
+                    }), t += $9472b6c6abbc82cb$var$o.length - 1;
                 }
             }
-            c++;
+            l++;
         }
     }
     static createElement(t, i) {
-        const s = $9472b6c6abbc82cb$var$r.createElement("template");
+        const s = $9472b6c6abbc82cb$var$l.createElement("template");
         return s.innerHTML = t, s;
     }
 }
-function $9472b6c6abbc82cb$var$S(t, i, s = t, e) {
+function $9472b6c6abbc82cb$var$M(t, i, s = t, e) {
     if (i === $9472b6c6abbc82cb$export$9c068ae9cc5db4e8) return i;
     let h = void 0 !== e ? s._$Co?.[e] : s._$Cl;
-    const o = $9472b6c6abbc82cb$var$c(i) ? void 0 : i._$litDirective$;
-    return h?.constructor !== o && (h?._$AO?.(!1), void 0 === o ? h = void 0 : (h = new o(t), h._$AT(t, s, e)), void 0 !== e ? (s._$Co ??= [])[e] = h : s._$Cl = h), void 0 !== h && (i = $9472b6c6abbc82cb$var$S(t, h._$AS(t, i.values), h, e)), i;
+    const o = $9472b6c6abbc82cb$var$a(i) ? void 0 : i._$litDirective$;
+    return h?.constructor !== o && (h?._$AO?.(!1), void 0 === o ? h = void 0 : (h = new o(t), h._$AT(t, s, e)), void 0 !== e ? (s._$Co ??= [])[e] = h : s._$Cl = h), void 0 !== h && (i = $9472b6c6abbc82cb$var$M(t, h._$AS(t, i.values), h, e)), i;
 }
-class $9472b6c6abbc82cb$var$M {
+class $9472b6c6abbc82cb$var$R {
     constructor(t, i){
         this._$AV = [], this._$AN = void 0, this._$AD = t, this._$AM = i;
     }
@@ -2175,24 +2201,24 @@ class $9472b6c6abbc82cb$var$M {
         return this._$AM._$AU;
     }
     u(t) {
-        const { el: { content: i }, parts: s } = this._$AD, e = (t?.creationScope ?? $9472b6c6abbc82cb$var$r).importNode(i, !0);
-        $9472b6c6abbc82cb$var$C.currentNode = e;
-        let h = $9472b6c6abbc82cb$var$C.nextNode(), o = 0, n = 0, l = s[0];
-        for(; void 0 !== l;){
-            if (o === l.index) {
+        const { el: { content: i }, parts: s } = this._$AD, e = (t?.creationScope ?? $9472b6c6abbc82cb$var$l).importNode(i, !0);
+        $9472b6c6abbc82cb$var$P.currentNode = e;
+        let h = $9472b6c6abbc82cb$var$P.nextNode(), o = 0, n = 0, r = s[0];
+        for(; void 0 !== r;){
+            if (o === r.index) {
                 let i;
-                2 === l.type ? i = new $9472b6c6abbc82cb$var$R(h, h.nextSibling, this, t) : 1 === l.type ? i = new l.ctor(h, l.name, l.strings, this, t) : 6 === l.type && (i = new $9472b6c6abbc82cb$var$z(h, this, t)), this._$AV.push(i), l = s[++n];
+                2 === r.type ? i = new $9472b6c6abbc82cb$var$k(h, h.nextSibling, this, t) : 1 === r.type ? i = new r.ctor(h, r.name, r.strings, this, t) : 6 === r.type && (i = new $9472b6c6abbc82cb$var$Z(h, this, t)), this._$AV.push(i), r = s[++n];
             }
-            o !== l?.index && (h = $9472b6c6abbc82cb$var$C.nextNode(), o++);
+            o !== r?.index && (h = $9472b6c6abbc82cb$var$P.nextNode(), o++);
         }
-        return $9472b6c6abbc82cb$var$C.currentNode = $9472b6c6abbc82cb$var$r, e;
+        return $9472b6c6abbc82cb$var$P.currentNode = $9472b6c6abbc82cb$var$l, e;
     }
     p(t) {
         let i = 0;
         for (const s of this._$AV)void 0 !== s && (void 0 !== s.strings ? (s._$AI(t, s, i), i += s.strings.length - 2) : s._$AI(t[i])), i++;
     }
 }
-class $9472b6c6abbc82cb$var$R {
+class $9472b6c6abbc82cb$var$k {
     get _$AU() {
         return this._$AM?._$AU ?? this._$Cv;
     }
@@ -2211,7 +2237,7 @@ class $9472b6c6abbc82cb$var$R {
         return this._$AB;
     }
     _$AI(t, i = this) {
-        t = $9472b6c6abbc82cb$var$S(this, t, i), $9472b6c6abbc82cb$var$c(t) ? t === $9472b6c6abbc82cb$export$45b790e32b2810ee || null == t || "" === t ? (this._$AH !== $9472b6c6abbc82cb$export$45b790e32b2810ee && this._$AR(), this._$AH = $9472b6c6abbc82cb$export$45b790e32b2810ee) : t !== this._$AH && t !== $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 && this._(t) : void 0 !== t._$litType$ ? this.$(t) : void 0 !== t.nodeType ? this.T(t) : $9472b6c6abbc82cb$var$u(t) ? this.k(t) : this._(t);
+        t = $9472b6c6abbc82cb$var$M(this, t, i), $9472b6c6abbc82cb$var$a(t) ? t === $9472b6c6abbc82cb$export$45b790e32b2810ee || null == t || "" === t ? (this._$AH !== $9472b6c6abbc82cb$export$45b790e32b2810ee && this._$AR(), this._$AH = $9472b6c6abbc82cb$export$45b790e32b2810ee) : t !== this._$AH && t !== $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 && this._(t) : void 0 !== t._$litType$ ? this.$(t) : void 0 !== t.nodeType ? this.T(t) : $9472b6c6abbc82cb$var$d(t) ? this.k(t) : this._(t);
     }
     O(t) {
         return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -2220,38 +2246,38 @@ class $9472b6c6abbc82cb$var$R {
         this._$AH !== t && (this._$AR(), this._$AH = this.O(t));
     }
     _(t) {
-        this._$AH !== $9472b6c6abbc82cb$export$45b790e32b2810ee && $9472b6c6abbc82cb$var$c(this._$AH) ? this._$AA.nextSibling.data = t : this.T($9472b6c6abbc82cb$var$r.createTextNode(t)), this._$AH = t;
+        this._$AH !== $9472b6c6abbc82cb$export$45b790e32b2810ee && $9472b6c6abbc82cb$var$a(this._$AH) ? this._$AA.nextSibling.data = t : this.T($9472b6c6abbc82cb$var$l.createTextNode(t)), this._$AH = t;
     }
     $(t) {
-        const { values: i, _$litType$: s } = t, e = "number" == typeof s ? this._$AC(t) : (void 0 === s.el && (s.el = $9472b6c6abbc82cb$var$N.createElement($9472b6c6abbc82cb$var$P(s.h, s.h[0]), this.options)), s);
+        const { values: i, _$litType$: s } = t, e = "number" == typeof s ? this._$AC(t) : (void 0 === s.el && (s.el = $9472b6c6abbc82cb$var$S.createElement($9472b6c6abbc82cb$var$V(s.h, s.h[0]), this.options)), s);
         if (this._$AH?._$AD === e) this._$AH.p(i);
         else {
-            const t = new $9472b6c6abbc82cb$var$M(e, this), s = t.u(this.options);
+            const t = new $9472b6c6abbc82cb$var$R(e, this), s = t.u(this.options);
             t.p(i), this.T(s), this._$AH = t;
         }
     }
     _$AC(t) {
-        let i = $9472b6c6abbc82cb$var$A.get(t.strings);
-        return void 0 === i && $9472b6c6abbc82cb$var$A.set(t.strings, i = new $9472b6c6abbc82cb$var$N(t)), i;
+        let i = $9472b6c6abbc82cb$var$C.get(t.strings);
+        return void 0 === i && $9472b6c6abbc82cb$var$C.set(t.strings, i = new $9472b6c6abbc82cb$var$S(t)), i;
     }
     k(t) {
-        $9472b6c6abbc82cb$var$a(this._$AH) || (this._$AH = [], this._$AR());
+        $9472b6c6abbc82cb$var$u(this._$AH) || (this._$AH = [], this._$AR());
         const i = this._$AH;
         let s, e = 0;
-        for (const h of t)e === i.length ? i.push(s = new $9472b6c6abbc82cb$var$R(this.O($9472b6c6abbc82cb$var$l()), this.O($9472b6c6abbc82cb$var$l()), this, this.options)) : s = i[e], s._$AI(h), e++;
+        for (const h of t)e === i.length ? i.push(s = new $9472b6c6abbc82cb$var$k(this.O($9472b6c6abbc82cb$var$c()), this.O($9472b6c6abbc82cb$var$c()), this, this.options)) : s = i[e], s._$AI(h), e++;
         e < i.length && (this._$AR(s && s._$AB.nextSibling, e), i.length = e);
     }
-    _$AR(t = this._$AA.nextSibling, i) {
-        for(this._$AP?.(!1, !0, i); t && t !== this._$AB;){
-            const i = t.nextSibling;
-            t.remove(), t = i;
+    _$AR(t = this._$AA.nextSibling, s) {
+        for(this._$AP?.(!1, !0, s); t !== this._$AB;){
+            const s = $9472b6c6abbc82cb$var$i(t).nextSibling;
+            $9472b6c6abbc82cb$var$i(t).remove(), t = s;
         }
     }
     setConnected(t) {
         void 0 === this._$AM && (this._$Cv = t, this._$AP?.(t));
     }
 }
-class $9472b6c6abbc82cb$var$k {
+class $9472b6c6abbc82cb$var$H {
     get tagName() {
         return this.element.tagName;
     }
@@ -2264,11 +2290,11 @@ class $9472b6c6abbc82cb$var$k {
     _$AI(t, i = this, s, e) {
         const h = this.strings;
         let o = !1;
-        if (void 0 === h) t = $9472b6c6abbc82cb$var$S(this, t, i, 0), o = !$9472b6c6abbc82cb$var$c(t) || t !== this._$AH && t !== $9472b6c6abbc82cb$export$9c068ae9cc5db4e8, o && (this._$AH = t);
+        if (void 0 === h) t = $9472b6c6abbc82cb$var$M(this, t, i, 0), o = !$9472b6c6abbc82cb$var$a(t) || t !== this._$AH && t !== $9472b6c6abbc82cb$export$9c068ae9cc5db4e8, o && (this._$AH = t);
         else {
             const e = t;
             let n, r;
-            for(t = h[0], n = 0; n < h.length - 1; n++)r = $9472b6c6abbc82cb$var$S(this, e[s + n], i, n), r === $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 && (r = this._$AH[n]), o ||= !$9472b6c6abbc82cb$var$c(r) || r !== this._$AH[n], r === $9472b6c6abbc82cb$export$45b790e32b2810ee ? t = $9472b6c6abbc82cb$export$45b790e32b2810ee : t !== $9472b6c6abbc82cb$export$45b790e32b2810ee && (t += (r ?? "") + h[n + 1]), this._$AH[n] = r;
+            for(t = h[0], n = 0; n < h.length - 1; n++)r = $9472b6c6abbc82cb$var$M(this, e[s + n], i, n), r === $9472b6c6abbc82cb$export$9c068ae9cc5db4e8 && (r = this._$AH[n]), o ||= !$9472b6c6abbc82cb$var$a(r) || r !== this._$AH[n], r === $9472b6c6abbc82cb$export$45b790e32b2810ee ? t = $9472b6c6abbc82cb$export$45b790e32b2810ee : t !== $9472b6c6abbc82cb$export$45b790e32b2810ee && (t += (r ?? "") + h[n + 1]), this._$AH[n] = r;
         }
         o && !e && this.j(t);
     }
@@ -2276,7 +2302,7 @@ class $9472b6c6abbc82cb$var$k {
         t === $9472b6c6abbc82cb$export$45b790e32b2810ee ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
     }
 }
-class $9472b6c6abbc82cb$var$H extends $9472b6c6abbc82cb$var$k {
+class $9472b6c6abbc82cb$var$I extends $9472b6c6abbc82cb$var$H {
     constructor(){
         super(...arguments), this.type = 3;
     }
@@ -2284,7 +2310,7 @@ class $9472b6c6abbc82cb$var$H extends $9472b6c6abbc82cb$var$k {
         this.element[this.name] = t === $9472b6c6abbc82cb$export$45b790e32b2810ee ? void 0 : t;
     }
 }
-class $9472b6c6abbc82cb$var$I extends $9472b6c6abbc82cb$var$k {
+class $9472b6c6abbc82cb$var$L extends $9472b6c6abbc82cb$var$H {
     constructor(){
         super(...arguments), this.type = 4;
     }
@@ -2292,12 +2318,12 @@ class $9472b6c6abbc82cb$var$I extends $9472b6c6abbc82cb$var$k {
         this.element.toggleAttribute(this.name, !!t && t !== $9472b6c6abbc82cb$export$45b790e32b2810ee);
     }
 }
-class $9472b6c6abbc82cb$var$L extends $9472b6c6abbc82cb$var$k {
+class $9472b6c6abbc82cb$var$z extends $9472b6c6abbc82cb$var$H {
     constructor(t, i, s, e, h){
         super(t, i, s, e, h), this.type = 5;
     }
     _$AI(t, i = this) {
-        if ((t = $9472b6c6abbc82cb$var$S(this, t, i, 0) ?? $9472b6c6abbc82cb$export$45b790e32b2810ee) === $9472b6c6abbc82cb$export$9c068ae9cc5db4e8) return;
+        if ((t = $9472b6c6abbc82cb$var$M(this, t, i, 0) ?? $9472b6c6abbc82cb$export$45b790e32b2810ee) === $9472b6c6abbc82cb$export$9c068ae9cc5db4e8) return;
         const s = this._$AH, e = t === $9472b6c6abbc82cb$export$45b790e32b2810ee && s !== $9472b6c6abbc82cb$export$45b790e32b2810ee || t.capture !== s.capture || t.once !== s.once || t.passive !== s.passive, h = t !== $9472b6c6abbc82cb$export$45b790e32b2810ee && (s === $9472b6c6abbc82cb$export$45b790e32b2810ee || e);
         e && this.element.removeEventListener(this.name, this, s), h && this.element.addEventListener(this.name, this, t), this._$AH = t;
     }
@@ -2305,7 +2331,7 @@ class $9472b6c6abbc82cb$var$L extends $9472b6c6abbc82cb$var$k {
         "function" == typeof this._$AH ? this._$AH.call(this.options?.host ?? this.element, t) : this._$AH.handleEvent(t);
     }
 }
-class $9472b6c6abbc82cb$var$z {
+class $9472b6c6abbc82cb$var$Z {
     constructor(t, i, s){
         this.element = t, this.type = 6, this._$AN = void 0, this._$AM = i, this.options = s;
     }
@@ -2313,32 +2339,32 @@ class $9472b6c6abbc82cb$var$z {
         return this._$AM._$AU;
     }
     _$AI(t) {
-        $9472b6c6abbc82cb$var$S(this, t);
+        $9472b6c6abbc82cb$var$M(this, t);
     }
 }
 const $9472b6c6abbc82cb$export$8613d1ca9052b22e = {
-    M: $9472b6c6abbc82cb$var$e,
-    P: $9472b6c6abbc82cb$var$h,
-    A: $9472b6c6abbc82cb$var$o,
+    M: $9472b6c6abbc82cb$var$h,
+    P: $9472b6c6abbc82cb$var$o,
+    A: $9472b6c6abbc82cb$var$n,
     C: 1,
-    L: $9472b6c6abbc82cb$var$V,
-    R: $9472b6c6abbc82cb$var$M,
-    D: $9472b6c6abbc82cb$var$u,
-    V: $9472b6c6abbc82cb$var$S,
-    I: $9472b6c6abbc82cb$var$R,
-    H: $9472b6c6abbc82cb$var$k,
-    N: $9472b6c6abbc82cb$var$I,
-    U: $9472b6c6abbc82cb$var$L,
-    B: $9472b6c6abbc82cb$var$H,
-    F: $9472b6c6abbc82cb$var$z
-}, $9472b6c6abbc82cb$var$j = $9472b6c6abbc82cb$var$t.litHtmlPolyfillSupport;
-$9472b6c6abbc82cb$var$j?.($9472b6c6abbc82cb$var$N, $9472b6c6abbc82cb$var$R), ($9472b6c6abbc82cb$var$t.litHtmlVersions ??= []).push("3.2.1");
+    L: $9472b6c6abbc82cb$var$N,
+    R: $9472b6c6abbc82cb$var$R,
+    D: $9472b6c6abbc82cb$var$d,
+    V: $9472b6c6abbc82cb$var$M,
+    I: $9472b6c6abbc82cb$var$k,
+    H: $9472b6c6abbc82cb$var$H,
+    N: $9472b6c6abbc82cb$var$L,
+    U: $9472b6c6abbc82cb$var$z,
+    B: $9472b6c6abbc82cb$var$I,
+    F: $9472b6c6abbc82cb$var$Z
+}, $9472b6c6abbc82cb$var$B = $9472b6c6abbc82cb$var$t.litHtmlPolyfillSupport;
+$9472b6c6abbc82cb$var$B?.($9472b6c6abbc82cb$var$S, $9472b6c6abbc82cb$var$k), ($9472b6c6abbc82cb$var$t.litHtmlVersions ??= []).push("3.3.2");
 const $9472b6c6abbc82cb$export$b3890eb0ae9dca99 = (t, i, s)=>{
     const e = s?.renderBefore ?? i;
     let h = e._$litPart$;
     if (void 0 === h) {
         const t = s?.renderBefore ?? null;
-        e._$litPart$ = h = new $9472b6c6abbc82cb$var$R(i.insertBefore($9472b6c6abbc82cb$var$l(), t), t, void 0, s ?? {});
+        e._$litPart$ = h = new $9472b6c6abbc82cb$var$k(i.insertBefore($9472b6c6abbc82cb$var$c(), t), t, void 0, s ?? {});
     }
     return h._$AI(t), h;
 };
@@ -2350,7 +2376,8 @@ const $9472b6c6abbc82cb$export$b3890eb0ae9dca99 = (t, i, s)=>{
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ class $43198d1a4e5573da$export$3f2f9f5909897157 extends (0, $a1659af8cb9ba679$export$c7c07a37856565d) {
+ */ const $43198d1a4e5573da$var$s = globalThis;
+class $43198d1a4e5573da$export$3f2f9f5909897157 extends (0, $a1659af8cb9ba679$export$c7c07a37856565d) {
     constructor(){
         super(...arguments), this.renderOptions = {
             host: this
@@ -2361,8 +2388,8 @@ const $9472b6c6abbc82cb$export$b3890eb0ae9dca99 = (t, i, s)=>{
         return this.renderOptions.renderBefore ??= t.firstChild, t;
     }
     update(t) {
-        const s = this.render();
-        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = (0, $9472b6c6abbc82cb$export$b3890eb0ae9dca99)(s, this.renderRoot, this.renderOptions);
+        const r = this.render();
+        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = (0, $9472b6c6abbc82cb$export$b3890eb0ae9dca99)(r, this.renderRoot, this.renderOptions);
     }
     connectedCallback() {
         super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -2374,20 +2401,20 @@ const $9472b6c6abbc82cb$export$b3890eb0ae9dca99 = (t, i, s)=>{
         return 0, $9472b6c6abbc82cb$export$9c068ae9cc5db4e8;
     }
 }
-$43198d1a4e5573da$export$3f2f9f5909897157._$litElement$ = !0, $43198d1a4e5573da$export$3f2f9f5909897157["finalized"] = !0, globalThis.litElementHydrateSupport?.({
+$43198d1a4e5573da$export$3f2f9f5909897157._$litElement$ = !0, $43198d1a4e5573da$export$3f2f9f5909897157["finalized"] = !0, $43198d1a4e5573da$var$s.litElementHydrateSupport?.({
     LitElement: $43198d1a4e5573da$export$3f2f9f5909897157
 });
-const $43198d1a4e5573da$var$i = globalThis.litElementPolyfillSupport;
-$43198d1a4e5573da$var$i?.({
+const $43198d1a4e5573da$var$o = $43198d1a4e5573da$var$s.litElementPolyfillSupport;
+$43198d1a4e5573da$var$o?.({
     LitElement: $43198d1a4e5573da$export$3f2f9f5909897157
 });
 const $43198d1a4e5573da$export$f5c524615a7708d6 = {
-    _$AK: (t, e, s)=>{
-        t._$AK(e, s);
+    _$AK: (t, e, r)=>{
+        t._$AK(e, r);
     },
     _$AL: (t)=>t._$AL
 };
-(globalThis.litElementVersions ??= []).push("4.1.1");
+($43198d1a4e5573da$var$s.litElementVersions ??= []).push("4.2.2");
 
 
 /**
@@ -2424,15 +2451,15 @@ const $43198d1a4e5573da$export$f5c524615a7708d6 = {
 }, $0e03e635ce324a21$export$8d623b1670eb40f4 = (t = $0e03e635ce324a21$var$o, e, r)=>{
     const { kind: n, metadata: i } = r;
     let s = globalThis.litPropertyMetadata.get(i);
-    if (void 0 === s && globalThis.litPropertyMetadata.set(i, s = new Map), s.set(r.name, t), "accessor" === n) {
+    if (void 0 === s && globalThis.litPropertyMetadata.set(i, s = new Map), "setter" === n && ((t = Object.create(t)).wrapped = !0), s.set(r.name, t), "accessor" === n) {
         const { name: o } = r;
         return {
             set (r) {
                 const n = e.get.call(this);
-                e.set.call(this, r), this.requestUpdate(o, n, t);
+                e.set.call(this, r), this.requestUpdate(o, n, t, !0, r);
             },
             init (e) {
-                return void 0 !== e && this.P(o, void 0, t), e;
+                return void 0 !== e && this.C(o, void 0, t, e), e;
             }
         };
     }
@@ -2440,7 +2467,7 @@ const $43198d1a4e5573da$export$f5c524615a7708d6 = {
         const { name: o } = r;
         return function(r) {
             const n = this[o];
-            e.call(this, r), this.requestUpdate(o, n, t);
+            e.call(this, r), this.requestUpdate(o, n, t, !0, r);
         };
     }
     throw Error("Unsupported decorator location: " + n);
@@ -2448,10 +2475,7 @@ const $43198d1a4e5573da$export$f5c524615a7708d6 = {
 function $0e03e635ce324a21$export$d541bacb2bda4494(t) {
     return (e, o)=>"object" == typeof o ? $0e03e635ce324a21$export$8d623b1670eb40f4(t, e, o) : ((t, e, o)=>{
             const r = e.hasOwnProperty(o);
-            return e.constructor.createProperty(o, r ? {
-                ...t,
-                wrapped: !0
-            } : t), r ? Object.getOwnPropertyDescriptor(e, o) : void 0;
+            return e.constructor.createProperty(o, t), r ? Object.getOwnPropertyDescriptor(e, o) : void 0;
         })(t, e, o);
 }
 
@@ -2867,7 +2891,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
                 this._alarmPickerSlidersQ.forEach((slidersHost)=>{
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = sliderStyle;
-                    slidersHost.shadowRoot.appendChild(myStyle);
+                    slidersHost.shadowRoot?.appendChild(myStyle);
                 });
             }
             if (this._alarmPickerSwitchQ.shadowRoot) {
@@ -2886,7 +2910,9 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
             }
             if (this._alarmTimeInputQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                const pickerStyle = ' .mdc-text-field__input { color: #696969 !important; font-size: inherit !important; text-align: center; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; padding: 0 !important; }';
+                let pickerStyle;
+                if ((0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).oldInput) pickerStyle = '.mdc-text-field__input { color: #696969 !important; font-size: inherit !important; text-align: center; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; padding: 0 !important; }';
+                else pickerStyle = 'wa-input { font-size: inherit; height: 1.75em; } wa-input::part(input) { text-align: center; }';
                 myStyle.innerHTML = pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
             }
@@ -3008,17 +3034,32 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
                 </div>
                 <div class="row-options"
                 >
-                    <ha-textfield
-                        id="alarmTimeInput"
-                        pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
-                        maxlength="8"
-                        ?disabled=${this.disabled}
-                        .value=${!this.nextAlarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
-                        ?overridden=${this.config?.next_alarm.overridden}
-                        @click=${this._clickHandler}
-                        readonly
-                        >
-                    </ha-textfield>
+                    ${(0, $fbafc8504bdc8693$export$cfa71a29f5c0676d).oldInput ? (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)`
+                        <ha-textfield
+                            id="alarmTimeInput"
+                            pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
+                            maxlength="8"
+                            ?disabled=${this.disabled}
+                            .value=${!this.nextAlarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
+                            ?overridden=${this.config?.next_alarm.overridden}
+                            @click=${this._clickHandler}
+                            readonly
+                            >
+                        </ha-textfield>
+                        ` : (0, $9472b6c6abbc82cb$export$c0bb0b647f701bb5)`
+                        <ha-input
+                            id="alarmTimeInput"
+                            appearance=""
+                            pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
+                            maxlength="8"
+                            ?disabled=${this.disabled}
+                            .value=${!this.nextAlarm ? '' : (0, (/*@__PURE__*/$parcel$interopDefault($04fcN)))(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
+                            ?overridden=${this.config?.next_alarm.overridden}
+                            @click=${this._clickHandler}
+                            readonly
+                            >
+                        </ha-input>
+                        `}
                 </div>
 
                 <ha-switch id="alarmEnabledToggleButton" ?holiday=${this.config?.next_alarm.holiday} ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this._toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
@@ -3067,11 +3108,8 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
 
         #alarmTimeInput {
             width: 5.1em;
-            margin: 0 1em;
-        }
-
-        #alarmTimeInput {
             margin: 0 0.5em;
+            padding-bottom: 0;
         }
 
         #alarmTimeInput[overridden] {
@@ -3130,6 +3168,13 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
             display: none;
         }
+
+        /* styles for HA >2026.4 */
+        ha-input {
+            --ha-color-form-background: none;
+            --wa-form-control-value-color: var(--kobold-color);
+            --ha-space-4: 0; /* padding */
+        }
     `;
 }
 (0, $daa14a4ff660f8e2$export$29e00dfd3077644b)([
@@ -3169,7 +3214,7 @@ class $f99f1d54953b8552$var$AlarmPicker extends (0, $43198d1a4e5573da$export$3f2
     (0, $937152fc79e0808a$export$2fa187e846a241c4)('div#alarmPicker.alarm ha-switch')
 ], $f99f1d54953b8552$var$AlarmPicker.prototype, "_alarmPickerSwitchQ", void 0);
 (0, $daa14a4ff660f8e2$export$29e00dfd3077644b)([
-    (0, $937152fc79e0808a$export$2fa187e846a241c4)('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true)
+    (0, $937152fc79e0808a$export$2fa187e846a241c4)('div#alarmPicker.alarm #alarmTimeInput', true)
 ], $f99f1d54953b8552$var$AlarmPicker.prototype, "_alarmTimeInputQ", void 0);
 (0, $daa14a4ff660f8e2$export$29e00dfd3077644b)([
     (0, $937152fc79e0808a$export$2fa187e846a241c4)('ha-icon.button')
@@ -3637,8 +3682,8 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                 switch(this.selectedTab){
                     case 1:
                         componentHosts = [
-                            this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot.querySelector('ha-form-grid')?.shadowRoot.querySelector('ha-form')?.shadowRoot,
-                            this.shadowRoot.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
+                            this.shadowRoot?.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot?.querySelector('ha-form-grid')?.shadowRoot?.querySelector('ha-form')?.shadowRoot,
+                            this.shadowRoot?.querySelector('#nap')?.querySelector('ha-form')?.shadowRoot
                         ];
                         componentStyles = [
                             'ha-form-grid { grid-template-columns: auto 0 !important; justify-content: end; }',
@@ -3647,7 +3692,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
                         break;
                     case 2:
                         componentHosts = [
-                            this.shadowRoot.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot
+                            this.shadowRoot?.querySelector('#schedule')?.querySelector('ha-form')?.shadowRoot
                         ];
                         componentStyles = [
                             'ha-form-grid { grid-template-columns: auto 65% !important; justify-content: end; }'
@@ -3669,7 +3714,9 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
             if (!error.message || error.message !== 'timeout') throw error;
             if (error.message === 'timeout') console.error('*** Attempt to inject styles into HA components of editor dialog timed out');
             return null;
-        }).then((interval)=>{
+        })// .then((interval: ReturnType<typeof setInterval>) => {
+        .then((value)=>{
+            const interval = value;
             if (interval && componentHosts) {
                 clearInterval(interval);
                 const myStyle = [];
@@ -3696,7 +3743,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
         if (!this._config) return;
         // const configChanges = Helpers.deepCompareObj(this._oldConfig, event.detail.value);
         this._configChanges = (0, $be7da167267683bf$export$4dc2b60021baefca).deepCompareObj(this._oldConfig, event.detail.value);
-        // console.log('*** configChanges: ', configChanges);
+        // console.log('*** configChanges: ', this._configChanges);
         // console.log('*** this._oldConfig: ', this._oldConfig);
         // console.log('*** event.detail.value: ', event.detail.value);
         // if (!configChanges) return;
@@ -3814,7 +3861,7 @@ class $bc3bffd9bb722a75$var$KoboldCardEditor extends (0, $43198d1a4e5573da$expor
       <ha-form
           .hass=${this._hass}
           .data=${this._config}
-          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || this._config.workday_sensor && !this._hass.states[this._config.workday_sensor])}
+          .schema=${this._configSchemaSettings(this._config.time_format === "12hr", this._config.workday_sensor === undefined || (this._config.workday_sensor && !this._hass.states[this._config.workday_sensor] ? true : false))}
           .computeLabel=${(s)=>s.label ?? s.name}
           @value-changed=${this._valueChanged}
       ></ha-form>
@@ -4336,8 +4383,13 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             });
             console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
         }
+        // TODO: move some or all event listeners to a mixin? see: https://github.com/thomasloven/hass-browser_mod/blob/07d7ae408cf9207c50712dff0e1e53bcf80c98fe/js/plugin/browser.ts
         // recover from disconnect, e.g., HA restart
-        window.addEventListener('connection-status', this._connectionStatusEvent);
+        //window.addEventListener('connection-status', this._connectionStatusEvent);
+        window.addEventListener('connection-status', async (event)=>{
+            const customEvent = event;
+            this._connectionStatusEvent;
+        });
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
         window.setMyEditMode = (mode = true)=>{
@@ -4357,7 +4409,11 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             });
             console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
         }
-        window.removeEventListener('connection-status', this._connectionStatusEvent);
+        //window.removeEventListener('connection-status', this._connectionStatusEvent);
+        window.removeEventListener('connection-status', async (event)=>{
+            const customEvent = event;
+            this._connectionStatusEvent;
+        });
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
         (0, $be7da167267683bf$export$4dc2b60021baefca).getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
     }
@@ -4395,8 +4451,8 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
     //   // console.log('*** update(); changed properties: ', _changedProperties);
     // }
     firstUpdated(_changedProperties) {
-        this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
-        if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+        this.preview = this.preview || this.parentElement?.classList.contains('preview') ? true : false;
+        if (document.querySelector('meta[name="color-scheme"]')?.getAttribute('content') === 'dark') {
             this.classList.add('dark');
             if (this._alarmPickerQ) this._alarmPickerQ.classList.add('dark');
         } else {
@@ -4424,11 +4480,17 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                 // hide visible line separating sidebar from main view on iOS
                 if ((0, $be7da167267683bf$export$4dc2b60021baefca).getDrawer()) (0, $be7da167267683bf$export$4dc2b60021baefca).getDrawer().style.borderRightStyle = 'unset';
                 // prevent scrolling
-                document.querySelector('body').style.overflow = 'hidden';
-                document.querySelector('body').style.position = 'fixed';
-                document.querySelector('body').style.width = '100%';
+                const bodyElement = document.querySelector('body');
+                if (bodyElement) {
+                    bodyElement.style.overflow = 'hidden';
+                    bodyElement.style.position = 'fixed';
+                    bodyElement.style.width = '100%';
+                }
+            // document.querySelector('body').style.overflow = 'hidden';
+            // document.querySelector('body').style.position = 'fixed';
+            // document.querySelector('body').style.width = '100%';
             }
-            if (this._config.cards?.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
+            if (this._config && this._config.cards && this._config.cards.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
             // inject style into mdc form fields
             let myStyle;
             //  alarmTop styles
@@ -4437,7 +4499,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
                 this._settingsButtonsHostsQ.forEach((settingsButtonsHost)=>{
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = settingsButtonsStyle;
-                    settingsButtonsHost.shadowRoot.appendChild(myStyle);
+                    settingsButtonsHost.shadowRoot?.appendChild(myStyle);
                 });
             }
         }
@@ -4468,6 +4530,7 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
     }
     // set hass(hass: HomeAssistant) {
     set hass(hass) {
+        // console.log('*** hass: ', hass);
         this._hass = hass;
         this._alarmController.hass = hass;
         (0, (/*@__PURE__*/$parcel$interopDefault($04fcN))).locale(hass.language);
@@ -4490,9 +4553,11 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
             const elements = this._elements = [];
             Promise.all(config.cards.map(async (card)=>{
                 const element = await this._createCardElement(card);
-                if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
-                elements.push(element);
-                this._extraInfoQ.appendChild(element);
+                if (element) {
+                    if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
+                    elements.push(element);
+                    this._extraInfoQ.appendChild(element);
+                }
             })).catch((error)=>{
                 console.error('*** Error while creating card element: ', error.message);
             }).then(()=>{
@@ -4506,16 +4571,18 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         }
     }
     async _createCardElement(card) {
-        let element;
+        // let element: LovelaceCard;
         try {
             this._cardHelpers = await window.loadCardHelpers();
-            element = await this._cardHelpers.createCardElement(card);
-            if (this._hass) element.hass = this._hass;
-            else console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
+            let element = await this._cardHelpers.createCardElement(card);
+            if (this._hass) {
+                element.hass = this._hass;
+                return element;
+            } else console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
         } catch (error) {
             console.warn(`*** Could not create card ${card.type}; ${error.message}`);
         }
-        return element;
+    //return element;
     }
     _updateLoop() {
         this._updateLoopId = setTimeout(()=>{
@@ -4602,23 +4669,31 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
         }, 250);
     }
     _handleAlarmButtonsClick(event) {
-        this._alarmController[event.target.id]();
+        // this._alarmController[(<HTMLInputElement>event.target).id]();
+        // this._alarmController[(event.target as Element).id]();
+        if (event.target) {
+            const targetMethodKey = event.target.id === 'dismiss' ? 'dismiss' : 'snooze';
+            this._alarmController[targetMethodKey]();
+        }
     }
     _toggleHideCards(event) {
         // event.stopPropagation(); // allow propagation so as to not interfere with alarmpicker's slider animation
-        if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
-            if (!this._config.hide_cards_default) {
-                // hiding cards
-                this._hideCards(true);
-                // allow card hiding animation to complete before saving
+        // if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
+        if (!this.preview && !this._alarmController.isAlarmRinging()) {
+            if (this._config && this._config.cards && this._config.cards.length > 0) {
+                if (!this._config.hide_cards_default) {
+                    // hiding cards
+                    this._hideCards(true);
+                    // allow card hiding animation to complete before saving
+                    window.setTimeout(()=>{
+                        this._alarmController.hideCardsDefault = true;
+                    }, 250);
+                } else // showing cards
+                // allow slider animation to complete in case open
                 window.setTimeout(()=>{
-                    this._alarmController.hideCardsDefault = true;
-                }, 250);
-            } else // showing cards
-            // allow slider animation to complete in case open
-            window.setTimeout(()=>{
-                this._alarmController.hideCardsDefault = false;
-            }, 120);
+                    this._alarmController.hideCardsDefault = false;
+                }, 120);
+            }
         }
     }
     _hideCards(hideCards) {
@@ -4641,48 +4716,67 @@ class $460b0e37c3e05eaa$var$KoboldAlarmClockCard extends (0, $43198d1a4e5573da$e
     }
     async _showEditor(event) {
         event.stopPropagation();
-        let tabNo = parseInt(event.target.id.slice(4));
-        window.setMyEditMode();
-        // new Promise((r) => setTimeout(r, 100))
-        //   .then(() => {
-        //     //
-        //   });
-        this._clockQ.style.display = 'none';
-        //  dialogBackground styles
-        if ((0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot) {
-            const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
-            const myStyle = document.createElement('style');
-            myStyle.innerHTML = dialogBackgroundStyle;
-            (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
-        }
-        // TODO: replace with testUntilTimeout()?
-        let rounds = 0;
-        // wait for availability of card-options; kobold card might be nested
-        while(!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)// while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
-        await new Promise((r)=>setTimeout(r, 100));
-        if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for edit mode');
-        else {
-            // const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
-            const huiCardPath = this.closest('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path ?? this.closest('hui-card-edit-mode')?.path;
-            // console.log('*** path1: ', this.closest<HuiCardOptions>('hui-card-options')?.path);
-            // console.log('*** path2: ', this.getRootNode().host.closest('hui-card-options')?.path);
-            // console.log('*** path3: ', this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path);
-            // console.log('*** huiCardPath: ', huiCardPath);
-            (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('ll-edit-card', {
-                path: huiCardPath
-            }, this);
+        if (event.target) {
+            let tabNo = parseInt(event.target.id.slice(4));
+            // let tabNo = parseInt(event.target.id.slice(4));
+            window.setMyEditMode();
+            // new Promise((r) => setTimeout(r, 100))
+            //   .then(() => {
+            //     //
+            //   });
+            this._clockQ.style.display = 'none';
+            //  dialogBackground styles
+            if ((0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot) {
+                const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
+                const myStyle = document.createElement('style');
+                myStyle.innerHTML = dialogBackgroundStyle;
+                (0, $be7da167267683bf$export$4dc2b60021baefca).getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
+            }
             // TODO: replace with testUntilTimeout()?
             let rounds = 0;
-            while(!this._koboldEditor && rounds++ < 5)await new Promise((r)=>setTimeout(r, 100));
-            if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for editor');
+            // wait for availability of card-options; kobold card might be nested
+            while(!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)// while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
+            await new Promise((r)=>setTimeout(r, 100));
+            if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for edit mode');
             else {
-                // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
-                this._koboldEditor.selectedTab = tabNo;
-                // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
-                this._koboldEditor = undefined; //TODO: why is this necessary?
+                // const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
+                const huiCardPath = this.closest('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path ?? this.closest('hui-card-edit-mode')?.path;
+                // console.log('*** path1: ', this.closest<HuiCardOptions>('hui-card-options')?.path);
+                // console.log('*** path2: ', this.getRootNode().host.closest('hui-card-options')?.path);
+                // console.log('*** path3: ', this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path);
+                // console.log('*** huiCardPath: ', huiCardPath);
+                (0, $be7da167267683bf$export$4dc2b60021baefca).fireEvent('ll-edit-card', {
+                    path: huiCardPath
+                }, this);
+                // TODO: replace with testUntilTimeout()?
+                let rounds = 0;
+                while(!this._koboldEditor && rounds++ < 5)await new Promise((r)=>setTimeout(r, 100));
+                if (rounds === 6) console.warn('*** _showEditor(); Timed out waiting for editor');
+                else {
+                    // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
+                    if (this._koboldEditor) this._koboldEditor.selectedTab = tabNo;
+                    // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+                    this._koboldEditor = undefined; //TODO: why is this necessary?
+                }
             }
+            this._clockQ.style.display = 'flex';
         }
-        this._clockQ.style.display = 'flex';
+    // try {
+    //   const myDateStart = dayjs().startOf('day');
+    //   const myDateEnd = myDateStart.add(1, 'day'); // add 24 hours in order to create an all-day event
+    //   const test = await this._hass.callService('calendar', 'create_event',
+    //     {
+    //       'summary': 'Bastille Day Party',
+    //       'start_date_time': myDateStart.format('YYYY-MM-DD HH:mm:ss'),
+    //       'end_date_time': myDateEnd.format('YYYY-MM-DD HH:mm:ss')
+    //     },
+    //     { entity_id: 'calendar.test' },
+    //     true
+    //   );
+    //   console.log('*** Test: ', test);
+    // } catch (error) {
+    //   console.warn(`*** Test; Error: ${error.message}`);
+    // }
     }
     render() {
         this._nextAlarm = this._nextAlarm ?? this._alarmController.nextAlarm;

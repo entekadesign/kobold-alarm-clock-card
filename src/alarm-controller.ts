@@ -17,9 +17,10 @@ export class AlarmController {
     private _isAlarmRinging: boolean = false;
     private readonly _mappingMediaPlayer = { 'turn_on': 'media_play', 'turn_off': 'media_pause' };
     private _cardId?: string;
-    private _alarmActionsScript?: Array<Record<string, boolean>> = [];
+    private _alarmActionsScript?: Array<{ [key: string]: boolean }> = [];
     private _koboldConnected: boolean;
     static oldTabs: boolean;
+    static oldInput: boolean;
 
     static defaultConfig = {
         name: "kobold_clock",
@@ -57,8 +58,10 @@ export class AlarmController {
     set hass(hass: HomeAssistant) {
         this._hass = hass;
         // tab element replacement beginning in HA 2025.10: https://github.com/thomasloven/hass-browser_mod/commit/2288d98896f6a8156b4a921827d7be23d70b4d21
-        // console.log('*** _saveConfigEntries; current HA version: ', this._hass.config.version);
+        // console.log('*** _set hass(); current HA version: ', this._hass.config.version);
         AlarmController.oldTabs = !Helpers.atLeastVersion(this._hass.config.version, 2025, 10, 1);
+        // ha-textfield replacement beginning in HA 2026.4: https://developers.home-assistant.io/blog/2026/03/25/frontend-component-updates-2026.4/
+        AlarmController.oldInput = !Helpers.atLeastVersion(this._hass.config.version, 2026, 4, 0);
         this._evaluate();
     }
 
@@ -141,13 +144,14 @@ export class AlarmController {
         this._koboldConnected = connectedState;
     }
 
-    set configEntries(entries: Object) {
+    set configEntries(entries: Partial<CardConfig>) {
         this._saveConfigEntries(entries);
     }
 
     set nextAlarm(nextAlarm: NextAlarmObject) {
         // console.log('*** saving nextalarm config');
-        this._saveConfigEntries({ next_alarm: nextAlarm });
+        // this._saveConfigEntries({ next_alarm: nextAlarm });
+        this.configEntries = { next_alarm: nextAlarm };
     }
     get nextAlarm(): NextAlarmObject {
         const nextAlarm = Object.assign({}, this._config.next_alarm); // TODO: make copy  in constructor instead?
@@ -172,7 +176,7 @@ export class AlarmController {
         return this._config.alarms_enabled && nextAlarm.enabled;
     }
 
-    set hideCardsDefault(keyValue) {
+    set hideCardsDefault(keyValue: boolean) {
         this.configEntries = { hide_cards_default: keyValue };
     }
 
@@ -204,7 +208,7 @@ export class AlarmController {
 
             this._checkWorkdayDate(nextAlarm.date).then((response) => {
                 // console.log('*** Workday Sensor response: ' + JSON.stringify(response));
-                const nextAlarmIsWorkday = response.response[this._config.workday_sensor].workday;
+                const nextAlarmIsWorkday = response.response[this._config.workday_sensor as string].workday;
                 if ((!nextAlarmIsWorkday && !nextAlarm.holiday && !nextAlarm.overridden) || (!nextAlarmIsWorkday && nextAlarm.holiday && nextAlarm.enabled && !nextAlarm.overridden)) {
                     this.nextAlarm = {
                         ...nextAlarm,
@@ -241,7 +245,8 @@ export class AlarmController {
             // NOTE: alarm_actions don't execute during nap or snooze
         } else if (!nextAlarm.snooze && !nextAlarm.overridden && this._config.alarm_actions) {
             this._config.alarm_actions
-                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+                // .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && !this._alarmActionsScript[`${action.entity}-${action.when}`])
+                .filter(action => action.when !== 'on_snooze' && action.when !== 'on_dismiss' && (this._alarmActionsScript && !this._alarmActionsScript[`${action.entity}-${action.when}` as keyof typeof this._alarmActionsScript]))
                 .forEach(action => {
                     let myDuration: Duration = structuredClone(action.offset);
                     if (action.negative && action.offset) {
@@ -255,7 +260,7 @@ export class AlarmController {
         }
     }
 
-    _deleteHolilday = (nextAlarm) => {
+    _deleteHolilday = (nextAlarm: NextAlarmObject) => {
         // console.log('deleting holiday');
         delete nextAlarm.holiday;
         this.nextAlarm = nextAlarm;
@@ -267,24 +272,35 @@ export class AlarmController {
         return await this._hass.callService('workday', 'check_date', { check_date: date }, { entity_id: this._config.workday_sensor }, false, true);
     }
 
-    async _saveConfigEntries(entries) {
+    async _saveConfigEntries(entries: Partial<CardConfig>) {
+        // console.log('*** saving');
         try {
             const lovelace = Helpers.getLovelace().lovelace;
+            // console.log('*** config: ', lovelace.config);
             const newConfig = structuredClone(lovelace.config);
             const tabGroupArry = [...Helpers.getLovelace().shadowRoot.querySelectorAll(AlarmController.oldTabs ? 'sl-tab-group sl-tab' : 'ha-tab-group ha-tab-group-tab')];
             const viewIndex = tabGroupArry.findIndex((tab) => { return tab.hasAttribute('active') });
-            const cardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card');
-
+            // cardConfig (config object for kobold) found within newConfig (config object for HA)
+            // exclamation mark (non-null assertion operator) here is necessary, because typescript linter fails to recognize guard on next line
+            // TODO: why is this?
+            let cardConfig: CardConfig = Helpers.findNested(newConfig.views[viewIndex > -1 ? viewIndex : 0], 'type', 'custom:kobold-alarm-clock-card')!;
             if (cardConfig) {
+                // console.log('*** cardConfig: ', cardConfig);
                 Object.keys(entries).forEach(entry => {
                     if (cardConfig[entry] !== undefined) {
+                        // console.log('*** ENTRY: ', entry);
+                        // console.log('*** BEFORE: cardConfig.entry = ', cardConfig[entry]);
+                        // console.log('*** typeof cardConfig[entry]: ', typeof cardConfig[entry]);
+                        // console.log('*** typeof cardConfig: ', typeof cardConfig);
                         cardConfig[entry] = entries[entry];
+                        // console.log('*** AFTER: cardConfig.entry = ', cardConfig[entry]);
                     } else {
                         console.warn('*** _saveConfigEntries(); Expected configuration entry is undefined');
                     };
                 });
                 cardConfig.last_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
+                // saving newConfig saves cardConfig becaause the latter part of the former
                 await lovelace.saveConfig(newConfig);
 
                 Helpers.testUntilTimeout(() => Helpers.getNotification(), 5000)
@@ -307,7 +323,10 @@ export class AlarmController {
         }
         const actionServiceCommand = myAction.service.split('.');
         this._hass.callService(actionServiceCommand[0], actionServiceCommand[1], { "entity_id": myAction.entity });
-        this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
+        // this._alarmActionsScript[`${myAction.entity}-${myAction.when}`] = true;
+        const alarmActionsScriptKey = `${myAction.entity}-${myAction.when}`;
+        const alarmAction = { alarmActionsScriptKey: true };
+        this._alarmActionsScript?.push(alarmAction);
     }
 
     _throttleAlarmRinging = Helpers.throttle((state) => {

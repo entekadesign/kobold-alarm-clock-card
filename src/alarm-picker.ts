@@ -1,4 +1,5 @@
-import { LitElement, html, css } from 'lit';
+import { AlarmController } from './alarm-controller';
+import { LitElement, html, css, CSSResultGroup } from 'lit';
 import { property, state, customElement, query, queryAll } from "lit/decorators.js";
 
 import dayjs from 'dayjs';
@@ -10,7 +11,7 @@ import type { CardConfig, NextAlarmObject } from './types';
 @customElement('alarm-picker')
 class AlarmPicker extends LitElement {
 
-    private _injectStylesDone: boolean;
+    private _injectStylesDone?: boolean;
 
     @state() private _displayedValueH: string;
     @state() private _displayedValueM: string;
@@ -22,7 +23,7 @@ class AlarmPicker extends LitElement {
 
     @queryAll('div#alarmPicker.alarm ha-slider') _alarmPickerSlidersQ: NodeListOf<HTMLElement>;
     @query('div#alarmPicker.alarm ha-switch') _alarmPickerSwitchQ: HTMLInputElement;
-    @query('div#alarmPicker.alarm ha-textfield#alarmTimeInput', true) _alarmTimeInputQ: HTMLInputElement;
+    @query('div#alarmPicker.alarm #alarmTimeInput', true) _alarmTimeInputQ: HTMLInputElement;
     @query('ha-icon.button') _iconButtonQ: HTMLElement;
     @query('#alarmPicker', true) _alarmPickerQ: HTMLElement;
 
@@ -54,7 +55,7 @@ class AlarmPicker extends LitElement {
                 this._alarmPickerSlidersQ.forEach((slidersHost) => {
                     myStyle = document.createElement('style');
                     myStyle.innerHTML = sliderStyle;
-                    slidersHost.shadowRoot.appendChild(myStyle);
+                    slidersHost.shadowRoot?.appendChild(myStyle);
                 });
             }
 
@@ -80,7 +81,12 @@ class AlarmPicker extends LitElement {
 
             if (this._alarmTimeInputQ.shadowRoot) {
                 myStyle = document.createElement('style');
-                const pickerStyle = ' .mdc-text-field__input { color: #696969 !important; font-size: inherit !important; text-align: center; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; padding: 0 !important; }';
+                let pickerStyle;
+                if (AlarmController.oldInput) {
+                    pickerStyle = '.mdc-text-field__input { color: #696969 !important; font-size: inherit !important; text-align: center; } .mdc-line-ripple::before, .mdc-line-ripple::after { border-bottom-width: 0 !important; } .mdc-text-field--filled { height: 1.75em !important; background-color: transparent !important; padding: 0 !important; }';
+                } else {
+                    pickerStyle = 'wa-input { font-size: inherit; height: 1.75em; } wa-input::part(input) { text-align: center; }';
+                }
                 myStyle.innerHTML = pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
             }
@@ -208,17 +214,33 @@ class AlarmPicker extends LitElement {
                 </div>
                 <div class="row-options"
                 >
-                    <ha-textfield
-                        id="alarmTimeInput"
-                        pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
-                        maxlength="8"
-                        ?disabled=${this.disabled}
-                        .value=${!this.nextAlarm ? '' : dayjs(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
-                        ?overridden=${this.config?.next_alarm.overridden}
-                        @click=${this._clickHandler}
-                        readonly
-                        >
-                    </ha-textfield>
+                    ${AlarmController.oldInput ? html`
+                        <ha-textfield
+                            id="alarmTimeInput"
+                            pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
+                            maxlength="8"
+                            ?disabled=${this.disabled}
+                            .value=${!this.nextAlarm ? '' : dayjs(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
+                            ?overridden=${this.config?.next_alarm.overridden}
+                            @click=${this._clickHandler}
+                            readonly
+                            >
+                        </ha-textfield>
+                        ` : html`
+                        <ha-input
+                            id="alarmTimeInput"
+                            appearance=""
+                            pattern="([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]( AM| PM|)"
+                            maxlength="8"
+                            ?disabled=${this.disabled}
+                            .value=${!this.nextAlarm ? '' : dayjs(this.nextAlarm.time, 'HH:mm:ss').format(this._alarmTimeFormat())}
+                            ?overridden=${this.config?.next_alarm.overridden}
+                            @click=${this._clickHandler}
+                            readonly
+                            >
+                        </ha-input>
+                        `
+            }
                 </div>
 
                 <ha-switch id="alarmEnabledToggleButton" ?holiday=${this.config?.next_alarm.holiday} ?checked=${!this.nextAlarm ? false : this.nextAlarm.enabled} @change=${this._toggleAlarmEnabled} ?disabled=${this.disabled} class></ha-switch>
@@ -268,11 +290,8 @@ class AlarmPicker extends LitElement {
 
         #alarmTimeInput {
             width: 5.1em;
-            margin: 0 1em;
-        }
-
-        #alarmTimeInput {
             margin: 0 0.5em;
+            padding-bottom: 0;
         }
 
         #alarmTimeInput[overridden] {
@@ -330,6 +349,13 @@ class AlarmPicker extends LitElement {
 
         :host([hide-toggle-button]) #alarmEnabledToggleButton {
             display: none;
+        }
+
+        /* styles for HA >2026.4 */
+        ha-input {
+            --ha-color-form-background: none;
+            --wa-form-control-value-color: var(--kobold-color);
+            --ha-space-4: 0; /* padding */
         }
     `;
 }

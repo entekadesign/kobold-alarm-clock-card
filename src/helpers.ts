@@ -79,11 +79,11 @@ export class Helpers {
         return root;
     };
 
-    static fireEvent = (event, detail = undefined, element = this.getLovelace()) => {
+    static fireEvent = (event: string, detail: Object, element = this.getLovelace()) => {
         element.dispatchEvent(new CustomEvent(event, { detail, bubbles: true, cancelable: false, composed: true, }));
     }
 
-    static deepMerge(obj1, obj2) {
+    static deepMerge(obj1: any, obj2: any) {
         const result = { ...obj1 };
 
         for (let key in obj2) {
@@ -100,7 +100,7 @@ export class Helpers {
     }
 
     // returns object containing all and only changed properties
-    static deepCompareObj(original, current) {
+    static deepCompareObj(original: any, current: any) {
         if (original === current) return null;
 
         // Handle non-object types (including null)
@@ -113,7 +113,7 @@ export class Helpers {
             return current;
         }
 
-        const changes = {};
+        const changes: any = {};
         let hasChanges = false;
 
         // Check for changes in current object
@@ -142,7 +142,7 @@ export class Helpers {
         return hasChanges ? changes : null;
     }
 
-    static findNested(obj, key, val) {
+    static findNested(obj: any, key: string, val: any) {
         let found;
         JSON.stringify(obj, (_, nestedVal) => {
             if (nestedVal && nestedVal[key] === val) {
@@ -154,7 +154,7 @@ export class Helpers {
     };
 
     static throttle<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
-        let timerFlag = null;
+        let timerFlag: number | null = null;
         return (...args: T) => {
             if (timerFlag === null) {
                 fn(...args);
@@ -214,7 +214,7 @@ export class Helpers {
     }
     static _updateHeightOnNormalCard(element: LovelaceCard) {
         if (element.shadowRoot) {
-            let cardTag: LovelaceCard = element.shadowRoot.querySelector('ha-card');
+            let cardTag: LovelaceCard | null = element.shadowRoot.querySelector('ha-card');
             if (cardTag) {
                 cardTag.style.height = "100%";
                 cardTag.style.boxSizing = "border-box";
@@ -225,7 +225,7 @@ export class Helpers {
     }
     static _updateHeightOnNestedCards(element: LovelaceCard) {
         if (element.firstChild && element.children[0].shadowRoot) {
-            let cardTag: LovelaceCard = element.children[0].shadowRoot.querySelector('ha-card');
+            let cardTag: LovelaceCard | null = element.children[0].shadowRoot.querySelector('ha-card');
             if (cardTag) {
                 cardTag.style.height = "100%";
                 cardTag.style.boxSizing = "border-box";

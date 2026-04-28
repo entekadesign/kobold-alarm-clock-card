@@ -13,6 +13,7 @@ let myStyle = document.createElement('style');
 myStyle.innerHTML = fontStyles;
 document.head.appendChild(myStyle);
 
+//TODO: replace this library with native time api
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/de';
 import 'dayjs/locale/fr';
@@ -27,12 +28,13 @@ import type { CardConfig, NextAlarmObject, KoboldEditor, TimeObject } from './ty
 
 // HA types
 // import type { HomeAssistant, LovelaceCard, LovelaceCardConfig } from "custom-card-helpers"; // HomeAssistant type is outdated
+import type { HomeAssistant } from "custom-card-helpers"; // source has been updated
 // Note: custom-card-helpers not updated with latest HA types; official source is years old: https://github.com/custom-cards/custom-card-helpers
 import type { LovelaceCard, LovelaceCardConfig } from "custom-card-helpers";
 
 declare global {
   interface Window {
-    hassConnection?: Promise<{ auth: any; conn: any }>;
+    hassConnection: Promise<{ auth: any; conn: any }>;
     loadCardHelpers(): Promise<void>;
     customCards: Array<any>;
     setMyEditMode(parameter?: boolean): void;
@@ -72,9 +74,10 @@ class KoboldAlarmClockCard extends LitElement {
   private _disconnectTimestamp: Dayjs;
 
   @state() _nextAlarm: NextAlarmObject;
-  @state() _hass: any; // _hass: HomeAssistant;
+  //@state() _hass: any; // _hass: HomeAssistant;
+  @state() _hass: HomeAssistant;
   @state() _time: string;
-  @state() _koboldEditor: KoboldEditor;
+  @state() _koboldEditor?: KoboldEditor;
   @state() _koboldHasConnected: boolean = false;
 
   @property({ type: Boolean, reflect: true }) public preview = false;
@@ -102,8 +105,13 @@ class KoboldAlarmClockCard extends LitElement {
       console.warn('*** connectedCallback(); _cardID: ' + this._cardId);
     };
 
+    // TODO: move some or all event listeners to a mixin? see: https://github.com/thomasloven/hass-browser_mod/blob/07d7ae408cf9207c50712dff0e1e53bcf80c98fe/js/plugin/browser.ts
     // recover from disconnect, e.g., HA restart
-    window.addEventListener('connection-status', this._connectionStatusEvent);
+    //window.addEventListener('connection-status', this._connectionStatusEvent);
+    window.addEventListener('connection-status', async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this._connectionStatusEvent
+    });
     Helpers.getHa().addEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().addEventListener('dialog-closed', this._dialogClosedEvent);
     window.setMyEditMode = (mode = true) => {
@@ -123,7 +131,11 @@ class KoboldAlarmClockCard extends LitElement {
       this._hass.callService('system_log', 'write', { 'message': '*** disconnectedCallback(); _cardID: ' + this._cardId, 'level': 'info' });
       console.warn(' *** disconnectedCallback(); _cardID: ' + this._cardId);
     };
-    window.removeEventListener('connection-status', this._connectionStatusEvent);
+    //window.removeEventListener('connection-status', this._connectionStatusEvent);
+    window.removeEventListener('connection-status', async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this._connectionStatusEvent
+    });
     Helpers.getHa().removeEventListener('kobold-editor', this._koboldEditorEvent);
     Helpers.getHa().removeEventListener('dialog-closed', this._dialogClosedEvent);
   }
@@ -305,7 +317,7 @@ class KoboldAlarmClockCard extends LitElement {
     return document.createElement("kobold-card-editor");
   }
 
-  static getStubConfig(hass, entities) {
+  static getStubConfig(hass: HomeAssistant, entities: string[]) {
     const ents = entities.filter((e) => {
       const domain = e.split(".")[0];
       return AlarmController.DOMAINS_ALARM_ENTITIES.includes(domain);
@@ -327,9 +339,9 @@ class KoboldAlarmClockCard extends LitElement {
 
   firstUpdated(_changedProperties: PropertyValues): void {
 
-    this.preview = this.preview || this.parentElement.classList.contains('preview') ? true : false;
+    this.preview = this.preview || this.parentElement?.classList.contains('preview') ? true : false;
 
-    if (document.querySelector('meta[name="color-scheme"]').getAttribute('content') === 'dark') {
+    if (document.querySelector('meta[name="color-scheme"]')?.getAttribute('content') === 'dark') {
       this.classList.add('dark');
       if (this._alarmPickerQ) this._alarmPickerQ.classList.add('dark');
     } else {
@@ -369,12 +381,18 @@ class KoboldAlarmClockCard extends LitElement {
         if (Helpers.getDrawer()) Helpers.getDrawer().style.borderRightStyle = 'unset';
 
         // prevent scrolling
-        document.querySelector('body').style.overflow = 'hidden';
-        document.querySelector('body').style.position = 'fixed';
-        document.querySelector('body').style.width = '100%';
+        const bodyElement = document.querySelector('body');
+        if (bodyElement) {
+          bodyElement.style.overflow = 'hidden';
+          bodyElement.style.position = 'fixed';
+          bodyElement.style.width = '100%';
+        }
+        // document.querySelector('body').style.overflow = 'hidden';
+        // document.querySelector('body').style.position = 'fixed';
+        // document.querySelector('body').style.width = '100%';
       }
 
-      if (this._config.cards?.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
+      if (this._config && this._config.cards && this._config.cards.length > 0) this._haCardQ.style.borderBottomStyle = 'unset';
 
       // inject style into mdc form fields
       let myStyle: HTMLElement;
@@ -385,7 +403,7 @@ class KoboldAlarmClockCard extends LitElement {
         this._settingsButtonsHostsQ.forEach((settingsButtonsHost) => {
           myStyle = document.createElement('style');
           myStyle.innerHTML = settingsButtonsStyle;
-          settingsButtonsHost.shadowRoot.appendChild(myStyle);
+          settingsButtonsHost.shadowRoot?.appendChild(myStyle);
         });
       }
     }
@@ -417,8 +435,9 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   // set hass(hass: HomeAssistant) {
-  set hass(hass) {
+  set hass(hass: HomeAssistant) {
 
+    // console.log('*** hass: ', hass);
     this._hass = hass;
     this._alarmController.hass = hass;
 
@@ -451,12 +470,14 @@ class KoboldAlarmClockCard extends LitElement {
     }
 
     if (config.cards) {
-      const elements = this._elements = [];
+      const elements: Array<LovelaceCard> = this._elements = [];
       Promise.all(config.cards.map(async (card: LovelaceCardConfig) => {
         const element = await this._createCardElement(card);
-        if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
-        elements.push(element);
-        this._extraInfoQ.appendChild(element);
+        if (element) {
+          if (card.type === 'media-control') element.setAttribute('type-media-control', 'true');
+          elements.push(element);
+          this._extraInfoQ.appendChild(element);
+        }
       })).
         catch(error => {
           console.error('*** Error while creating card element: ', error.message);
@@ -476,20 +497,20 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   async _createCardElement(card: LovelaceCardConfig) {
-    let element: LovelaceCard;
+    // let element: LovelaceCard;
     try {
       this._cardHelpers = await (window).loadCardHelpers();
-      element = await this._cardHelpers.createCardElement(card);
+      let element: LovelaceCard = await this._cardHelpers.createCardElement(card);
       if (this._hass) {
         element.hass = this._hass;
+        return element;
       } else {
         console.warn(`*** _createCardElement(); Missing hass object for card ${card.type}`);
       }
-
     } catch (error) {
-      console.warn(`*** Could not create card ${card.type}; ${error.message}`);
+      console.warn(`*** Could not create card ${card.type}; ${(error as Error).message}`);
     }
-    return element;
+    //return element;
   }
 
   _updateLoop() {
@@ -597,25 +618,33 @@ class KoboldAlarmClockCard extends LitElement {
   }
 
   _handleAlarmButtonsClick(event: Event) {
-    this._alarmController[(<HTMLInputElement>event.target).id]();
+    // this._alarmController[(<HTMLInputElement>event.target).id]();
+    // this._alarmController[(event.target as Element).id]();
+    if (event.target) {
+      const targetMethodKey = ((event.target as Element).id === 'dismiss' ? 'dismiss' : 'snooze')
+      this._alarmController[targetMethodKey]();
+    }
   }
 
-  _toggleHideCards(event) {
+  _toggleHideCards(event: Event) {
     // event.stopPropagation(); // allow propagation so as to not interfere with alarmpicker's slider animation
-    if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
-      if (!this._config.hide_cards_default) {
-        // hiding cards
-        this._hideCards(true);
-        // allow card hiding animation to complete before saving
-        window.setTimeout(() => {
-          this._alarmController.hideCardsDefault = true;
-        }, 250);
-      } else {
-        // showing cards
-        // allow slider animation to complete in case open
-        window.setTimeout(() => {
-          this._alarmController.hideCardsDefault = false;
-        }, 120);
+    // if (!this.preview && !this._alarmController.isAlarmRinging() && this._config.cards?.length > 0) {
+    if (!this.preview && !this._alarmController.isAlarmRinging()) {
+      if (this._config && this._config.cards && this._config.cards.length > 0) {
+        if (!this._config.hide_cards_default) {
+          // hiding cards
+          this._hideCards(true);
+          // allow card hiding animation to complete before saving
+          window.setTimeout(() => {
+            this._alarmController.hideCardsDefault = true;
+          }, 250);
+        } else {
+          // showing cards
+          // allow slider animation to complete in case open
+          window.setTimeout(() => {
+            this._alarmController.hideCardsDefault = false;
+          }, 120);
+        }
       }
     }
   }
@@ -643,56 +672,77 @@ class KoboldAlarmClockCard extends LitElement {
     }
   }
 
-  async _showEditor(event) {
+  async _showEditor(event: Event) {
     event.stopPropagation();
-    let tabNo = parseInt(event.target.id.slice(4));
-    window.setMyEditMode();
-    // new Promise((r) => setTimeout(r, 100))
-    //   .then(() => {
-    //     //
-    //   });
+    if (event.target) {
+      let tabNo = parseInt((event.target as Element).id.slice(4));
+      // let tabNo = parseInt(event.target.id.slice(4));
+      window.setMyEditMode();
+      // new Promise((r) => setTimeout(r, 100))
+      //   .then(() => {
+      //     //
+      //   });
 
-    this._clockQ.style.display = 'none';
-    //  dialogBackground styles
+      this._clockQ.style.display = 'none';
+      //  dialogBackground styles
 
-    if (Helpers.getLovelace().shadowRoot) {
-      const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
-      const myStyle = document.createElement('style');
-      myStyle.innerHTML = dialogBackgroundStyle;
-      Helpers.getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
-    }
-
-    // TODO: replace with testUntilTimeout()?
-    let rounds = 0;
-    // wait for availability of card-options; kobold card might be nested
-    while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)
-      // while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
-      await new Promise((r) => setTimeout(r, 100));
-    if (rounds === 6) {
-      console.warn('*** _showEditor(); Timed out waiting for edit mode');
-    } else {
-      // const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
-      const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path ?? this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path;
-      // console.log('*** path1: ', this.closest<HuiCardOptions>('hui-card-options')?.path);
-      // console.log('*** path2: ', this.getRootNode().host.closest('hui-card-options')?.path);
-      // console.log('*** path3: ', this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path);
-      // console.log('*** huiCardPath: ', huiCardPath);
-      Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
+      if (Helpers.getLovelace().shadowRoot) {
+        const dialogBackgroundStyle = 'hui-view, div.header { display: none; }';
+        const myStyle = document.createElement('style');
+        myStyle.innerHTML = dialogBackgroundStyle;
+        Helpers.getLovelace().shadowRoot.querySelector('div').appendChild(myStyle);
+      }
 
       // TODO: replace with testUntilTimeout()?
       let rounds = 0;
-      while (!this._koboldEditor && rounds++ < 5)
+      // wait for availability of card-options; kobold card might be nested
+      while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && !this.closest('hui-card-edit-mode') && rounds++ < 5)
+        // while (!this.closest('hui-card-options') && !this.getRootNode().host.closest('hui-card-options') && rounds++ < 5)
         await new Promise((r) => setTimeout(r, 100));
       if (rounds === 6) {
-        console.warn('*** _showEditor(); Timed out waiting for editor');
+        console.warn('*** _showEditor(); Timed out waiting for edit mode');
       } else {
-        // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
-        this._koboldEditor.selectedTab = tabNo;
-        // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
-        this._koboldEditor = undefined;  //TODO: why is this necessary?
+        // const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path;
+        const huiCardPath = this.closest<HuiCardOptions>('hui-card-options')?.path ?? this.getRootNode().host.closest('hui-card-options')?.path ?? this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path;
+        // console.log('*** path1: ', this.closest<HuiCardOptions>('hui-card-options')?.path);
+        // console.log('*** path2: ', this.getRootNode().host.closest('hui-card-options')?.path);
+        // console.log('*** path3: ', this.closest<HuiCardEditMode>('hui-card-edit-mode')?.path);
+        // console.log('*** huiCardPath: ', huiCardPath);
+        Helpers.fireEvent('ll-edit-card', { path: huiCardPath }, this);
+
+        // TODO: replace with testUntilTimeout()?
+        let rounds = 0;
+        while (!this._koboldEditor && rounds++ < 5)
+          await new Promise((r) => setTimeout(r, 100));
+        if (rounds === 6) {
+          console.warn('*** _showEditor(); Timed out waiting for editor');
+        } else {
+          // this._koboldEditor.alarmController = this._alarmController; // TODO: is this getting used?
+          if (this._koboldEditor) this._koboldEditor.selectedTab = tabNo;
+          // Helpers.fireEvent('kobold-tab', { tab: tabNo }, this._koboldEditor.shadowRoot.querySelector('#kobold-card-config'));
+          this._koboldEditor = undefined;  //TODO: why is this necessary?
+        }
       }
+      this._clockQ.style.display = 'flex';
     }
-    this._clockQ.style.display = 'flex';
+
+    // try {
+    //   const myDateStart = dayjs().startOf('day');
+    //   const myDateEnd = myDateStart.add(1, 'day'); // add 24 hours in order to create an all-day event
+
+    //   const test = await this._hass.callService('calendar', 'create_event',
+    //     {
+    //       'summary': 'Bastille Day Party',
+    //       'start_date_time': myDateStart.format('YYYY-MM-DD HH:mm:ss'),
+    //       'end_date_time': myDateEnd.format('YYYY-MM-DD HH:mm:ss')
+    //     },
+    //     { entity_id: 'calendar.test' },
+    //     true
+    //   );
+    //   console.log('*** Test: ', test);
+    // } catch (error) {
+    //   console.warn(`*** Test; Error: ${error.message}`);
+    // }
   }
 
   render() {
