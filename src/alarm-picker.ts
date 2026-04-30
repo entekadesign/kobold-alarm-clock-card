@@ -59,19 +59,6 @@ class AlarmPicker extends LitElement {
                 });
             }
 
-            if (this._alarmPickerSwitchQ.shadowRoot) {
-                myStyle = document.createElement('style');
-                let switchStyle = '';
-                if (!this.classList.contains('narrow')) {
-                    switchStyle += 'div.mdc-switch { scale: 1.25; } ';
-                }
-                if (this.classList.contains('dark')) {
-                    switchStyle += '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
-                }
-                myStyle.innerHTML = switchStyle;
-                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
-            }
-
             if (this._iconButtonQ.shadowRoot) {
                 myStyle = document.createElement('style');
                 const iconStyle = 'ha-svg-icon { height: calc(1.5rem + 1vh); height: calc(1.25rem + 0.5cqw); width: calc(1.5rem + 1vh); width: calc(1.25rem + 0.5cqw); }';
@@ -89,6 +76,19 @@ class AlarmPicker extends LitElement {
                 }
                 myStyle.innerHTML = pickerStyle;
                 this._alarmTimeInputQ.shadowRoot.appendChild(myStyle);
+            }
+
+            if (this._alarmPickerSwitchQ.shadowRoot) {
+                myStyle = document.createElement('style');
+                let switchStyle = '';
+                if (!this.classList.contains('narrow')) {
+                    switchStyle += 'div.mdc-switch { scale: 1.25; } ';
+                }
+                if (this.classList.contains('dark')) {
+                    switchStyle += '.mdc-switch.mdc-switch--checked div.mdc-switch__thumb { box-shadow: 0 0 15px 2px; }';
+                }
+                myStyle.innerHTML = switchStyle;
+                this._alarmPickerSwitchQ.shadowRoot.appendChild(myStyle);
             }
         }
     }

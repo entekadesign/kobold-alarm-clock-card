@@ -319,7 +319,12 @@ class KoboldCardEditor extends LitElement {
     disconnectedCallback() {
         super.disconnectedCallback();
         const editorStyleTag = Helpers.getLovelace().shadowRoot ? Helpers.getLovelace().shadowRoot.querySelector('div > style') : undefined;
-        if (editorStyleTag) editorStyleTag.remove();
+        if (editorStyleTag) {
+            window.setTimeout(() => {
+                editorStyleTag.remove();
+            }, 100);
+        }
+        // if (editorStyleTag) editorStyleTag.remove();
     }
 
     setConfig(config: CardConfig) {
